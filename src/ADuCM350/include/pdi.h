@@ -24,7 +24,7 @@ License Agreement.
 #define __PDI_H__
 
 #include "device.h"
-#include "config/adi_pdi_config.h"  /* for static initializations */
+#include "adi_pdi_config.h"  /* for static initializations */
 
 /* C++ linkage */
 #ifdef __cplusplus

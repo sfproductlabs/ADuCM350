@@ -30,7 +30,7 @@ License Agreement.
 #include "gpio.h"
 #include "dma.h"
 
-#include "config/adi_spi_config.h"
+#include "adi_spi_config.h"
 
 /* make generic defines to adapt old macro names to new macros file */
 #ifndef SPIDMA_ENABLE

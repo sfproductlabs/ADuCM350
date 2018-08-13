@@ -31,7 +31,7 @@ License Agreement.
 #include <device.h>
 #include "dma.h"
 
-#include "config/adi_fee_config.h"
+#include "adi_fee_config.h"
 #include "flash.h"
 
 #define REVERT_ADI_MISRA_SUPPRESSIONS  /*!< Revert ADI MISRA Suppressions */

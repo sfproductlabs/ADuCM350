@@ -26,7 +26,7 @@ License Agreement.
 #include <stdlib.h>  /* for 'NULL" definition */
 #include "crc.h"
 #include "dma.h"
-#include "config/adi_crc_config.h"
+#include "adi_crc_config.h"
 
 #define ADI_DMA_DATA_WIDTH      ADI_DMA_WIDTH_WORD  /*!< DMA data attribute */
 #define ADI_DMA_DATA_INCREMENT  ADI_DMA_INCR_WORD   /*!< DMA data attribute */

@@ -27,7 +27,7 @@ License Agreement.
 #include "device.h"
 
 /* I2C config stuff */
-#include "config/adi_i2c_config.h"
+#include "adi_i2c_config.h"
 
 /* C++ linkage */
 #ifdef __cplusplus

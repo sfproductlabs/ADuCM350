@@ -24,7 +24,7 @@ License Agreement.
 #define __CT_H__
 
 #include "device.h"
-#include "config/adi_ct_config.h"
+#include "adi_ct_config.h"
 
 /* C++ linkage */
 #ifdef __cplusplus

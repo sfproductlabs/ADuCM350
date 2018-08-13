@@ -25,7 +25,7 @@ License Agreement.
 
 #include "device.h"
 #include "adi_int.h"
-#include "config/adi_wut_config.h"
+#include "adi_wut_config.h"
 
 /* C++ linkage */
 #ifdef __cplusplus

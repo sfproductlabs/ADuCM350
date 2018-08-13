@@ -23,7 +23,7 @@ License Agreement.
 #define __FEE_H__
 
 #include "device.h"
-#include "config/adi_fee_config.h"
+#include "adi_fee_config.h"
 
 /* C++ linkage */
 #ifdef __cplusplus

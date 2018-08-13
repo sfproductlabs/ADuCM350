@@ -25,7 +25,7 @@ License Agreement.
 #define __BEEP_H__
 
 #include "device.h"
-#include "config/adi_beep_config.h"
+#include "adi_beep_config.h"
 
 /* C++ linkage */
 #ifdef __cplusplus

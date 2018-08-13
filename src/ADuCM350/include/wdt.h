@@ -24,7 +24,7 @@ License Agreement.
 #define __WDT_H__
 
 #include "device.h"
-#include "config/adi_wdt_config.h"
+#include "adi_wdt_config.h"
 
 /* C++ linkage */
 #ifdef __cplusplus

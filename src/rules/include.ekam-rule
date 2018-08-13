@@ -36,6 +36,8 @@ INCLUDE_NAME=${INCLUDE_NAME##*/include/}
 INCLUDE_NAME=${INCLUDE_NAME#include/}
 INCLUDE_NAME=${INCLUDE_NAME##*/include/config}
 INCLUDE_NAME=${INCLUDE_NAME#include/config/}
+INCLUDE_NAME=${INCLUDE_NAME##*/config}
+INCLUDE_NAME=${INCLUDE_NAME#config/}
 
 
 echo provide "$INPUT" "c++header:$INCLUDE_NAME"

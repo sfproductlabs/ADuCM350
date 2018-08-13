@@ -24,7 +24,7 @@ License Agreement.
 #define __UART_H__
 
 #include "device.h"
-#include "config/adi_uart_config.h"
+#include "adi_uart_config.h"
 
 /* C++ linkage */
 #ifdef __cplusplus

@@ -26,7 +26,7 @@ License Agreement.
 
 #include "device.h"
 #include "adi_int.h"
-#include "config/adi_gpt_config.h"
+#include "adi_gpt_config.h"
 
 /* C++ linkage */
 #ifdef __cplusplus

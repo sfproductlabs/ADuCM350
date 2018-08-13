@@ -11,7 +11,7 @@
 #include "dma.h"
 #include "uart.h"
 #include "adi_int.h"
-#include "config/adi_afe_config.h"
+#include "adi_afe_config.h"
 
 /* C++ linkage */
 #ifdef __cplusplus

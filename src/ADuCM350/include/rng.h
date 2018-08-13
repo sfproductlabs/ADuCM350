@@ -25,7 +25,7 @@ License Agreement.
 #define __RNG_H__
 
 #include "device.h"
-#include "config/adi_rng_config.h"
+#include "adi_rng_config.h"
 
 /* C++ linkage */
 #ifdef __cplusplus
