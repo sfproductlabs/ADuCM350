@@ -1,0 +1,7 @@
+adi_AFE_EnableSoftwareCRC
+adi_AFE_GetRcal
+adi_AFE_GetRtia
+adi_AFE_RunSequence
+adi_AFE_SetSwitchState
+adi_AFE_WriteCalibrationRegister
+_GLOBAL_OFFSET_TABLE_

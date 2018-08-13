@@ -1,0 +1,5 @@
+_GLOBAL_OFFSET_TABLE_
+SystemEnableClock
+SystemEnterLowPowerMode
+SystemExitLowPowerMode
+SystemGetClockFrequency

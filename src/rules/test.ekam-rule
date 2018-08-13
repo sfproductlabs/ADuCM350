@@ -1,0 +1,66 @@
+#! /bin/sh
+
+# Ekam Build System
+# Author: Kenton Varda (kenton@sandstorm.io)
+# Copyright (c) 2010-2015 Kenton Varda, Google Inc., and contributors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+set -eu
+
+if test $# = 0; then
+  echo trigger test:executable
+  exit 0
+fi
+
+echo findInput "$1"
+read TEST_PROG
+
+INTERCEPTOR_TAG=special:ekam-interceptor
+INTERPRETER=
+
+for TARGET in ${CROSS_TARGETS:-}; do
+  if test "${1%.$TARGET}" != "$1"; then
+    INTERCEPTOR_TAG="special:ekam-interceptor-$TARGET"
+    export QEMU_LD_PREFIX=/usr/$TARGET
+    INTERPRETER="qemu-${TARGET%-linux-gnu}"
+  fi
+done
+
+if grep -q EKAM_TEST_DISABLE_INTERCEPTOR "$TEST_PROG"; then
+  # Test requested no interceptor.
+  INTERCEPTOR=
+else
+  echo findProvider "$INTERCEPTOR_TAG"
+  read INTERCEPTOR
+
+  if test "$INTERCEPTOR" = ""; then
+    echo "error:  couldn't find intercept.so." >&2
+    exit 1
+  fi
+fi
+
+# TODO:  Run in sandbox.
+
+echo newOutput "${1}.log"
+read TEST_LOG
+
+if LD_PRELOAD=$INTERCEPTOR DYLD_FORCE_FLAT_NAMESPACE= DYLD_INSERT_LIBRARIES=$INTERCEPTOR \
+   $INTERPRETER $TEST_PROG 3>&1 4<&0 2>"$TEST_LOG" >&2; then
+	echo passed
+	exit 0
+else
+  echo "full log: $TEST_LOG" >&2
+  egrep 'FAIL|ERROR|FATAL|ekam-provider' "$TEST_LOG" >&2
+  exit 1
+fi

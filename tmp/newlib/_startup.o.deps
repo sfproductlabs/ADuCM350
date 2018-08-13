@@ -1,0 +1,11 @@
+__bss_end__
+__bss_start__
+_edata
+_exit
+_GLOBAL_OFFSET_TABLE_
+__initialize_args
+__initialize_hardware
+__initialize_hardware_early
+main
+_sdata
+_sidata

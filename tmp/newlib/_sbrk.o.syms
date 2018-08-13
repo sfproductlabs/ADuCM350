@@ -1,0 +1,6 @@
+0000000000000000 b current_heap_end.2215
+                 U __errno_location
+                 U _GLOBAL_OFFSET_TABLE_
+                 U _Heap_Begin
+                 U _Heap_Limit
+0000000000000000 T _sbrk

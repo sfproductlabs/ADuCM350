@@ -1,0 +1,49 @@
+#! /bin/sh
+
+# Ekam Build System
+# Author: Kenton Varda (kenton@sandstorm.io)
+# Copyright (c) 2010-2015 Kenton Varda, Google Inc., and contributors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+set -eu
+
+if test $# = 0; then
+  # Ekam is querying the script.  Tell it that we care about headers.
+  echo trigger filetype:.h
+  echo trigger 'directory:*'
+  echo silent
+  exit 0
+fi
+
+INPUT=$1
+
+INCLUDE_NAME=$INPUT
+INCLUDE_NAME=${INCLUDE_NAME#.}
+INCLUDE_NAME=${INCLUDE_NAME##*/src/}
+INCLUDE_NAME=${INCLUDE_NAME#src/}
+INCLUDE_NAME=${INCLUDE_NAME##*/include/}
+INCLUDE_NAME=${INCLUDE_NAME#include/}
+INCLUDE_NAME=${INCLUDE_NAME##*/include/config}
+INCLUDE_NAME=${INCLUDE_NAME#include/config/}
+
+
+echo provide "$INPUT" "c++header:$INCLUDE_NAME"
+
+# HACK:  gtest likes to include things from its top-level directory.
+# TODO:  Come up with a more general way for dealing with this.
+INCLUDE_NAME=${INPUT##*/gtest/}
+INCLUDE_NAME=${INCLUDE_NAME#gtest/}
+if test "$INCLUDE_NAME" != "$INPUT"; then
+  echo provide "$INPUT" "c++header:$INCLUDE_NAME"
+fi

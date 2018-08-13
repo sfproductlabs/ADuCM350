@@ -1,0 +1,76 @@
+#! /bin/sh
+
+# Ekam Build System
+# Author: Kenton Varda (kenton@sandstorm.io)
+# Copyright (c) 2010-2015 Kenton Varda, Google Inc., and contributors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+set -eu
+
+if test $# = 0; then
+  echo trigger filetype:.proto
+  exit 0
+fi
+
+INPUT=$1
+
+PROTO_NAME=$INPUT
+PROTO_NAME=${PROTO_NAME##*/src/}
+PROTO_NAME=${PROTO_NAME#src/}
+PROTO_NAME=${PROTO_NAME##*/include/}
+PROTO_NAME=${PROTO_NAME#include/}
+
+if test "$PROTO_NAME" = "google/protobuf/descriptor.proto" -o \
+        "$PROTO_NAME" = "google/protobuf/compiler/plugin.proto"; then
+  # HACK:  The generated code for this proto is checked into the repository because protoc itself
+  #   depends on it.
+  # TODO:  This could be made more general by checking if the output already exists.  Or maybe
+  #   Ekam itself should detect when the same file exists from two sources and produce an error
+  #   if and only if they are not identical.  That would actually be ideal here because it would
+  #   mean an error is produced if the checked-in generated code is out-of-date.
+  exit 0
+fi
+
+if test "$PROTO_NAME" = "$INPUT"; then
+  SOURCE_ROOT=.
+else
+  SOURCE_ROOT=${INPUT%/$PROTO_NAME}
+fi
+
+echo findProvider special:ekam-interceptor
+read INTERCEPTOR
+
+if test "$INTERCEPTOR" = ""; then
+  echo "error:  couldn't find intercept.so." >&2
+  exit 1
+fi
+
+if test "${PROTOC:-}" = ""; then
+  # No PROTOC specified; try to find one built from the source tree.
+  echo findProvider file:google/protobuf/compiler/main
+  read PROTOC
+
+  if test "$PROTOC" = ""; then
+    echo "error:  couldn't find protoc." >&2
+    exit 1
+  fi
+fi
+
+LD_PRELOAD=$INTERCEPTOR DYLD_FORCE_FLAT_NAMESPACE= DYLD_INSERT_LIBRARIES=$INTERCEPTOR \
+$PROTOC -I"$SOURCE_ROOT" -I/ekam-provider/protobuf --cpp_out="$SOURCE_ROOT" "$INPUT" 3>&1 4<&0 >&2
+
+echo findInput $INPUT
+read INPUT_DISK_PATH
+
+echo provide "$INPUT_DISK_PATH" protobuf:"$PROTO_NAME"

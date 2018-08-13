@@ -1,0 +1,10 @@
+                 U adi_WDT_Init
+                 U adi_WDT_SetEnable
+                 U adi_WDT_UnInit
+                 U exit
+                 U _GLOBAL_OFFSET_TABLE_
+0000000000000000 t quit
+0000000000000060 T test_Fail
+0000000000000010 T test_Init
+0000000000000050 T test_Pass
+0000000000000070 T test_Perf

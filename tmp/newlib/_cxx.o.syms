@@ -1,0 +1,4 @@
+                 U abort
+0000000000000006 T __cxa_pure_virtual
+                 U _GLOBAL_OFFSET_TABLE_
+0000000000000000 T _ZN9__gnu_cxx27__verbose_terminate_handlerEv

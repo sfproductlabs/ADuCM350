@@ -1,0 +1,10 @@
+adi_GPT_GetTxVal
+adi_GPT_Init
+adi_GPT_RegisterCallback
+adi_GPT_SetClockSelect
+adi_GPT_SetCountMode
+adi_GPT_SetLdVal
+adi_GPT_SetPeriodicMode
+adi_GPT_SetPrescaler
+adi_GPT_UnInit
+_GLOBAL_OFFSET_TABLE_

@@ -1,0 +1,7 @@
+0000000000000070 T adi_int_EnableInt
+0000000000000000 T adi_int_InstallHandler
+0000000000000050 T adi_int_UninstallHandler
+                 U adi_nvic_EnableInt
+                 U adi_osal_InstallHandler
+                 U adi_osal_UninstallHandler
+                 U _GLOBAL_OFFSET_TABLE_

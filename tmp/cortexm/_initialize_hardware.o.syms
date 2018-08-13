@@ -1,0 +1,5 @@
+                 U _GLOBAL_OFFSET_TABLE_
+0000000000000010 W __initialize_hardware
+0000000000000000 W __initialize_hardware_early
+                 U SystemCoreClockUpdate
+                 U SystemInit

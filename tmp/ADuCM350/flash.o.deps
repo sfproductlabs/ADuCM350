@@ -1,0 +1,7 @@
+adi_DMA_Init
+adi_DMA_SetChannelAssign
+adi_DMA_SubmitTransfer
+adi_DMA_UnInit
+_GLOBAL_OFFSET_TABLE_
+SystemEnterLowPowerMode
+SystemExitLowPowerMode

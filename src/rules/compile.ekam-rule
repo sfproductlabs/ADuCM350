@@ -1,0 +1,226 @@
+#! /bin/sh
+
+# Ekam Build System
+# Author: Kenton Varda (kenton@sandstorm.io)
+# Copyright (c) 2010-2015 Kenton Varda, Google Inc., and contributors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+set -eu
+
+if test $# = 0; then
+  # Ekam is querying the script.  Tell it that we like C++ source files.
+  echo trigger filetype:.cpp
+  echo trigger filetype:.cc
+  echo trigger filetype:.C
+  echo trigger filetype:.cxx
+  echo trigger filetype:.c++
+  echo trigger filetype:.c
+  exit 0
+fi
+
+INPUT=$1
+shift
+
+# Set defaults. We use -O2 -DNDEBUG as default flags because the users that are most likely not
+# to specify flags are people who are just compiling someone else's code to use it, and those
+# people do not want debug builds.
+CXX=${CXX:-c++}
+CXXFLAGS=${CXXFLAGS:--O2 -DNDEBUG}
+CC=${CC:-cc}
+CFLAGS=${CFLAGS:--O2 -DNDEBUG}
+
+# Look up modifiers.
+echo findModifiers compile.ekam-flags
+while true; do
+  read MODIFIER
+  if test -z "$MODIFIER"; then
+    break
+  fi
+  . "$MODIFIER" 1>&2
+done
+
+case "$INPUT" in
+  *.cpp )
+    MODULE_NAME=${INPUT%.cpp}
+    ;;
+  *.cc )
+    MODULE_NAME=${INPUT%.cc}
+    ;;
+  *.C )
+    MODULE_NAME=${INPUT%.C}
+    ;;
+  *.cxx )
+    MODULE_NAME=${INPUT%.cxx}
+    ;;
+  *.c++ )
+    MODULE_NAME=${INPUT%.c++}
+    ;;
+  intercept.c | */intercept.c )
+    # Hack: Skip interceptor. It screws everything up since it appears to define syscalls like
+    #   write().
+    # TODO(cleanup): Do a better job detecting this.
+    exit 0
+    ;;
+  *.c )
+    MODULE_NAME=${INPUT%.c}
+    CXX=${CC}
+    CXXFLAGS=${CFLAGS}
+    ;;
+  * )
+    echo "Wrong file type: $INPUT" >&2
+    exit 1
+    ;;
+esac
+
+echo findProvider special:ekam-interceptor
+read INTERCEPTOR
+
+if test "$INTERCEPTOR" = ""; then
+  echo "error:  couldn't find intercept.so." >&2
+  exit 1
+fi
+
+# Ask Ekam where to put the output file.  Actually, the compiler will make the same request again
+# when it runs, but we need to know the location too.
+OUTPUT=${MODULE_NAME}.o
+echo newOutput "$OUTPUT"
+read OUTPUT_DISK_PATH
+
+compile() {
+  local TARGET_CXX="$1"
+  local SUFFIX="$2"
+  local FLAGSVAR="CXXFLAGS_$3"
+  shift 3
+
+  local FLAGS="$(eval "echo \"\${$FLAGSVAR:-\$CXXFLAGS}\"")"
+
+  # Remove -Wglobal-constructors in tests because the test framework depends on registering global
+  # objects, and we only care about global constructors in runtime code anyway.
+  case "$FLAGS" in
+    *-Wglobal-constructors* )
+      case "$MODULE_NAME" in
+        *-test )
+          FLAGS="$FLAGS -Wno-global-constructors"
+          ;;
+      esac
+  esac
+
+  # Compile!  We LD_PRELOAD intercept.so to intercept open() and other filesystem calls and convert
+  # them into Ekam requests.  intercept.so expects file descriptors 3 and 4 to be the Ekam request
+  # and response streams, so we remap them to stdout and stdin, respectively.  We also remap stdout
+  # itself to stderr just to make sure that if the compiler prints anything to stdout (which
+  # normally it shouldn't), that does not get misinterpreted as an Ekam request.
+  #
+  # The DYLD_ vars are the Mac OSX equivalent of LD_PRELOAD.  We don't bother checking which OS
+  # we're on since the other vars will just be ignored anyway.
+  LD_PRELOAD=$INTERCEPTOR DYLD_FORCE_FLAT_NAMESPACE= DYLD_INSERT_LIBRARIES=$INTERCEPTOR \
+      $TARGET_CXX -I/ekam-provider/c++header $FLAGS "$@" -c "/ekam-provider/canonical/$INPUT" \
+      -o "${MODULE_NAME}${SUFFIX}" 3>&1 4<&0 >&2
+}
+
+compile "$CXX" .o host
+
+for TARGET in ${CROSS_TARGETS:-}; do
+  SUFFIX="$(echo "$TARGET" | tr - _)"
+  case "$(basename "$CXX")" in
+    *clang* )
+      compile "$CXX" ".$TARGET.o" "$SUFFIX" -target "$TARGET" "-isystem/usr/$TARGET/include"
+      ;;
+    * )
+      compile "$TARGET-$CXX" ".$TARGET.o" "$SUFFIX"
+      ;;
+  esac
+done
+
+# TODO(someday): Generate symbols and deps separately for each target? Currently this is aimed at
+#   architecture cross-compiling, not OS cross-compiling, so we expect the symbols are identical.
+#   If they are not, the linker rule needs to change to understand this, too. Of course, what we
+#   should really do is handle separate targets using separate build steps, but that seems to
+#   require deep changes to Ekam.
+
+# Ask Ekam where to put the symbol and deps lists.
+echo newOutput "${MODULE_NAME}.o.syms"
+read SYMFILE
+echo newOutput "${MODULE_NAME}.o.deps"
+read DEPFILE
+
+# Generate the symbol list.
+# TODO:  Would be nice to use nm -C here to demangle names but it doesn't appear
+#   to be supported on OSX.
+nm "$OUTPUT_DISK_PATH" > $SYMFILE
+
+# Function which reads the symbol list on stdin and writes all symbols matching
+# the given type pattern to stdout, optionally with a prefix.
+readsyms() {
+  grep '[^ ]*  *['$1'] ' | sed -e 's,^[^ ]*  *. \(.*\)$,'"${2:-}"'\1,g'
+}
+
+# Construct the deps file by listing all undefined symbols.
+readsyms U < $SYMFILE > $DEPFILE
+
+# ========================================================================================
+# Detect gtest-based tests and test support while we're here.
+# TODO(kenton):  Probably should be a separate rule.
+
+IS_TEST=no
+
+case $OUTPUT in
+  */gtest_main.o )
+    echo provide "$OUTPUT_DISK_PATH" gtest:main
+    ;;
+  */kj/test.o | kj/test.o )
+    echo provide "$OUTPUT_DISK_PATH" kjtest:main
+    ;;
+  *_test.o | *_unittest.o | *_regtest.o | *-test.o )
+    # Is this a gtest test that needs to link against gtest_main?
+    if grep -q 7testing8internal23MakeAndRegisterTestInfo $DEPFILE && \
+       ! egrep -q '[^U] _?main$' $SYMFILE; then
+      echo provide "$OUTPUT_DISK_PATH" gtest:test
+      IS_TEST=yes
+    fi
+
+    # Is this a KJ test that needs to link against kj/test.o?
+    if grep -q N2kj8TestCaseC $DEPFILE; then
+      echo provide "$OUTPUT_DISK_PATH" kjtest:test
+      IS_TEST=yes
+    fi
+    ;;
+  * )
+    # Node v0.10 exports a symbol like so:
+    # NODE_MODULE_EXPORT node::node_module_struct modname ## _module = ...
+    #
+    # The HandleScope constructor is v8::HandleScope::HandleScope().
+    if egrep -q ' D [a-z0-9]+_module' $SYMFILE && \
+       grep -q _ZN2v811HandleScopeC1Ev $DEPFILE; then
+            echo provide "$OUTPUT_DISK_PATH" nodejs:module
+    fi
+    # Node v4 exports a symbol like so:
+    # static node::node_module _module = ...
+    #
+    # Symbols may bear an "L" prefix to indicate constness, but not all compiler versions
+    # mangle this way, so we tolerate the presence or absence of the qualifier.
+    #
+    # The HandleScope constructor is v8::HandleScope::HandleScope(v8::Isolate*)
+    if grep -q -E ' d _ZL?7_module' $SYMFILE && \
+       grep -q _ZN2v811HandleScopeC1EPNS_7IsolateE $DEPFILE; then
+            echo provide "$OUTPUT_DISK_PATH" nodejs:module
+    fi
+    ;;
+esac
+
+if [ "$IS_TEST" = no ]; then
+  # Tell Ekam about the symbols provided by this file. But not for tests, because we don't want
+  # other things to accidentally link against tests.
+  readsyms ABCDGRSTV "provide $OUTPUT_DISK_PATH c++symbol:" < $SYMFILE
+fi

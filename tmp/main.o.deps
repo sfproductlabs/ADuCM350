@@ -1,0 +1,17 @@
+adi_GPIO_SetHigh
+adi_GPIO_SetLow
+adi_GPIO_SetOutputEnable
+adi_UART_BufRx
+adi_UART_BufTx
+adi_UART_Enable
+adi_UART_Init
+adi_UART_SetBaudRate
+adi_UART_SetGenericSettings
+adi_UART_UnInit
+_GLOBAL_OFFSET_TABLE_
+printf
+puts
+SetSystemClockDivider
+SystemInit
+SystemTransitionClocks
+test_Fail
