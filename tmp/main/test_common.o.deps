@@ -1,0 +1,5 @@
+adi_WDT_Init
+adi_WDT_SetEnable
+adi_WDT_UnInit
+exit
+_GLOBAL_OFFSET_TABLE_
