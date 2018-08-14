@@ -48,38 +48,38 @@ endif
 
 # Add inputs and outputs from these tool invocations to the build variables 
 SECONDARY_FLASH += \
-aducm-fresh-cortexm-template.hex \
+firm.hex \
 
 SECONDARY_SIZE += \
-aducm-fresh-cortexm-template.siz \
+firm.siz \
 
 
 # All Target
-all: aducm-fresh-cortexm-template.elf secondary-outputs
+all: firm.elf secondary-outputs
 
 # Tool invocations
-aducm-fresh-cortexm-template.elf: $(OBJS) $(USER_OBJS)
+firm.elf: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GNU ARM Cross C++ Linker'
-	arm-none-eabi-g++ -mcpu=cortex-m3 -mthumb -Og -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -ffreestanding -fno-move-loop-invariants -Wall -Wextra  -g3 -T mem.ld -T libs.ld -T sections.ld -nostartfiles -Xlinker --gc-sections -L"../ldscripts" -Wl,-Map,"aducm-fresh-cortexm-template.map" --specs=nano.specs -o "aducm-fresh-cortexm-template.elf" $(OBJS) $(USER_OBJS) $(LIBS)
+	arm-none-eabi-g++ -mcpu=cortex-m3 -mthumb -Og -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -ffreestanding -fno-move-loop-invariants -Wall -Wextra  -g3 -T mem.ld -T libs.ld -T sections.ld -nostartfiles -Xlinker --gc-sections -L"../ldscripts" -Wl,-Map,"firm.map" --specs=nano.specs -o "firm.elf" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
-aducm-fresh-cortexm-template.hex: aducm-fresh-cortexm-template.elf
+firm.hex: firm.elf
 	@echo 'Invoking: GNU ARM Cross Create Flash Image'
-	arm-none-eabi-objcopy -O ihex "aducm-fresh-cortexm-template.elf"  "aducm-fresh-cortexm-template.hex"
+	arm-none-eabi-objcopy -O ihex "firm.elf"  "firm.hex"
 	@echo 'Finished building: $@'
 	@echo ' '
 
-aducm-fresh-cortexm-template.siz: aducm-fresh-cortexm-template.elf
+firm.siz: firm.elf
 	@echo 'Invoking: GNU ARM Cross Print Size'
-	arm-none-eabi-size --format=berkeley "aducm-fresh-cortexm-template.elf"
+	arm-none-eabi-size --format=berkeley "firm.elf"
 	@echo 'Finished building: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(CC_DEPS)$(C++_DEPS)$(OBJS)$(C_UPPER_DEPS)$(CXX_DEPS)$(SECONDARY_FLASH)$(SECONDARY_SIZE)$(ASM_DEPS)$(S_UPPER_DEPS)$(C_DEPS)$(CPP_DEPS) aducm-fresh-cortexm-template.elf
+	-$(RM) $(CC_DEPS)$(C++_DEPS)$(OBJS)$(C_UPPER_DEPS)$(CXX_DEPS)$(SECONDARY_FLASH)$(SECONDARY_SIZE)$(ASM_DEPS)$(S_UPPER_DEPS)$(C_DEPS)$(CPP_DEPS) firm.elf
 	-@echo ' '
 
 secondary-outputs: $(SECONDARY_FLASH) $(SECONDARY_SIZE)
