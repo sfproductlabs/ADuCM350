@@ -1,4 +1,0 @@
-adi_nvic_EnableInt
-adi_osal_InstallHandler
-adi_osal_UninstallHandler
-_GLOBAL_OFFSET_TABLE_
