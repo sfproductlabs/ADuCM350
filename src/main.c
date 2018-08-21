@@ -32,7 +32,7 @@ License Agreement.
 /* Macro to enable the returning of AFE data using the UART */
 /*      1 = return AFE data on UART                         */
 /*      0 = return AFE data on SW (Std Output)              */
-#define USE_UART_FOR_DATA           (1)
+#define USE_UART_FOR_DATA           (0)
 
 /* Macro to enable multiplexer choice                      */
 /*      0 = user MULTIPLEXER ADG1608                       */
@@ -116,12 +116,7 @@ void test_print (char *pBuffer) {
  
 #elif (0 == USE_UART_FOR_DATA) 
     /* Print  to console */ 
-	#if !defined(OS_USE_SEMIHOSTING)
-    	trace_puts(pBuffer);
-	#else
-		printf(pBuffer);
-	#endif
-
+	printf(pBuffer);
     //usning nosys - should migrate to libgloss
 
  
@@ -176,9 +171,11 @@ int32_t adi_initpinmux(void) {
     return 0;
 }
 
-
+extern void initialise_monitor_handles(void); /* prototype */
 
 int main(void) {
+	//AG: for semihosting
+	initialise_monitor_handles();
 
     ADI_AFE_DEV_HANDLE  hDevice;
     int16_t             dft_results[DFT_RESULTS_COUNT];
