@@ -31,7 +31,7 @@ License Agreement.
 /* Macro to enable the returning of AFE data using the UART */
 /*      1 = return AFE data on UART                         */
 /*      0 = return AFE data on SW (Std Output)              */
-#define USE_UART_FOR_DATA           (0)
+#define USE_UART_FOR_DATA           (1)
 
 /* Macro to enable multiplexer choice                      */
 /*      0 = user MULTIPLEXER ADG1608                       */
