@@ -1,8 +1,5 @@
-
-/*
- * Placeholder to list other libraries required by the application.
- 
+/*TODO: libg.a, librdimon.a, libgloss.a, libnosys.a 
 GROUP(
+	
 )
-
- */
+*/	

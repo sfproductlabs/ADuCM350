@@ -15,7 +15,7 @@ License Agreement.
  * @version: $Revision: 30127 $
  * @date:    $Date: 2015-03-09 12:05:31 -0400 (Mon, 09 Mar 2015) $
  *****************************************************************************/
-
+#include "newlib/sys/reent.h"
 #include "startup.h"
 
 //#ifdef _USING_UCOS_II_
@@ -236,7 +236,7 @@ WEAK_FUNC (void ResetISR (void)) {
 
 #ifdef __GNUC__
 /*
-  unsigned long *pulSrc, *pulDest;
+    unsigned long *pulSrc, *pulDest;
 
     // Copy initialised data from flash into RAM
     pulSrc = &_etext;
@@ -250,9 +250,10 @@ WEAK_FUNC (void ResetISR (void)) {
     {
         *pulDest++ = 0;
     }
+*/
     // Call application main directly.
     main();
-*/
+
 #elif __ICCARM__
 
     // Call IAR system startup

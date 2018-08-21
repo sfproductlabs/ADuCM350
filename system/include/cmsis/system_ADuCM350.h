@@ -257,8 +257,8 @@ typedef enum
  *                                          configurations are requested asynchronously.
  */
 typedef enum {
-    ADI_SYS_CLOCK_STATE_INVALID,               /* use to flag invalid state transitions */
-    ADI_SYS_CLOCK_STATE_MINIMAL, 
+    ADI_SYS_CLOCK_STATE_INVALID = 0,               /* use to flag invalid state transitions */
+    ADI_SYS_CLOCK_STATE_MINIMAL = 1,
     ADI_SYS_CLOCK_STATE_MEASUREMENT,
     ADI_SYS_CLOCK_STATE_USB,
     ADI_SYS_CLOCK_STATE_USB_MEASUREMENT,

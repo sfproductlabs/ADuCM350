@@ -1,5 +1,6 @@
 system/src/cmsis/vectors_ADuCM350.o: \
  ../system/src/cmsis/vectors_ADuCM350.c \
+ ../system/include/newlib/sys/reent.h \
  ../system/include/ADuCM350/startup.h ../system/include/ADuCM350/device.h \
  ../system/include/ADuCM350/adi_rtos.h \
  ../system/include/ADuCM350/adi_int.h ../system/include/ADuCM350/misra.h \
@@ -21,6 +22,8 @@ system/src/cmsis/vectors_ADuCM350.o: \
  ../system/include/cmsis/DEVICE.h \
  ../system/include/cmsis/system_ADuCM350.h \
  ../system/include/ADuCM350/defADuCM350.h
+
+../system/include/newlib/sys/reent.h:
 
 ../system/include/ADuCM350/startup.h:
 

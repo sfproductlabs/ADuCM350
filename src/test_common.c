@@ -125,6 +125,7 @@ static void quit(void)
 #if defined ( __CC_ARM   )
 	_sys_exit(0);  // Keil retargeted implimentation for MicroLib
 #else
-   exit(0);
+   //AG exit(0);
+   _exit(0); //AG
 #endif
 }
