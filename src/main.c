@@ -297,6 +297,9 @@ int main(void) {
         FAIL("uart_Init");
     }
 
+    while (1)
+    	PRINT("SDFSDF");
+
     /* Initialize the AFE API */
     if (ADI_AFE_SUCCESS != adi_AFE_Init(&hDevice))
     {

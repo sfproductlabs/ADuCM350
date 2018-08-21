@@ -7,7 +7,7 @@ monitor halt
 monitor endian little
 monitor speed auto
 monitor flash device ADUCM350
-#monitor semihosting enable
+monitor semihosting enable
 monitor reset halt
 load
 #monitor reset init
