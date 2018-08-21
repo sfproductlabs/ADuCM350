@@ -2453,6 +2453,7 @@ ADI_AFE_RESULT_TYPE adi_AFE_Init(ADI_AFE_DEV_HANDLE* const phDevice) {
 
     /* Enable all AFE interrupts from NVIC */
     /* They are all still masked locally   */
+
     ADI_ENABLE_INT(AFE_CAPTURE_IRQn);
     ADI_ENABLE_INT(AFE_GENERATE_IRQn);
     ADI_ENABLE_INT(AFE_CMD_FIFO_IRQn);

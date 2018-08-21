@@ -313,7 +313,9 @@ int main(void) {
         FAIL("adi_AFE_SetTia");
     }
 
+
     delay(2000000);
+
 
     /* AFE power up */
     if (ADI_AFE_SUCCESS != adi_AFE_PowerUp(hDevice))
