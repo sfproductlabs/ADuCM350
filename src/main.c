@@ -21,6 +21,7 @@ License Agreement.
 #define ARM_MATH_CM3 1
 #include "arm_math.h"
 
+#include "diag/Trace.h"
 #include "test_common.h"
 #include "afe.h"
 #include "afe_lib.h"
@@ -213,7 +214,13 @@ int main(void) {
     {
         FAIL("uart_Init");
     }
-    
+
+    while(1) {
+
+    	test_print("Test 123 \n");
+
+    }
+
     PRINT("UART test\n");
 
     /* Initialize the AFE API */

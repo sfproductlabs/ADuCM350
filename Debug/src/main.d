@@ -2,8 +2,9 @@ src/main.o: ../src/main.c ../system/include/cmsis/arm_math.h \
  ../system/include/cmsis/core_cm3.h \
  ../system/include/cmsis/core_cmInstr.h \
  ../system/include/cmsis/cmsis_gcc.h \
- ../system/include/cmsis/core_cmFunc.h ../src/test_common.h \
- ../system/include/ADuCM350/wdt.h ../system/include/ADuCM350/device.h \
+ ../system/include/cmsis/core_cmFunc.h ../system/include/diag/Trace.h \
+ ../src/test_common.h ../system/include/ADuCM350/wdt.h \
+ ../system/include/ADuCM350/device.h \
  ../system/include/ADuCM350/adi_rtos.h \
  ../system/include/ADuCM350/adi_int.h ../system/include/ADuCM350/misra.h \
  ../system/include/ADuCM350/macros.h \
@@ -38,6 +39,8 @@ src/main.o: ../src/main.c ../system/include/cmsis/arm_math.h \
 ../system/include/cmsis/cmsis_gcc.h:
 
 ../system/include/cmsis/core_cmFunc.h:
+
+../system/include/diag/Trace.h:
 
 ../src/test_common.h:
 

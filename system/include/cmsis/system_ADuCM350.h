@@ -46,7 +46,14 @@
 #endif
 
  // added: MVB
-#define ADI_SYSTEM_CLOCK_TRANSITION
+#define ADI_SYSTEM_CLOCK_TRANSITION 1
+ // added: AG
+//#define OS_USE_SEMIHOSTING 0
+//#define OS_USE_TRACE_SEMIHOSTING_DEBUG 0
+//#define OS_USE_TRACE_SEMIHOSTING_STDOUT 0
+//or
+//#define OS_USE_TRACE_ITM 1
+//#define __ARM_ARCH_7M__
 
 /* clock IDs */
 typedef enum {
