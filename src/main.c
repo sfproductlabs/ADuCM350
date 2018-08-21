@@ -212,12 +212,6 @@ int main(void) {
         FAIL("uart_Init");
     }
 
-    while(1) {
-
-    	test_print("Test 123 \n");
-
-    }
-
     PRINT("UART test\n");
 
     /* Initialize the AFE API */
@@ -229,7 +223,7 @@ int main(void) {
     PRINT("AFE API\n");    
     
     /* AFE power up */ // This part is failing? 
-    if (adi_AFE_PowerUp(hDevice)) 
+    if (adi_AFE_PowerUp(hDevice))
     {
         FAIL("adi_AFE_PowerUp");
     }
