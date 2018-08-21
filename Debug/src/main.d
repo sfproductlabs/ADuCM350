@@ -2,9 +2,8 @@ src/main.o: ../src/main.c ../system/include/cmsis/arm_math.h \
  ../system/include/cmsis/core_cm3.h \
  ../system/include/cmsis/core_cmInstr.h \
  ../system/include/cmsis/cmsis_gcc.h \
- ../system/include/cmsis/core_cmFunc.h ../system/include/diag/Trace.h \
- ../src/test_common.h ../system/include/ADuCM350/wdt.h \
- ../system/include/ADuCM350/device.h \
+ ../system/include/cmsis/core_cmFunc.h ../src/test_common.h \
+ ../system/include/ADuCM350/wdt.h ../system/include/ADuCM350/device.h \
  ../system/include/ADuCM350/adi_rtos.h \
  ../system/include/ADuCM350/adi_int.h ../system/include/ADuCM350/misra.h \
  ../system/include/ADuCM350/macros.h \
@@ -22,13 +21,13 @@ src/main.o: ../src/main.c ../system/include/cmsis/arm_math.h \
  ../system/include/cmsis/DEVICE.h \
  ../system/include/cmsis/system_ADuCM350.h \
  ../system/include/ADuCM350/defADuCM350.h \
- ../system/include/ADuCM350/config/adi_wdt_config.h \
+ ../system/include/ADuCM350/config/adi_wdt_config.h ../src/sequences.h \
  ../system/include/ADuCM350/afe.h ../system/include/ADuCM350/dma.h \
  ../system/include/ADuCM350/uart.h \
  ../system/include/ADuCM350/config/adi_uart_config.h \
  ../system/include/ADuCM350/config/adi_afe_config.h \
  ../system/include/ADuCM350/afe_lib.h ../system/include/ADuCM350/uart.h \
- ../src/sequences.h
+ ../system/include/ADuCM350/rtc.h
 
 ../system/include/cmsis/arm_math.h:
 
@@ -39,8 +38,6 @@ src/main.o: ../src/main.c ../system/include/cmsis/arm_math.h \
 ../system/include/cmsis/cmsis_gcc.h:
 
 ../system/include/cmsis/core_cmFunc.h:
-
-../system/include/diag/Trace.h:
 
 ../src/test_common.h:
 
@@ -90,6 +87,8 @@ src/main.o: ../src/main.c ../system/include/cmsis/arm_math.h \
 
 ../system/include/ADuCM350/config/adi_wdt_config.h:
 
+../src/sequences.h:
+
 ../system/include/ADuCM350/afe.h:
 
 ../system/include/ADuCM350/dma.h:
@@ -104,4 +103,4 @@ src/main.o: ../src/main.c ../system/include/cmsis/arm_math.h \
 
 ../system/include/ADuCM350/uart.h:
 
-../src/sequences.h:
+../system/include/ADuCM350/rtc.h:

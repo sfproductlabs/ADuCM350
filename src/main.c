@@ -8,25 +8,31 @@ License Agreement.
 
 *********************************************************************************/
 
+
 /*****************************************************************************
- * @file:    ImpedanceMeasurement_2Wire.c
- * @brief:   Impedance measurement example for ADuCM350 in 2-wire configuration
+ * @file:    ImpedanceMeasurement_4Wire.c
+ * @brief:   Impedance measurement example for ADuCM350 in 4-wire configuration
+ *           Bio-Impedance measurement. The ADuCM350 4Wire Bio Config Board is
+ *           is required in this example
  * @version: $Revision: 29043 $
  * @date:    $Date: 2014-12-08 08:53:03 -0500 (Mon, 08 Dec 2014) $
  *****************************************************************************/
 
-
-#include <stdio.h>
+#include <time.h>
+#include <stddef.h>  // for 'NULL'
+#include <stdio.h>   // for scanf
+#include <string.h>  // for strncmp
+#include <stdint.h>
 
 #define ARM_MATH_CM3 1
 #include "arm_math.h"
 
-#include "diag/Trace.h"
 #include "test_common.h"
+#include "sequences.h"
 #include "afe.h"
 #include "afe_lib.h"
 #include "uart.h"
-#include "sequences.h"
+#include "rtc.h"
 
 
 /* Macro to enable the returning of AFE data using the UART */
@@ -34,47 +40,43 @@ License Agreement.
 /*      0 = return AFE data on SW (Std Output)              */
 #define USE_UART_FOR_DATA           (0)
 
-/* Macro to enable multiplexer choice                      */
-/*      0 = user MULTIPLEXER ADG1608                       */
-/*      1 = use MULTIPLEXER BASED ON AFE1-8                */
-#define USE_MULTIPLEXER_AFE          (1)
-
-#define RUNNING    (1) /* defaults to yes it's running */
-
 /* Excitation frequency in Hz */
 #define FREQ                        (50000)
 /* Peak voltage in mV */
-#define VPEAK                       (12.73)
-/* RCAL value, in ohms */
+#define VPEAK                       (599)
+/* RCAL value in Ohms */
 #define RCAL                        (1000)
+/* RTIA value in Ohms */
+#define RTIA                        (33000)
+
+#define RUNNING    (1) /* defaults to yes it's running */
+/* Instrumentation Amplifier Gain */
+#define INST_AMP_GAIN               (1.494)
 
 /* FCW = FREQ * 2^26 / 16e6 */
 #define FCW                         ((uint32_t)(((uint64_t)FREQ << 26) / 16000000 + 0.5))
 
-/* DAC LSB size in mV, before attenuator (1.6V / (2^12 - 1)) */
+/* DAC LSB size in mV = (1.6V / (2^12 - 1)) */
 #define DAC_LSB_SIZE                (0.39072)
 
 /* Sine amplitude in DAC codes */
-#define SINE_AMPLITUDE              ((uint16_t)((VPEAK * 40) / DAC_LSB_SIZE + 0.5))
+#define SINE_AMPLITUDE              ((uint16_t)((VPEAK) / DAC_LSB_SIZE + 0.5))
 
 /* If both real and imaginary result are within the interval (DFT_RESULTS_OPEN_MIN_THR, DFT_RESULTS_OPEN_MAX_THR),  */
 /* it is considered an open circuit and results for both magnitude and phase will be 0.                             */
-#define DFT_RESULTS_OPEN_MAX_THR    (10)
-#define DFT_RESULTS_OPEN_MIN_THR    (-10)
+#define DFT_RESULTS_OPEN_MAX_THR    (1)
+#define DFT_RESULTS_OPEN_MIN_THR    (-1)
 
-/* The number of results expected from the DFT, in this case 8 for 4 complex results */
-#define DFT_RESULTS_COUNT               (58)
+#define CLOCKS_PER_SECOND  (16000) /* how many clocks per second */
+
    
+/* The number of results expected from the DFT; 4 for 2 complex results */
+#define DFT_RESULTS_COUNT           (4)
+
 /* Fractional LSB size for the fixed32_t type defined below, used for printing only. */
 #define FIXED32_LSB_SIZE            (625)
-//#define MSG_MAXLEN                  (50)
-#define MSG_MAXLEN                  (300)
+#define MSG_MAXLEN                  (50)
 
-#define UART0_TX_PORTP0_MUX  ((uint16_t) ((uint16_t) 2<<12))
-#define UART0_RX_PORTP0_MUX  ((uint16_t) ((uint16_t) 2<<14))
-
-
-   
 /* Helper macro for printing strings to UART or Std. Output */
 #define PRINT(s)                    test_print(s)
 
@@ -91,77 +93,26 @@ typedef union {
 
 ADI_UART_HANDLE     hUartDevice     = NULL;
 
-/* Function prototypes */
-q15_t                   arctan                  (q15_t imag, q15_t real);
-fixed32_t               calculate_magnitude     (q31_t magnitude_rcal, q31_t magnitude_z);
-fixed32_t               calculate_phase         (q15_t phase_rcal, q15_t phase_z);
-void                    convert_dft_results     (int16_t *dft_results, q15_t *dft_results_q15, q31_t *dft_results_q31);
-void                    sprintf_fixed32         (char *out, fixed32_t in);
-void                    print_MagnitudePhase    (char *text, fixed32_t magnitude, fixed32_t phase);
-void                    test_print              (char *pBuffer);
-ADI_UART_RESULT_TYPE    uart_Init               (void);
-ADI_UART_RESULT_TYPE    uart_UnInit             (void);
-extern int32_t          adi_initpinmux          (void);
-void                    multiplex_AFE           (ADI_AFE_DEV_HANDLE  hDevice, const uint32_t *const seq, uint16_t *dft_results);
-void                    multiplex_adg1608       (ADI_AFE_DEV_HANDLE  hDevice, const uint32_t *const seq, uint16_t *dft_results);
+// leap-year compute macro (ignores leap-seconds)
+#define LEAP_YEAR(x) (((0==x%4)&&(0!=x%100))||(0==x%400))
+/* device and board specific values selected according to computed trim measurement */
+/* THESE VALUES ARE UNIQUE TO THE EVAL-ADUCM350EBZ REV. 0 BOARD, SERIAL#: AVAS 35070 */
+#define ADI_RTC_TRIM_INTERVAL    (uint32_t)ADI_RTC_TRIM_INTERVAL_14
+#define ADI_RTC_TRIM_DIRECTION   (uint32_t)ADI_RTC_TRIM_SUB
+#define ADI_RTC_TRIM_VALUE       (uint32_t)ADI_RTC_TRIM_1
 
+#define UART0_TX_PORTP0_MUX  ((uint16_t) ((uint16_t) 2<<12))
+#define UART0_RX_PORTP0_MUX  ((uint16_t) ((uint16_t) 2<<14))
 
-/* Helper function for printing a string to UART or Std. Output */ 
-void test_print (char *pBuffer) { 
-#if (1 == USE_UART_FOR_DATA) 
-    int16_t size; 
-    /* Print to UART */ 
-    size = strlen(pBuffer); 
-    adi_UART_BufTx(hUartDevice, pBuffer, &size); 
- 
-#elif (0 == USE_UART_FOR_DATA) 
-    /* Print  to console */ 
-	printf(pBuffer);
-    //usning nosys - should migrate to libgloss
+/* Device handle */
+ADI_RTC_HANDLE hRTC = NULL;
+volatile bool_t bRtcAlarmFlag;
+volatile bool_t bRtcInterrupt;
+volatile bool_t bWdtInterrupt;
+volatile bool_t bHibernateExitFlag;
 
- 
-#endif /* USE_UART_FOR_DATA */ 
-}
-
-
-/* Initialize the UART, set the baud rate and enable */
-ADI_UART_RESULT_TYPE uart_Init (void) {
-    ADI_UART_RESULT_TYPE    result = ADI_UART_SUCCESS;
-
-    /* Open UART in blocking, non-intrrpt mode by supplying no internal buffs */
-    if (ADI_UART_SUCCESS != (result = adi_UART_Init(ADI_UART_DEVID_0, &hUartDevice, NULL)))
-    {
-        return result;
-    }
-
-    /* Set UART baud rate to 115200 */
-    if (ADI_UART_SUCCESS != (result = adi_UART_SetBaudRate(hUartDevice, ADI_UART_BAUD_115200)))
-    {
-        return result;
-    }
-
-    /* Enable UART q */
-    if (ADI_UART_SUCCESS != (result = adi_UART_Enable(hUartDevice,true)))
-    {
-        return result;
-    }
-
-    return result;
-}
-
-/* Uninitialize the UART */
-ADI_UART_RESULT_TYPE uart_UnInit (void) {
-    ADI_UART_RESULT_TYPE    result = ADI_UART_SUCCESS;
-
-  /* Uninitialize the UART API */
-    if (ADI_UART_SUCCESS != (result = adi_UART_UnInit(hUartDevice)))
-    {
-        return result;
-    }
-
-    return result;
-
-}
+void rtc_ReportTime(void);
+uint32_t BuildSeconds(void);
 
 int32_t adi_initpinmux(void) {
     /* Port Control MUX registers */
@@ -171,10 +122,139 @@ int32_t adi_initpinmux(void) {
     return 0;
 }
 
-extern void initialise_monitor_handles(void); /* prototype */
+/* callbacks */
+void rtcCallback (void *pCBParam, uint32_t Event, void *EventArg);
+//static void Ext_Int8_Callback (void *pCBParam, uint32_t Event, void *pArg);
+
+/* Function prototypes */
+q15_t                   arctan                  (q15_t imag, q15_t real);
+fixed32_t calculate_magnitude(q31_t magnitude_1, q31_t magnitude_2, uint32_t res);
+fixed32_t               calculate_phase         (q15_t phase_rcal, q15_t phase_z);
+void                    convert_dft_results     (int16_t *dft_results, q15_t *dft_results_q15, q31_t *dft_results_q31);
+void                    sprintf_fixed32         (char *out, fixed32_t in);
+void                    print_MagnitudePhase    (char *text, fixed32_t magnitude, fixed32_t phase);
+void                    test_print              (char *pBuffer);
+ADI_UART_RESULT_TYPE    uart_Init               (void);
+ADI_UART_RESULT_TYPE    uart_UnInit             (void);
+void                    delay                   (uint32_t counts);
+extern int32_t          adi_initpinmux          (void);
+void rtc_Init(void);
+// void rtc_Calibrate(void);
+
+/* Sequence for 4-Wire Bio-Impedance measurement, performs 2 DFTs:  */
+/*     TIA (Current) and AN_A (Voltage)                               */
+//uint32_t seq_afe_acmeasBioZ_4wire[] = {
+//    0x0016001A,   /* Safety word: bits 31:16 = command count, bits 7:0 = CRC                */
+//    0x84005818,   /* AFE_FIFO_CFG: DATA_FIFO_SOURCE_SEL = 10                                */
+//    0x8A000034,   /* AFE_WG_CFG: TYPE_SEL = 10                                              */
+//    0x98000000,   /* AFE_WG_CFG: SINE_FCW = 0 (placeholder, user programmable)              */
+//    0x9E000000,   /* AFE_WG_AMPLITUDE: SINE_AMPLITUDE = 0 (placeholder, user programmable)  */
+//    0x88000F00,   /* DAC_CFG: DAC_ATTEN_EN = 0                                              */
+//    /* TIA  */
+//    0x86007788,   /* DMUX_STATE = 8, PMUX_STATE = 8, NMUX_STATE = 7, TMUX_STATE = 7         */
+//    0xA0000002,   /* AFE_ADC_CFG: TIA, no bypass, offset and gain correction.               */
+//    0x0080E800,   /* Wait 528ms.                                                            */
+//                  /* This is the worst case settling time:                                  */
+//                  /* Rcm=10M, Ciso=22nF(20%tol) => settling time = 2*RC = 528 ms            */
+//                  /* This settling time is only required the first time the switches are    */
+//                  /* closed.                                                                */
+//    0x80024EF0,   /* AFE_CFG: WAVEGEN_EN = 1                                                */
+//    0x00000C80,   /* Wait 200us                                                             */
+//    0x8002CFF0,   /* AFE_CFG: ADC_CONV_EN = 1, DFT_EN = 1                                   */
+//    0x00032340,   /* Wait 13ms ( -148us to stop at midscale)                                */
+//    0x80020EF0,   /* AFE_CFG: ADC_CONV_EN = 0, DFT_EN = 0                                   */
+//    /* AN_A */
+//    0xA0000208,   /* AFE_ADC_CFG: AN_A, Use GAIN and OFFSET AUX                             */
+//    0x00000640,   /* Wait 100us                                                             */
+//    0x80024EF0,   /* AFE_CFG: WAVEGEN_EN = 1                                                */
+//    0x00000C80,   /* Wait 200us                                                             */
+//    0x8002CFF0,   /* AFE_CFG: ADC_CONV_EN = 1, DFT_EN = 1                                   */
+//    0x00032340,   /* Wait 13ms                                                              */
+//    0x80020EF0,   /* AFE_CFG: WAVEGEN_EN, ADC_CONV_EN = 0, DFT_EN = 0                       */
+//    0x86007788,   /* DMUX_STATE = 0, PMUX_STATE = 0, NMUX_STATE = 0, TMUX_STATE = 0         */
+//    0x82000002,   /* AFE_SEQ_CFG: SEQ_EN = 0                                                */
+//};
+
+/* Sequence for 4-Wire Bio-Impedance measurement, performs 2 DFTs:  */
+/*     TIA (Current) and AN_A (Voltage)                               */
+//uint32_t seq_afe_fast_acmeasBioZ_4wire[] = {
+//
+//    0x0016001A,   /* Safety word: bits 31:16 = command count, bits 7:0 = CRC                */
+//    0x84005818,   /* AFE_FIFO_CFG: DATA_FIFO_SOURCE_SEL = 10                                */
+//    0x8A000034,   /* AFE_WG_CFG: TYPE_SEL = 10                                              */
+//    0x98000000,   /* AFE_WG_CFG: SINE_FCW = 0 (placeholder, user programmable)              */
+//    0x9E000000,   /* AFE_WG_AMPLITUDE: SINE_AMPLITUDE = 0 (placeholder, user programmable)  */
+//    0x88000F00,   /* DAC_CFG: DAC_ATTEN_EN = 0                                              */
+//
+//    /* TIA  */
+//    0x86007788,   /* DMUX_STATE = 8, PMUX_STATE = 8, NMUX_STATE = 7, TMUX_STATE = 7         */
+//    0xA0000002,   /* AFE_ADC_CFG: TIA, no bypass, offset and gain correction.               */
+//    // 0x00000640,   /* wait 100us */
+//    0x00003E80,      /* 20 ms */
+//    //0x0080E800,   /* Wait 528ms.                                                            */
+//                  /* This is the worst case settling time:                                  */
+//                  /* Rcm=10M, Ciso=22nF(20%tol) => settling time = 2*RC = 528 ms            */
+//                  /* This settling time is only required the first time the switches are    */
+//                  /* closed.                                                                */
+//    0x80024EF0,   /* AFE_CFG: WAVEGEN_EN = 1                                                */
+//    0x00000C80,   /* Wait 200us                                                             */
+//    0x8002CFF0,   /* AFE_CFG: ADC_CONV_EN = 1, DFT_EN = 1                                   */
+//    0x00032340,   /* Wait 13ms ( -148us to stop at midscale)                                */
+//    0x80020EF0,   /* AFE_CFG: ADC_CONV_EN = 0, DFT_EN = 0                                   */
+//
+//    /* AN_A */
+//    0xA0000208,   /* AFE_ADC_CFG: AN_A, Use GAIN and OFFSET AUX                             */
+//    0x00000640,   /* Wait 100us                                                             */
+//    0x80024EF0,   /* AFE_CFG: WAVEGEN_EN = 1                                                */
+//    0x00000C80,   /* Wait 200us                                                             */
+//    0x8002CFF0,   /* AFE_CFG: ADC_CONV_EN = 1, DFT_EN = 1                                   */
+//    0x00032340,   /* Wait 13ms                                                              */
+//    0x80020EF0,   /* AFE_CFG: WAVEGEN_EN, ADC_CONV_EN = 0, DFT_EN = 0                       */
+//    0x86007788,   /* DMUX_STATE = 0, PMUX_STATE = 0, NMUX_STATE = 0, TMUX_STATE = 0         */
+//    0x82000002,   /* AFE_SEQ_CFG: SEQ_EN = 0                                                */
+//};
+
+uint32_t seq_afe_poweritup[] = {
+    5 << 16 | 0x43,
+    0x84005818,   /* AFE_FIFO_CFG: DATA_FIFO_SOURCE_SEL = 10                                */
+    0x8A000034,   /* AFE_WG_CFG: TYPE_SEL = 10                                              */
+    0x98000000,   /* AFE_WG_CFG: SINE_FCW = 0 (placeholder, user programmable)              */
+    0x9E000000,   /* AFE_WG_AMPLITUDE: SINE_AMPLITUDE = 0 (placeholder, user programmable)  */
+    0x88000F00,   /* DAC_CFG: DAC_ATTEN_EN = 0                                              */
+
+};
+
+uint32_t seq_afe_fast_meas_4wire[] = {
+
+    17 << 16 | 0x43,
+    /* TIA  */
+    0x86007788,   /* DMUX_STATE = 8, PMUX_STATE = 8, NMUX_STATE = 7, TMUX_STATE = 7         */
+    0xA0000002,   /* AFE_ADC_CFG: TIA, no bypass, offset and gain correction.               */
+    0x00000640,   /* wait 100us */
+    //0x00027100,    /* wait 10ms */
+    0x80024EF0,   /* AFE_CFG: WAVEGEN_EN = 1                                                */
+    0x00000C80,   /* Wait 200us                                                             */
+    0x8002CFF0,   /* AFE_CFG: ADC_CONV_EN = 1, DFT_EN = 1                                   */
+    0x00032340,   /* Wait 13ms ( -148us to stop at midscale)                                */
+    0x80020EF0,   /* AFE_CFG: ADC_CONV_EN = 0, DFT_EN = 0                                   */
+
+    /* AN_A */
+    0xA0000208,   /* AFE_ADC_CFG: AN_A, Use GAIN and OFFSET AUX                             */
+    0x00000640,   /* Wait 100us                                                             */
+    0x80024EF0,   /* AFE_CFG: WAVEGEN_EN = 1                                                */
+    0x00000C80,   /* Wait 200us                                                             */
+    0x8002CFF0,   /* AFE_CFG: ADC_CONV_EN = 1, DFT_EN = 1                                   */
+    0x00032340,   /* Wait 13ms                                                              */
+    //0x00000C80,   /* Wait 200us                                                             */
+    0x80020EF0,   /* AFE_CFG: WAVEGEN_EN, ADC_CONV_EN = 0, DFT_EN = 0                       */
+    0x86007788,   /* DMUX_STATE = 0, PMUX_STATE = 0, NMUX_STATE = 0, TMUX_STATE = 0         */
+    0x82000002,   /* AFE_SEQ_CFG: SEQ_EN = 0                                                */
+};
+
+extern void initialise_monitor_handles(void);
+
 
 int main(void) {
-	//AG: for semihosting
 	initialise_monitor_handles();
 
     ADI_AFE_DEV_HANDLE  hDevice;
@@ -182,20 +262,25 @@ int main(void) {
     q15_t               dft_results_q15[DFT_RESULTS_COUNT];
     q31_t               dft_results_q31[DFT_RESULTS_COUNT];
     q31_t               magnitude[DFT_RESULTS_COUNT / 2];
-    q15_t               phase[DFT_RESULTS_COUNT / 2];
-    fixed32_t           magnitude_result[DFT_RESULTS_COUNT / 2 - 1];
-    fixed32_t           phase_result[DFT_RESULTS_COUNT / 2 - 1];
-    int8_t              i;
+    //q15_t               phase[DFT_RESULTS_COUNT / 2];
+    //fixed32_t           magnitude_result[DFT_RESULTS_COUNT / 2 - 1];
+    //fixed32_t           phase_result[DFT_RESULTS_COUNT / 2 - 1];
+
+    uint32_t            offset_code;
+    uint32_t            gain_code;
+    uint32_t            rtiaAndGain;
     int8_t              running;
-    
     running = RUNNING;
-    
+
     /* Initialize system */
     SystemInit();
-    
+
     /* Change the system clock source to HFXTAL and change clock frequency to 16MHz     */
     /* Requirement for AFE (ACLK)                                                       */
-    SystemTransitionClocks(ADI_SYS_CLOCK_TRIGGER_MEASUREMENT_ON);
+    if (ADI_SYS_SUCCESS != SystemTransitionClocks(ADI_SYS_CLOCK_TRIGGER_MEASUREMENT_ON))
+    {
+        FAIL("SystemTransitionClocks");
+    }
 
     /* SPLL with 32MHz used, need to divide by 2 */
     SetSystemClockDivider(ADI_SYS_CLOCK_UART, 2);
@@ -203,7 +288,7 @@ int main(void) {
     /* Test initialization */
     test_Init();
 
-    /* initialize static pinmuxing */
+    /* Initialize static pinmuxing */
     adi_initpinmux();
 
     /* Initialize the UART for transferring measurement data out */
@@ -212,68 +297,132 @@ int main(void) {
         FAIL("uart_Init");
     }
 
-    PRINT("UART test\n");
-
     /* Initialize the AFE API */
-    if (adi_AFE_Init(&hDevice)) 
+    if (ADI_AFE_SUCCESS != adi_AFE_Init(&hDevice))
     {
-        FAIL("adi_AFE_Init");
+        FAIL("Init");
     }
 
-    PRINT("AFE API\n");    
-    
-    /* AFE power up */ // This part is failing? 
-    if (adi_AFE_PowerUp(hDevice))
+    /* Set RCAL and RTIA values */
+    if (ADI_AFE_SUCCESS != adi_AFE_SetRcal(hDevice, RCAL))
+    {
+        FAIL("adi_AFE_SetRcal");
+    }
+    if (ADI_AFE_SUCCESS != adi_AFE_SetRtia(hDevice, RTIA))
+    {
+        FAIL("adi_AFE_SetTia");
+    }
+
+    delay(2000000);
+
+    /* AFE power up */
+    if (ADI_AFE_SUCCESS != adi_AFE_PowerUp(hDevice))
     {
         FAIL("adi_AFE_PowerUp");
     }
 
-    PRINT("POWERED UP\n");   
+    /* Delay to ensure Vbias is stable */
+    delay(2000000);
+
+    /* Temp Channel Calibration */
+    if (ADI_AFE_SUCCESS != adi_AFE_TempSensChanCal(hDevice))
+    {
+        PRINT("adi_AFE_TempSensChanCal");
+    }
     
+    /* Auxiliary Channel Calibration */
+    if (ADI_AFE_SUCCESS != adi_AFE_AuxChanCal(hDevice))
+    {
+        PRINT("adi_AFE_AuxChanCal");
+    }
+
     /* Excitation Channel Power-Up */
-    if (adi_AFE_ExciteChanPowerUp(hDevice)) 
+    if (ADI_AFE_SUCCESS != adi_AFE_ExciteChanPowerUp(hDevice))
     {
         FAIL("adi_AFE_ExciteChanPowerUp");
     }
 
-    PRINT("POWERED EXCITATION CHANNEL\n");       
-    
-    /* TIA Channel Calibration */
-    if (adi_AFE_TiaChanCal(hDevice)) 
+    /* TempCal results will be used to set the TIA calibration registers. These */
+    /* values will ensure the ratio between current and voltage is exactly 1.5  */
+    if (ADI_AFE_SUCCESS != adi_AFE_ReadCalibrationRegister(hDevice, ADI_AFE_CAL_REG_ADC_GAIN_TEMP_SENS, &gain_code))
     {
-        FAIL("adi_AFE_TiaChanCal");
+        FAIL("adi_AFE_ReadCalibrationRegister, gain");
+    }
+    if (ADI_AFE_SUCCESS != adi_AFE_WriteCalibrationRegister(hDevice, ADI_AFE_CAL_REG_ADC_GAIN_TIA, gain_code))
+    {
+        FAIL("adi_AFE_WriteCalibrationRegister, gain");
+    }
+    if (ADI_AFE_SUCCESS != adi_AFE_ReadCalibrationRegister(hDevice, ADI_AFE_CAL_REG_ADC_OFFSET_TEMP_SENS, &offset_code))
+    {
+        FAIL("adi_AFE_ReadCalibrationRegister, offset");
+    }
+    if (ADI_AFE_SUCCESS != adi_AFE_WriteCalibrationRegister(hDevice, ADI_AFE_CAL_REG_ADC_OFFSET_TIA, offset_code))
+    {
+        FAIL("adi_AFE_WriteCalibrationRegister, offset");
     }
 
-    PRINT("TIA CHANNEL CALIBRATION\n");    
-    
-    /* Excitation Channel Calibration (Attenuation Enabled) */
-    if (adi_AFE_ExciteChanCalAtten(hDevice)) 
-    {
-        FAIL("adi_AFE_ExciteChanCalAtten");
-    }
-
-    PRINT("READY TO START FOR LOOP\n");     
-    
     /* Update FCW in the sequence */
-    seq_afe_mux1[3] = SEQ_MMR_WRITE(REG_AFE_AFE_WG_FCW, FCW);
+    seq_afe_poweritup[3] = SEQ_MMR_WRITE(REG_AFE_AFE_WG_FCW, FCW);
     /* Update sine amplitude in the sequence */
-    seq_afe_mux1[4] = SEQ_MMR_WRITE(REG_AFE_AFE_WG_AMPLITUDE, SINE_AMPLITUDE);
+    seq_afe_poweritup[4] = SEQ_MMR_WRITE(REG_AFE_AFE_WG_AMPLITUDE, SINE_AMPLITUDE);
 
     /* Recalculate CRC in software for the AC measurement, because we changed   */
-    /* FCW and sine amplitude settings                                          */
+    /* FCW and sine amplitude settings.                                         */
     adi_AFE_EnableSoftwareCRC(hDevice, true);
 
-    int max = 1000;
-    int iterator = 0;
+    int run_max         = 100000000;        // do only hundred runs of each frequency sweep.
+    int run_iterator    = 0;
+    PRINT("STEP ONE\n");
+    if (ADI_AFE_SUCCESS != adi_AFE_RunSequence(hDevice, seq_afe_poweritup, (uint16_t *)dft_results, DFT_RESULTS_COUNT))
+    {
+     PRINT("AFE PROBLEM!");
+    }
 
-    while (running) {
+    //// How to create a timer? ////
+    // 16MHz clock,
 
+    /* initialize driver */
+    //rtc_Init();
+
+    //PRINT("RTC INITED\n");
+    /* calibrate */
+    //rtc_Calibrate();
+
+    //time_t rawtime;
+    // get the RTC count through the "time" CRTL function
+    //time(&rawtime);
+    //PRINT ("here\n");
+
+//    clock_t start, end;
+//    double cpu_time_used;
+//    start = clock();
+//    /* Do the work. */
+//    end = clock();
+//    cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+//
+
+    /* get the time */
+    //rtc_ReportTime();
+
+    while (running) // running
+    {
+
+      fixed32_t           magnitude_result[DFT_RESULTS_COUNT / 2 - 1]={0};
+      char                msg[MSG_MAXLEN] = {0};
+      char                tmp[300] = {0};
+
+      // rtc_ReportTime();
       /* Perform the Impedance measurement */
-      multiplex_AFE(hDevice, seq_afe_mux1, (uint16_t *)dft_results);
-  
-      /* Restore to using default CRC stored with the sequence */
-      // adi_AFE_EnableSoftwareCRC(hDevice, false); 
-      
+//      if (ADI_AFE_SUCCESS != adi_AFE_RunSequence(hDevice, seq_afe_fast_acmeasBioZ_4wire, (uint16_t *)dft_results, DFT_RESULTS_COUNT))
+//      {
+//        FAIL("Impedance Measurement");
+//      }
+
+      if (ADI_AFE_SUCCESS != adi_AFE_RunSequence(hDevice, seq_afe_fast_meas_4wire, (uint16_t *)dft_results, DFT_RESULTS_COUNT))
+      {
+        FAIL("Impedance Measurement");
+      }
+
       /* Convert DFT results to 1.15 and 1.31 formats.  */
       convert_dft_results(dft_results, dft_results_q15, dft_results_q31);
       
@@ -281,87 +430,53 @@ int main(void) {
       /* Use CMSIS function */
       arm_cmplx_mag_q31(dft_results_q31, magnitude, DFT_RESULTS_COUNT / 2);
       
-      /* Calculate final magnitude values, calibrated with RCAL. */
-      for (i = 0; i < DFT_RESULTS_COUNT / 2 - 1; i++) 
-      {
-        magnitude_result[i] = calculate_magnitude(magnitude[0], magnitude[i + 1]);
-      }
-      
-      /* Phase calculation */
-      /* RCAL first */
-      phase[0] = arctan(dft_results[1], dft_results[0]);
-      // it goes to 55. 
-      for (i = 0; i < DFT_RESULTS_COUNT / 2 - 1; i++) 
-      {
-        /* No need to calculate the phase if magnitude is 0 (open circuit) */
-        if (magnitude_result[i].full) 
-        {
-          /* First the measured phase. */
-          phase[i + 1]         = arctan(dft_results[2 * (i + 1) + 1], dft_results[2 * (i + 1)]);
-          /* Then the phase calibrated with RCAL. */
-          phase_result[i]      = calculate_phase(phase[0], phase[i + 1]);
-        }
-        else 
-        {
-          phase[i + 1]         = 0;
-          phase_result[i].full = 0;
-        }
-      }
-      char                msg[MSG_MAXLEN];
-      char                tmp[MSG_MAXLEN];
-      // char                str[10];
-      sprintf(msg, "    %s :", "magnitudes");
-      
-      for (i = 0; i < DFT_RESULTS_COUNT / 2 - 1; i++) {
-        //sprintf(str,"%d\n",i);
-        //PRINT(str);
-         /* Only if magnitude is not 0 (open circuit) */
-        if (magnitude_result[i].full)  // append the value. 
-        {
-           /* Magnitude */
-           sprintf_fixed32(tmp, magnitude_result[i]);
-           strcat(msg,tmp);
-        }
-        else { // append a 0. 
-           //PRINT("zero encountered\n");
-           strcat(msg, " 0");
-        }
-        strcat(msg," ,");
-      }
+      /* Calculate final magnitude value, calibrated with RTIA the gain of the instrumenation amplifier */
+      rtiaAndGain = (uint32_t)((RTIA * 1.5) / INST_AMP_GAIN);
+      magnitude_result[0] = calculate_magnitude(magnitude[1], magnitude[0], rtiaAndGain);
+      //
+      sprintf_fixed32(tmp, magnitude_result[0]);
+      strcat(msg,tmp);
       strcat(msg," \r\n");
       PRINT(msg);
-
       
-      iterator++;
-      if (iterator >= max) {
+      run_iterator++;
+      if (run_iterator >= run_max) {
         running = 0;
         break;
-      }
+      } // THIS ALLOWS THE CODE TO BREAK AFTER RUNNING FOR A WHILE.
+
+
     }
 
-
     /* Restore to using default CRC stored with the sequence */
-    /* adi_AFE_EnableSoftwareCRC(hDevice, false);  */
+    // adi_AFE_EnableSoftwareCRC(hDevice, false);
 
     /* AFE Power Down */
-    if (adi_AFE_PowerDown(hDevice)) 
+    if (ADI_AFE_SUCCESS != adi_AFE_PowerDown(hDevice))
     {
-        FAIL("adi_AFE_PowerDown");
+        FAIL("PowerDown");
     }
 
     /* Uninitialize the AFE API */
-    if (adi_AFE_UnInit(hDevice)) 
+    if (ADI_AFE_SUCCESS != adi_AFE_UnInit(hDevice))
     {
-        FAIL("adi_AFE_UnInit");
+        FAIL("Uninit");
     }
 
-    /* Uninitialize the UART */
-    adi_UART_UnInit(hUartDevice);
+    /* Uninitilize the UART */
+    uart_UnInit();
 
     PASS();
 
 }
 
+void delay(uint32_t count)
+{
+    while(count>0)
+    {
+        count--;
+    }
+}
 
 /* Arctan Implementation                                                                                    */
 /* =====================                                                                                    */
@@ -443,7 +558,7 @@ q15_t arctan(q15_t imag, q15_t real) {
 
         for (i = 4; i >=0; i--) {
             out += coeff[i];
-			arm_mult_q15(&out, &t, &out, 1);
+            arm_mult_q15(&out, &t, &out, 1);
         }
         
         /* Rotate back to original position, in multiples of pi/4 */
@@ -453,8 +568,6 @@ q15_t arctan(q15_t imag, q15_t real) {
         return out;
     }
 }
-
-
 
 /* This function performs dual functionality:                                           */
 /* - open circuit check: the real and imaginary parts can be non-zero but very small    */
@@ -487,21 +600,19 @@ void convert_dft_results(int16_t *dft_results, q15_t *dft_results_q15, q31_t *df
 
 }
 
-/* Calculates calibrated magnitude.                                     */
-/* The input values are the measured RCAL magnitude (magnitude_rcal)    */
-/* and the measured magnitude of the unknown impedance (magnitude_z).   */
-/* Performs the calculation:                                            */
-/*      magnitude = magnitude_rcal / magnitude_z * RCAL                 */
-/* Output in custom fixed-point format (28.4).                          */
-fixed32_t calculate_magnitude(q31_t magnitude_rcal, q31_t magnitude_z) {
+/* Calculates magnitude.                                */
+/* performs the calculation:                            */
+/*      magnitude = magnitude_1 / magnitude_2 * res     */
+/* Output in custom fixed-point format (28.4)           */
+fixed32_t calculate_magnitude(q31_t magnitude_1, q31_t magnitude_2, uint32_t res) {
     q63_t       magnitude;
     fixed32_t   out;
 
     magnitude = (q63_t)0;
-    if ((q63_t)0 != magnitude_z) {
-        magnitude = (q63_t)magnitude_rcal * (q63_t)RCAL;
+    if ((q63_t)0 != magnitude_2) {
+        magnitude = (q63_t)magnitude_1 * (q63_t)res;
         /* Shift up for additional precision and rounding */
-        magnitude = (magnitude << 5) / (q63_t)magnitude_z;
+        magnitude = (magnitude << 5) / (q63_t)magnitude_2;
         /* Rounding */
         magnitude = (magnitude + 1) >> 1;
     }
@@ -518,19 +629,17 @@ fixed32_t calculate_magnitude(q31_t magnitude_rcal, q31_t magnitude_z) {
     return out;
 }
 
-/* Calculates calibrated phase.                                     */
-/* The input values are the measured RCAL phase (phase_rcal)        */
-/* and the measured phase of the unknown impedance (magnitude_z).   */
-/* Performs the calculation:                                        */
-/*      phase = (phase_z - phase_rcal) * PI / (2 * PI) * 180        */
-/*            = (phase_z - phase_rcal) * 180                        */
-/* Output in custom fixed-point format (28.4).                      */
-fixed32_t calculate_phase(q15_t phase_rcal, q15_t phase_z) {
+/* Calculates phase.                                        */
+/* performs the calculation:                                */
+/*      phase = (phase_2 - phase_1) * PI / (2 * PI) * 180   */
+/*            = (phase_2 - phase_1) * 180                   */
+/* Output in custom fixed-point format (28.4).              */
+fixed32_t calculate_phase(q15_t phase_1, q15_t phase_2) {
     q63_t       phase;
     fixed32_t   out;
 
     /* Multiply by 180 to convert to degrees */
-    phase = ((q63_t)(phase_z - phase_rcal) * (q63_t)180);
+    phase = ((q63_t)(phase_2 - phase_1) * (q63_t)180);
     /* Round and convert to fixed32_t */
     out.full = ((phase + (q63_t)0x400) >> 11) & 0xFFFFFFFF;
 
@@ -579,164 +688,358 @@ void print_MagnitudePhase(char *text, fixed32_t magnitude, fixed32_t phase) {
     PRINT(msg);
 }
 
-/* ADG1608 Truth Table
-A2      A1      A0      EN      On Switch 
-X       X       X       0       None
-0       0       0       1       1
-0       0       1       1       2
-0       1       0       1       3
-0       1       1       1       4
-1       0       0       1       5
-1       0       1       1       6
-1       1       0       1       7
-1       1       1       1       8
+/* Helper function for printing a string to UART or Std. Output */
+void test_print (char *pBuffer) {
+#if (1 == USE_UART_FOR_DATA)
+    int16_t size;
+    /* Print to UART */
+    size = strlen(pBuffer);
+    adi_UART_BufTx(hUartDevice, pBuffer, &size);
 
-EN      - P1.8/S11/D8 (port 1, pin 8)
-A0      - P1.9
-A1      - P1.10
-A2      - P1.11
-EN2     - P1.12
-A0_2    - P1.13
-A1_2    - P1.14
-A2_2    - P1.15
+#elif (0 == USE_UART_FOR_DATA)
+    /* Print  to console */
+    printf(pBuffer);
 
-AFE3, AFE4. (R7,P7)
+#endif /* USE_UART_FOR_DATA */
+}
 
-*/
-void multiplex_adg1608(ADI_AFE_DEV_HANDLE  hDevice, const uint32_t *const seq, uint16_t *dft_results) {
+/* Initialize the UART, set the baud rate and enable */
+ADI_UART_RESULT_TYPE uart_Init (void) {
+    ADI_UART_RESULT_TYPE    result = ADI_UART_SUCCESS;
+
+    /* Open UART in blocking, non-intrrpt mode by supplying no internal buffs */
+    if (ADI_UART_SUCCESS != (result = adi_UART_Init(ADI_UART_DEVID_0, &hUartDevice, NULL)))
+    {
+        return result;
+    }
+
+    /* Set UART baud rate to 115200 */
+    if (ADI_UART_SUCCESS != (result = adi_UART_SetBaudRate(hUartDevice, ADI_UART_BAUD_115200)))
+    {
+        return result;
+    }
+
+    /* Enable UART */
+    if (ADI_UART_SUCCESS != (result = adi_UART_Enable(hUartDevice,true)))
+    {
+        return result;
+    }
+
+    return result;
+}
+
+/* Uninitialize the UART */
+ADI_UART_RESULT_TYPE uart_UnInit (void) {
+    ADI_UART_RESULT_TYPE    result = ADI_UART_SUCCESS;
+
+    /* Uninitialize the UART API */
+    if (ADI_UART_SUCCESS != (result = adi_UART_UnInit(hUartDevice)))
+    {
+        return result;
+    }
+
+    return result;
+}
+
+void rtc_Init (void) {
+
+    PRINT("rtc init");
+
+    /* callbacks */
+    ADI_RTC_INT_SOURCE_TYPE callbacks = (ADI_RTC_INT_SOURCE_TYPE)
+                                       ( ADI_RTC_INT_SOURCE_WRITE_PEND
+                                       | ADI_RTC_INT_SOURCE_WRITE_SYNC
+                                       | ADI_RTC_INT_SOURCE_WRITE_PENDERR
+                                       | ADI_RTC_INT_SOURCE_ISO_DONE
+                                       | ADI_RTC_INT_SOURCE_LCD_UPDATE
+                                       | ADI_RTC_INT_SOURCE_ALARM
+                                       | ADI_RTC_INT_SOURCE_FAIL);
+    uint32_t buildTime = BuildSeconds();
+    ADI_RTC_RESULT_TYPE result;
+
+    result = adi_RTC_Init(ADI_RTC_DEVID_0, &hRTC);
+
+    /* retry on failsafe */
+    if (ADI_RTC_ERR_CLOCK_FAILSAFE == result) {
+
+        /* clear the failsafe */
+        adi_RTC_ClearFailSafe();
+
+        /* un-init RTC for a clean restart, but ignore failure */
+        adi_RTC_UnInit(hRTC);
+
+        /* re-init RTC */
+        if (ADI_RTC_SUCCESS != adi_RTC_Init(ADI_RTC_DEVID_0, &hRTC))
+            PRINT("Double fault on adi_RTC_Init");
+
+        PRINT("Resetting clock and trim values after init failure");
+
+        /* set clock to latest build time */
+        if (ADI_RTC_SUCCESS != adi_RTC_SetCount(hRTC, buildTime))
+            PRINT("adi_RTC_SetCount failed");
+
+        /* apply pre-computed calibration BOARD-SPECIFIC trim values */
+        if (adi_RTC_SetTrim(hRTC, ADI_RTC_TRIM_INTERVAL | ADI_RTC_TRIM_DIRECTION | ADI_RTC_TRIM_VALUE))
+            PRINT("adi_RTC_SetTrim failed");
+
+        /* enable trimming */
+        if (adi_RTC_EnableTrim(hRTC, true))
+            PRINT("adi_RTC_EnableTrim failed");
+
+    /* catch all other open failures */
+    } else {
+          //PRINT("could not initialize RTC \n");
+		if (result != ADI_RTC_SUCCESS)
+		  PRINT("Generic failure to initialize the RTC");
+    }
+
+    /* RTC opened successfully... */
+      PRINT("RTC OPENED SUCCESSFULLY \n");
+
+    /* disable alarm */
+    if (ADI_RTC_SUCCESS != adi_RTC_EnableAlarm(hRTC, false))
+        PRINT("adi_RTC_EnableAlarm failed");
+
+//#ifdef ADI_RTC_RESET
+    /* force a reset to the latest build timestamp */
+//    PRINT("Resetting clock");
+//    if (ADI_RTC_SUCCESS != adi_RTC_SetCount(hRTC, buildTime))
+//        PRINT("adi_RTC_SetCount failed");
+//    PRINT("New time is:");
+//    rtc_ReportTime();
+//#endif
+
+    /* register callback handler for all interrupts */
+    if (ADI_RTC_SUCCESS != adi_RTC_RegisterCallback (hRTC,  rtcCallback, callbacks)) {
+        PRINT("adi_RTC_RegisterCallback failed");
+    }
+
+    /* enable RTC */
+    if (ADI_RTC_SUCCESS != adi_RTC_EnableDevice(hRTC, true))
+        PRINT("adi_RTC_EnableDevice failed");
+
+
+	/* program GPIO to capture P0.10 pushbutton interrupt... */
+
+	/* initialize GPIO driver */
+//	if (adi_GPIO_Init()) {
+//		FAIL("adi_GPIO_Init failed");
+//	}
+//
+//	/* enable P0.10 input */
+//    if (adi_GPIO_SetInputEnable(ADI_GPIO_PORT_0, ADI_GPIO_PIN_10, true)) {
+//    	FAIL("Initialise_GPIO: adi_GPIO_SetInputEnable failed");
+//    }
+//
+//	/* disable P0.10 output */
+//    if (adi_GPIO_SetOutputEnable(ADI_GPIO_PORT_0, ADI_GPIO_PIN_10, false)) {
+//    	FAIL("Initialise_GPIO: adi_GPIO_SetOutputEnable failed");
+//    }
+//
+//	/* set P0.10 pullep enable */
+//    if (adi_GPIO_SetPullUpEnable(ADI_GPIO_PORT_0, ADI_GPIO_PIN_10, true)) {
+//    	FAIL("Initialise_GPIO: adi_GPIO_SetOutputEnable failed");
+//    }
+//
+//    /* Register the external interrupt callback */
+//    if(adi_GPIO_RegisterCallback(EINT8_IRQn,  Ext_Int8_Callback, NULL)) {
+//      FAIL("Initialise_GPIO: adi_GPIO_RegisterCallbackExtInt failed");
+//    }
+//
+//	/* enable P0.10 as external interrupt */
+//    if (adi_GPIO_EnableIRQ(EINT8_IRQn,  ADI_GPIO_IRQ_EITHER_EDGE)) {
+//    	FAIL("Initialise_GPIO: adi_GPIO_EnableIRQ failed");
+//    }
+//
+//	/* release GPIO driver */
+//	if (adi_GPIO_UnInit()) {
+//		FAIL("adi_GPIO_Init failed");
+//	}
+}
+
+
+//void rtc_Calibrate (void) {
+//
+//#ifdef ADI_RTC_CALIBRATE
+//
+//    /*
+//
+//    Compute the LF crystal trim values to compensate the RTC.  This can
+//    come from a static measure (a frequency counter), a real-time drift measure
+//    based on a USB transaction, Ethernet NTP or PTP protocol, or some other
+//    external reference.
+//
+//    Commercial crystals typically run between 20-100 ppm.  As an exercise, we
+//    demonstrate trimming a particular crystal and board configuration in which
+//    we measure an untrimmed error of about +58.6ppm (0.00586%).  This corresponds
+//    to a raw clock about 35.5 seconds/week fast (30 minutes/year).
+//
+//    Available Trim Corrections:
+//    	X axis: trim interval (seconds)
+//    	Y axis: trim value (seconds)
+//    	Table content: trim correction (ppm)
+//      Value     16384    32768    65536   131072 (Interval)
+//        0        0.00     0.00     0.00     0.00
+//        1       61.04    30.52    15.26     7.63
+//        2      122.07    61.04    30.52    15.26
+//        3      183.11    91.55    45.78    22.89
+//        4      244.14   122.07    61.04    30.52
+//        5      305.18   152.59    76.29    38.15
+//        6      366.21   183.11    91.55    45.78
+//        7      427.25   213.62   106.81    53.41
+//
+//    Referencing the trim table, we see the closest matching ppm correction for
+//    our example is 61.04.  In case there are different combinations yielding
+//    the same desired correction, we prefer the shortest trim interval (and
+//    smallest trim value) so as to minimize instantaneous drift.
+//
+//    So we choose a trim interval of 2^14 seconds with a negative trim value of 1
+//    second, subtracting 1 second every 4.5 hours to "slow" the fast crystal down
+//    to a more reasonable rate.  This particular trim leaves a residual error of
+//    negative 2.44ppm (0.000244%), making the trimmed clock a tad slow (less than
+//    1.5 seconds/week or about 1.3 minutes/year), but much better than the
+//    untrimmed accuracy of 30 minutes/year.
+//
+//    */
+//
+//    /* dial-up external LF crystal to clockout pin (P1.7) for measurement */
+//    if (adi_GPIO_Init())
+//        PRINT("adi_GPIO_Init failed");
+//    SetSystemClockMux(ADI_SYS_CLOCK_MUX_LFCLK_LFXTAL);   // select LF crystal
+//    SetSystemClockMux(ADI_SYS_CLOCK_MUX_OUTPUT_LF_CLK);  // route output
+//
+//    /* Use static pinmuxing */
+//    adi_initpinmux();
+//
+//    //if (adi_GPIO_UnInit())
+//    //    PRINT("adi_GPIO_UnInit failed");
+//
+//    //PRINT("RTC clockout programmed to P1.7 for calibration...");
+//
+//    /* program the BOARD-SPECIFIC computed trim value, as described above */
+//    if (adi_RTC_SetTrim(hRTC, ADI_RTC_TRIM_INTERVAL | ADI_RTC_TRIM_DIRECTION | ADI_RTC_TRIM_VALUE))
+//        PRINT("adi_RTC_SetTrim failed");
+//
+//    /* enable trim */
+//    if (adi_RTC_EnableTrim(hRTC, true))
+//        PRINT("adi_RTC_EnableTrim failed");
+//
+//#endif
+//}
+
+/* test standard ctime (time.h) constructs */
+void rtc_ReportTime(void) {
+
+
+  char buffer[300];
+  char tmp[200];
+  PRINT("REPORTING THE TIME\n");
+
+  clock_t c = clock();
   
-   // Create a new temporary array where we apepnd results.  
-   int16_t             temp_dft_results[4];
-   int n,i                              = 0;
-     
-   // Enable Both Multiplexers to take digital input switching. 
-   // M1 ENABLE. 
-   adi_GPIO_SetHigh(ADI_GPIO_PORT_1, ADI_GPIO_PIN_8);
-   // Set M1 to source 1
-   adi_GPIO_SetLow(ADI_GPIO_PORT_1, ADI_GPIO_PIN_9 | ADI_GPIO_PIN_10 | ADI_GPIO_PIN_11);
-   
-   // M2 ENABLE
-   adi_GPIO_SetHigh(ADI_GPIO_PORT_1, ADI_GPIO_PIN_12);  // EN 2
-   // Set M2 to source 2 
-   adi_GPIO_SetHigh(ADI_GPIO_PORT_1, ADI_GPIO_PIN_13);
-   adi_GPIO_SetLow(ADI_GPIO_PORT_1, ADI_GPIO_PIN_14 | ADI_GPIO_PIN_15);
-
-   // Get a measurement:  
-   // 1. calibrate (only the first time) 
-   // 2. sequence enable
-   // 3. take measurement. 
-   // 4. sequence disable
-   // 5. put result into new results table
-   /* Perform the Impedance measurement */
-   if (adi_AFE_RunSequence(hDevice, seq, (uint16_t *)temp_dft_results,4)) 
-   {
-        FAIL("Impedance Measurement");
-   }
-   for (i = 0; i < 4; i++) 
-   {
-     dft_results[n] = temp_dft_results[i];
-     n = n+1;
-   }
-
-   // Set M2 to source 3 
-   adi_GPIO_SetHigh(ADI_GPIO_PORT_1, ADI_GPIO_PIN_14);
-   adi_GPIO_SetLow(ADI_GPIO_PORT_1, ADI_GPIO_PIN_13 | ADI_GPIO_PIN_15);
-
-     if (adi_AFE_RunSequence(hDevice, seq, (uint16_t *)temp_dft_results,4)) 
-   {
-        FAIL("Impedance Measurement");
-   }
-   for (i = 2; i < 4; i++) 
-   {
-     dft_results[n] = temp_dft_results[i];
-     n = n+1;
-   }
-   
-   // Set M2 to source 4 
-   adi_GPIO_SetHigh(ADI_GPIO_PORT_1, ADI_GPIO_PIN_13 | ADI_GPIO_PIN_14);
-   adi_GPIO_SetLow(ADI_GPIO_PORT_1, ADI_GPIO_PIN_15);   
-
-     if (adi_AFE_RunSequence(hDevice, seq, (uint16_t *)temp_dft_results,4)) 
-   {
-        FAIL("Impedance Measurement");
-   }
-   for (i = 2; i < 4; i++) 
-   {
-     dft_results[n] = temp_dft_results[i];
-     n = n+1;
-   }
-   
-   // Set M2 to source 5 
-   adi_GPIO_SetHigh(ADI_GPIO_PORT_1, ADI_GPIO_PIN_15);
-   adi_GPIO_SetLow(ADI_GPIO_PORT_1, ADI_GPIO_PIN_13 | ADI_GPIO_PIN_14);   
-   
-   if (adi_AFE_RunSequence(hDevice, seq, (uint16_t *)temp_dft_results,4)) 
-   {
-        FAIL("Impedance Measurement");
-   }
-   for (i = 2; i < 4; i++) 
-   {
-     dft_results[n] = temp_dft_results[i];
-     n = n+1;
-   }
-   
-   // Set M2 to source 6 
-   adi_GPIO_SetHigh(ADI_GPIO_PORT_1, ADI_GPIO_PIN_13 | ADI_GPIO_PIN_15);
-   adi_GPIO_SetLow(ADI_GPIO_PORT_1, ADI_GPIO_PIN_14);   
-   
-   if (adi_AFE_RunSequence(hDevice, seq, (uint16_t *)temp_dft_results,4)) 
-   {
-        FAIL("Impedance Measurement");
-   }
-   for (i = 2; i < 4; i++) 
-   {
-     dft_results[n] = temp_dft_results[i];
-     n = n+1;
-   }
-   // Set M2 to source 7 
-   adi_GPIO_SetHigh(ADI_GPIO_PORT_1, ADI_GPIO_PIN_14 | ADI_GPIO_PIN_15);
-   adi_GPIO_SetLow(ADI_GPIO_PORT_1, ADI_GPIO_PIN_13);      
-   
-   if (adi_AFE_RunSequence(hDevice, seq, (uint16_t *)temp_dft_results,4)) 
-   {
-        FAIL("Impedance Measurement");
-   }
-   for (i = 2; i < 4; i++) 
-   {
-     dft_results[n] = temp_dft_results[i];
-     n = n+1;
-   }
-   
-   // Set M2 to source 8 
-   adi_GPIO_SetHigh(ADI_GPIO_PORT_1, ADI_GPIO_PIN_13 | ADI_GPIO_PIN_14 | ADI_GPIO_PIN_15);
-
-   if (adi_AFE_RunSequence(hDevice, seq, (uint16_t *)temp_dft_results,4)) 
-   {
-        FAIL("Impedance Measurement");
-   }
-   for (i = 2; i < 4; i++)  // start at 2 to skip calibration data. 
-   {
-     dft_results[n] = temp_dft_results[i];
-     n = n+1;
-   }
-   
-    // END 
-    // M1,M2 DISABLE. 
-   adi_GPIO_SetLow(ADI_GPIO_PORT_1, ADI_GPIO_PIN_8 | ADI_GPIO_PIN_12);
-   
-   
-  // it's a for loop within a for loop, within inner conditional so not to measure against self. 
-  // could we fill a secondary larger DFTResults variable and commence same processing as m1 method?  
+  PRINT("after clock call\n");
+  double time_in_seconds = (double)c / (double)CLOCKS_PER_SECOND;
+  PRINT("PRINTING IT OUT\n");
+  sprintf(tmp,"%g seconds", time_in_seconds);
+  strcat(buffer,tmp);
+  strcat(buffer,"\r\n");
+  PRINT(buffer);
   
 }
 
-void multiplex_AFE(ADI_AFE_DEV_HANDLE  hDevice, const uint32_t *const seq, uint16_t *dft_results) {
-  
-   /* Perform the Impedance measurement */
-   //if (adi_AFE_RunSequence(hDevice, test_sequence1, (uint16_t *)dft_results,DFT_RESULTS_COUNT))   
-   if (adi_AFE_RunSequence(hDevice, seq, (uint16_t *)dft_results,DFT_RESULTS_COUNT)) 
-   {
-        FAIL("Impedance_Measurement");
-   }  
-  
+/* External interrupt callback */
+//static void Ext_Int8_Callback (void *pCBParam, uint32_t Event, void *pArg)
+//{
+//    /* clear the interrupt */
+//    NVIC_ClearPendingIRQ(EINT8_IRQn);
+//
+//    /* also call hibernation exit API */
+//    SystemExitLowPowerMode(&bHibernateExitFlag);
+//}
+//
+
+uint32_t BuildSeconds(void)
+{
+    /* count up seconds from the epoc (1/1/70) to the most recient build time */
+
+    char timestamp[] = __DATE__ " " __TIME__;
+    int month_days [] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    uint32_t days, month, date, year, hours, minutes, seconds;
+    char Month[4];
+
+    // parse the build timestamp
+    sscanf(timestamp, "%s %d %d %d:%d:%d", Month, &date, &year, &hours, &minutes, &seconds);
+
+    // parse ASCII month to a value
+    if     ( !strncmp(Month, "Jan", 3 )) month = 1;
+    else if( !strncmp(Month, "Feb", 3 )) month = 2;
+    else if( !strncmp(Month, "Mar", 3 )) month = 3;
+    else if( !strncmp(Month, "Apr", 3 )) month = 4;
+    else if( !strncmp(Month, "May", 3 )) month = 5;
+    else if( !strncmp(Month, "Jun", 3 )) month = 6;
+    else if( !strncmp(Month, "Jul", 3 )) month = 7;
+    else if( !strncmp(Month, "Aug", 3 )) month = 8;
+    else if( !strncmp(Month, "Sep", 3 )) month = 9;
+    else if( !strncmp(Month, "Oct", 3 )) month = 10;
+    else if( !strncmp(Month, "Nov", 3 )) month = 11;
+    else if( !strncmp(Month, "Dec", 3 )) month = 12;
+
+    // count days from prior years
+    days=0;
+    for (int y=1970; y<year; y++) {
+        days += 365;
+        if (LEAP_YEAR(y))
+            days += 1;
+    }
+
+    // add days for current year
+    for (int m=1; m<month; m++)
+        days += month_days[m-1];
+
+    // adjust if current year is a leap year
+    if ( (LEAP_YEAR(year) && ( (month > 2) || ((month == 2) && (date == 29)) ) ) )
+        days += 1;
+
+    // add days this month (not including current day)
+    days += date-1;
+
+    return (days*24*60*60 + hours*60*60 + minutes*60 + seconds);
+}
+
+
+/* RTC Callback handler */
+void rtcCallback (void *pCBParam, uint32_t nEvent, void *EventArg) {
+
+    bRtcInterrupt = true;
+
+    /* process RTC interrupts (cleared by driver) */
+    if (ADI_RTC_INT_SOURCE_WRITE_PEND & (ADI_RTC_INT_SOURCE_TYPE) nEvent) {
+        PERF("got RTC interrupt callback with ADI_RTC_INT_SOURCE_WRITE_PEND status");
+    }
+
+    if (ADI_RTC_INT_SOURCE_WRITE_SYNC & (ADI_RTC_INT_SOURCE_TYPE) nEvent) {
+        PERF("got RTC interrupt callback with ADI_RTC_INT_SOURCE_WRITE_SYNC status");
+    }
+
+    if (ADI_RTC_INT_SOURCE_WRITE_PENDERR & (ADI_RTC_INT_SOURCE_TYPE) nEvent) {
+        PERF("got RTC interrupt callback with ADI_RTC_INT_SOURCE_WRITE_PENDERR status");
+    }
+
+    if (ADI_RTC_INT_SOURCE_ISO_DONE & (ADI_RTC_INT_SOURCE_TYPE) nEvent) {
+        PERF("got RTC interrupt callback with ADI_RTC_INT_SOURCE_ISO_DONE status");
+    }
+
+    if (ADI_RTC_INT_SOURCE_LCD_UPDATE & (ADI_RTC_INT_SOURCE_TYPE) nEvent) {
+        PERF("got RTC interrupt callbackwithon ADI_RTC_INT_SOURCE_LCD_UPDATE status");
+    }
+
+    if (ADI_RTC_INT_SOURCE_ALARM & (ADI_RTC_INT_SOURCE_TYPE) nEvent) {
+        PERF("got RTC interrupt callback with ADI_RTC_INT_SOURCE_ALARM status");
+        bRtcAlarmFlag = true;       // note alarm flag
+        bHibernateExitFlag = true;  // exit hibernation on return from interrupt
+    }
+
+    if (ADI_RTC_INT_SOURCE_FAIL & (ADI_RTC_INT_SOURCE_TYPE) nEvent) {
+        PERF("got RTC interrupt callback with ADI_RTC_INT_SOURCE_FAIL status");
+    }
 }
