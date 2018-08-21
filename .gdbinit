@@ -7,7 +7,8 @@ monitor halt
 monitor endian little
 monitor speed auto
 monitor flash device ADUCM350
-monitor semihosting enable
+#This is required for gdb on console...
+#monitor semihosting enable 
 monitor reset halt
 load
 #monitor reset init
