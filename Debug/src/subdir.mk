@@ -4,20 +4,26 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../src/PinMux.c \
 ../src/Timer.c \
 ../src/_write.c \
+../src/crc32.c \
 ../src/main.c \
 ../src/test_common.c 
 
 OBJS += \
+./src/PinMux.o \
 ./src/Timer.o \
 ./src/_write.o \
+./src/crc32.o \
 ./src/main.o \
 ./src/test_common.o 
 
 C_DEPS += \
+./src/PinMux.d \
 ./src/Timer.d \
 ./src/_write.d \
+./src/crc32.d \
 ./src/main.d \
 ./src/test_common.d 
 

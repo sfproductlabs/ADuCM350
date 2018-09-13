@@ -28,12 +28,15 @@ License Agreement.
 #include "arm_math.h"
 
 #include "test_common.h"
+
+#include "flash.h"
+#include "assert.h"
+
 #include "sequences.h"
 #include "afe.h"
 #include "afe_lib.h"
 #include "uart.h"
 #include "rtc.h"
-
 
 /* Macro to enable the returning of AFE data using the UART */
 /*      1 = return AFE data on UART                         */
@@ -69,7 +72,7 @@ License Agreement.
 
 #define CLOCKS_PER_SECOND  (16000) /* how many clocks per second */
 
-   
+
 /* The number of results expected from the DFT; 4 for 2 complex results */
 #define DFT_RESULTS_COUNT           (4)
 
@@ -114,13 +117,821 @@ volatile bool_t bHibernateExitFlag;
 void rtc_ReportTime(void);
 uint32_t BuildSeconds(void);
 
-int32_t adi_initpinmux(void) {
-    /* Port Control MUX registers */
-    *((volatile uint32_t *)REG_GPIO0_GPCON) = UART0_TX_PORTP0_MUX | UART0_RX_PORTP0_MUX;
 
+
+/* The symbol USE_TIMERS controls whether timer-driven Flash aborts are
+ * generated during the test run. This exercises the ability of the driver to
+ * cope with flash writes being aborted. Set to zero to disable the timer aborts.
+ */
+#define USE_TIMERS 1
+
+#if (1 == USE_TIMERS)
+static void InitializeWUT(void);
+/* pick some 16-bit comparator values for the
+   WUT (even though the WUT is 32-bit), because
+   the GPT resolution is only 16-bit */
+#define LOADB   0x80
+#define LOADC  0x800
+#define LOADD 0x8000
+
+#define COUNT 5
+static uint32_t tickCount = 0u;
+static uint32_t wakeCount = 0u;
+#endif /* (1 == USE_TIMERS) */
+
+/* CRC polynomial for signature checking */
+#define IEEE_802_3_POLYNOMIAL      0x04C11DB7
+
+static bool_t parityErrorOccurred = false;
+
+/* device handles */
+static ADI_WUT_DEV_HANDLE hWUT;
+static ADI_FEE_DEV_HANDLE  hAbortFlashDevice = NULL;
+
+static char strbuf[256]; /* buffer for logging messages */
+static uint32_t totalCount = 0; /* count of test iterations */
+
+/* skipCount is a debugging feature. It is a module-static variable that
+ * causes test passes to be skipped up to the specified number. This
+ * allows the test cycle to be quickly advanced to a known failing case.
+ */
+static uint32_t skipCount = 0;
+
+static void writeFlash(ADI_FEE_DEV_HANDLE  hDevice, bool_t useDMA, uint32_t addr, uint32_t length, uint8_t *pBuffer)
+{
+    ADI_FEE_RESULT_TYPE feeResult = ADI_FEE_ERR_UNSUPPORTED;
+    char *psFnName = "adi_FEE_SubmitTxBuffer";
+
+#if (1 == ADI_FEE_CFG_GPF_DMA_SUPPORT)
+    if (useDMA)
+    {
+        // Try to use DMA, if available
+        feeResult = adi_FEE_SubmitTxBuffer(hDevice,
+                                addr,
+                                pBuffer,
+                                length);
+    }
+
+    if ((ADI_FEE_ERR_UNSUPPORTED != feeResult) &&
+        (ADI_FEE_ERR_INVALID_ADDRESS != feeResult) &&
+        (ADI_FEE_ERR_INVALID_PARAMETER != feeResult))
+    {
+        void *pRetBuff = NULL;
+
+        feeResult = adi_FEE_GetTxBuffer(hDevice, &pRetBuff);
+
+        if (pRetBuff != pBuffer)
+        {
+            test_Fail("pRetBuff != pBuffer after adi_FEE_GetTxBuffer()");
+        }
+    }
+    else
+#endif /* (1 == ADI_FEE_CFG_GPF_DMA_SUPPORT) */
+    {
+        psFnName = "adi_FEE_Write";
+
+        feeResult = adi_FEE_Write(hDevice,
+                                addr,
+                                pBuffer,
+                                length);
+    }
+
+    if (ADI_FEE_SUCCESS != feeResult)
+    {
+        sprintf(strbuf, "%s(addr = 0x%08x, length = %ld) failed with %d\n", psFnName, addr, length, feeResult);
+        test_Fail(strbuf);
+    }
+}
+
+static void verifyFlash(uint32_t baseAddr, uint32_t flashSize, uint32_t relAddr, uint32_t length, uint8_t startVal)
+{
+    uint8_t *pByte = (uint8_t*)baseAddr;
+    uint32_t byteCount;
+
+    for (byteCount = 0u;
+         byteCount < relAddr;
+         byteCount += 1)
+    {
+        if (0xFFu != *pByte)
+        {
+            sprintf(strbuf, "verifyFlash: [0x%08x] != 0xFF", pByte);
+            test_Fail(strbuf);
+        }
+
+        ++pByte;
+    }
+
+    for (;
+         byteCount < (relAddr + length);
+         byteCount += 1)
+    {
+        if (startVal != *pByte)
+        {
+            sprintf(strbuf, "verifyFlash: [0x%08x] != 0x%02x, == 0x%02x", pByte, startVal, *pByte);
+            test_Fail(strbuf);
+        }
+
+        ++pByte;
+        startVal = (startVal + 1) % 255; /* stay within 0-254 range */
+    }
+
+    for (;
+         byteCount < flashSize;
+         byteCount += 1)
+    {
+        if (0xFFu != *pByte)
+        {
+            sprintf(strbuf, "verifyFlash: [0x%08x] != 0xFF", pByte);
+            test_Fail(strbuf);
+        }
+
+        ++pByte;
+    }
+}
+
+static void erasePages(ADI_FEE_DEV_HANDLE  hDevice, uint32_t addr, uint32_t length)
+{
+    uint32_t lastAddr = addr + length - 1u;
+    uint32_t page, firstPage, lastPage;
+    ADI_FEE_RESULT_TYPE feeResult;
+
+     feeResult = adi_FEE_GetPageNumber(hDevice,
+                                      addr,
+                                      &firstPage);
+
+    if (ADI_FEE_SUCCESS != feeResult)
+    {
+        sprintf(strbuf, "adi_FEE_GetPageNumber(addr = 0x%08x) failed with %d\n", addr, feeResult);
+        test_Fail(strbuf);
+    }
+
+     feeResult = adi_FEE_GetPageNumber(hDevice,
+                                      lastAddr,
+                                      &lastPage);
+
+    if (ADI_FEE_SUCCESS != feeResult)
+    {
+        sprintf(strbuf, "adi_FEE_GetPageNumber(addr = 0x%08x) failed with %d\n", lastAddr, feeResult);
+        test_Fail(strbuf);
+    }
+
+    for (page = firstPage;
+         page <= lastPage;
+         ++page)
+    {
+        feeResult = adi_FEE_PageErase(hDevice, page);
+
+      if (ADI_FEE_SUCCESS != feeResult)
+      {
+          sprintf(strbuf, "adi_FEE_PageErase(page = %ld) failed with %d\n", page, feeResult);
+          test_Fail(strbuf);
+      }
+    }
+}
+
+static void eraseSignaturePage(ADI_FEE_DEV_HANDLE  hDevice, uint32_t baseAddr, uint32_t flashSize)
+{
+    uint32_t lastAddr = baseAddr + flashSize - 1u;
+    uint32_t page;
+    ADI_FEE_RESULT_TYPE feeResult;
+
+    feeResult = adi_FEE_GetPageNumber(hDevice,
+                                      lastAddr,
+                                      &page);
+
+    if (ADI_FEE_SUCCESS != feeResult)
+    {
+        sprintf(strbuf, "adi_FEE_GetPageNumber(addr = 0x%08x) failed with %d\n", lastAddr, feeResult);
+        test_Fail(strbuf);
+    }
+
+    feeResult = adi_FEE_PageErase(hDevice, page);
+
+    if (ADI_FEE_SUCCESS != feeResult)
+    {
+        sprintf(strbuf, "adi_FEE_PageErase(page = %ld) failed with %d\n", page, feeResult);
+        test_Fail(strbuf);
+    }
+}
+
+static void massErase(ADI_FEE_DEV_HANDLE  hDevice)
+{
+      ADI_FEE_RESULT_TYPE feeResult;
+
+      feeResult = adi_FEE_MassErase(hDevice);
+
+      if (ADI_FEE_SUCCESS != feeResult)
+      {
+          test_Fail("mass erase failed");
+      }
+}
+
+static void checkAndErase(ADI_FEE_DEV_HANDLE  hDevice, uint32_t baseAddr, uint32_t flashSize)
+{
+    uint32_t *pWord = (uint32_t*)baseAddr;
+    uint32_t byteCount;
+    ADI_FEE_RESULT_TYPE feeResult;
+
+    for (byteCount = 0u;
+         byteCount < flashSize;
+         byteCount += 4)
+    {
+        if (0xFFFFFFFFu != *pWord)
+        {
+            uint32_t pageNum;
+
+            feeResult = adi_FEE_GetPageNumber(hDevice,
+                                        (uint32_t)pWord,
+                                        &pageNum);
+
+            if (ADI_FEE_SUCCESS != feeResult)
+            {
+                sprintf(strbuf, "adi_FEE_GetPageNumber(addr = 0x%08x) failed with %d\n", pWord, feeResult);
+                test_Fail(strbuf);
+            }
+
+            sprintf(strbuf, "cleaning up page %ld, address 0x%08x", pageNum, pWord);
+            test_Perf(strbuf);
+            feeResult = adi_FEE_PageErase(hDevice, pageNum);
+
+            if (ADI_FEE_SUCCESS != feeResult)
+            {
+                sprintf(strbuf, "adi_FEE_PageErase(page = %ld) failed with %d\n", pageNum, feeResult);
+                test_Fail(strbuf);
+            }
+        }
+
+        ++pWord;
+    }
+
+}
+
+static void verifyFlashErased(uint32_t baseAddr, uint32_t flashSize)
+{
+    uint32_t *pWord = (uint32_t*)baseAddr;
+    uint32_t byteCount;
+
+    for (byteCount = 0u;
+         byteCount < flashSize;
+         byteCount += 4)
+    {
+        if (0xFFFFFFFFu != *pWord)
+        {
+            sprintf(strbuf, "flash address 0x%08x != 0xFFFFFFFF", pWord);
+            test_Fail(strbuf);
+        }
+
+        ++pWord;
+    }
+}
+
+static void checkSignatures(ADI_FEE_DEV_HANDLE  hDevice, uint32_t baseAddr, uint32_t flashSize, ADI_FEE_SIGN_DIR direction, uint32_t *pSignature)
+{
+    ADI_FEE_RESULT_TYPE feeResult;
+    uint32_t startPage, endPage;
+    uint32_t signature = 0u;
+    uint32_t endAddr = baseAddr + flashSize - 4u;
+
+    feeResult = adi_FEE_GetPageNumber(hDevice,
+                            baseAddr,
+                            &startPage);
+
+    if (ADI_FEE_SUCCESS != feeResult)
+    {
+        sprintf(strbuf, "adi_FEE_GetPageNumber(addr = 0x%08x) failed with %d\n", baseAddr, feeResult);
+        test_Fail(strbuf);
+    }
+
+    feeResult = adi_FEE_GetPageNumber(hDevice,
+                            endAddr,
+                            &endPage);
+
+    if (ADI_FEE_SUCCESS != feeResult)
+    {
+        sprintf(strbuf, "adi_FEE_GetPageNumber(addr = 0x%08x) failed with %d\n", endAddr, feeResult);
+        test_Fail(strbuf);
+    }
+
+    feeResult = adi_FEE_VerifySignature(hDevice,
+                                        direction,
+                                        startPage,
+                                        endPage,
+                                        &signature);
+
+    if (ADI_FEE_ERR_READ_VERIFY_ERROR != feeResult)
+    {
+        sprintf(strbuf, "adi_FEE_Sign(%ld, %ld) != ADI_FEE_ERR_READ_VERIFY_ERROR\n", startPage, endPage);
+        test_Fail(strbuf);
+    }
+
+    if (ADI_FEE_SIGN_REVERSE == direction)
+    {
+        endAddr -= 4u;
+    }
+
+    feeResult = adi_FEE_Write(hDevice,
+                            endAddr,
+                            (uint8_t*)&signature,
+                            4u);
+
+    if (ADI_FEE_SUCCESS != feeResult)
+    {
+        sprintf(strbuf, "adi_FEE_Write() of signature word at 0x%08x failed with %d\n", endAddr, feeResult);
+        test_Fail(strbuf);
+    }
+
+    feeResult = adi_FEE_VerifySignature(hDevice,
+                                        direction,
+                                        startPage,
+                                        endPage,
+                                        &signature);
+
+    if (ADI_FEE_SUCCESS != feeResult)
+    {
+        sprintf(strbuf, "adi_FEE_Sign(%ld, %ld) != ADI_FEE_SUCCESS\n", startPage, endPage);
+        test_Fail(strbuf);
+    }
+
+    *pSignature = signature;
+}
+
+
+#if 1
+#include "crc32.h"     /* include the header file generated with pycrc */
+
+/*
+ * Software implementation of the signature algorithm, used
+ * for checking the hardware-produced signatures. This version uses a
+ * module (crc32.c) which was generated by pycrc (http://www.tty1.net/pycrc/)
+ * using the following command lines:
+ *
+ * python pycrc.py --generate=h --output=crc32.h --model=crc-32 --algorithm=tbl
+ *  --xor-out=0 --reflect-in=true --reflect-out=false
+ * python pycrc.py --generate=c --output=crc32.c --model=crc-32 --algorithm=tbl
+ *  --xor-out=0 --reflect-in=true --reflect-out=false
+ *
+ * Assumes start and end addresses are word-aligned.
+ */
+static uint32_t
+crcBlock(
+    uint32_t addr,
+    uint32_t endAddr,
+    const int32_t stride,
+    const uint32_t polynomial,
+    const uint32_t crc)
+{
+    uint32_t pyCrc = crc_init();
+
+    /* Outer loop - iterates over data words */
+    for(;;) /* middle-breaking loop */
+    {
+        uint32_t *pWord = ((uint32_t  *)addr);
+        uint32_t  word = __RBIT(*pWord);
+
+        pyCrc = crc_update(pyCrc, (uint8_t*)&word, 4);
+
+        if (addr == endAddr) break; /* loop breaks here */
+
+        addr += stride;
+    }
+
+    return crc_finalize(pyCrc);
+}
+#else
+/*
+ * Software implementation of the signature algorithm, used
+ * for checking the hardware-produced signatures.
+ * Assumes start and end addresses are word-aligned.
+ */
+static uint32_t
+crcBlock(
+    uint32_t addr,
+    uint32_t endAddr,
+    const int32_t stride,
+    const uint32_t polynomial,
+    uint32_t crc)
+{
+    /* Outer loop - iterates over data words */
+    for(;;) /* middle-breaking loop */
+    {
+        uint32_t data = *((uint32_t *)addr);
+        uint32_t i;
+
+        /* Inner loop - updates CRC from current data word */
+        for (i = 0;     i < 32; i++)
+        {
+            uint32_t xor = data ^ crc;
+
+            crc  <<= 1;
+            data <<= 1;
+
+            if (xor & 0x80000000)
+            {
+                crc ^= polynomial;
+            }
+        }
+
+        if (addr == endAddr) break; /* loop breaks here */
+
+        addr += stride;
+    }
+
+    return crc;
+}
+#endif
+
+static void testParityChecking(ADI_FEE_DEV_ID_TYPE const devID, uint32_t flashBase, uint32_t flashStart, uint32_t nWords, uint32_t parityBase)
+{
+    ADI_FEE_RESULT_TYPE feeResult;
+    ADI_FEE_DEV_HANDLE  hDevice;
+    uint32_t   offset = (flashStart & 0x1Fu);
+    uint32_t   addr   = (flashStart >> 3u) | parityBase;
+    uint32_t *pFlashWord = (uint32_t*)flashStart;
+    uint32_t wordsProcessed = 0u;
+
+    test_Perf("Testing parity checking");
+
+    feeResult = adi_FEE_Init(devID, true, &hDevice);
+
+    if (ADI_FEE_SUCCESS != feeResult)
+    {
+      test_Fail("adi_FEE_Init() failed\n");
+    }
+
+    /* Erase the parity region first, so we know that it will fail checking */
+    erasePages(hDevice, addr,  nWords/8);
+
+    feeResult = adi_FEE_SetParityChecking(hDevice, ADI_FEE_PARITY_ENABLE_INTERRUPT);
+
+    if (ADI_FEE_SUCCESS != feeResult)
+    {
+        test_Fail("adi_FEE_SetParityChecking(ON) failed\n");
+    }
+
+    /* If we're executing from this flash memory then a parity error should occur immediately,
+     * otherwise we need to force one with a data read. */
+    if (!parityErrorOccurred)
+    {
+        volatile uint32_t dummy = *(uint32_t*)flashBase;
+    }
+
+    if (parityErrorOccurred)
+    {
+        pADI_FEE0->FEEPARSTA = 0x1u; /* clear the parity error indication */
+    }
+    else
+    {
+        test_Fail("No parity error detected");
+    }
+
+    feeResult = adi_FEE_SetParityChecking(hDevice, ADI_FEE_PARITY_DISABLE);
+
+    if (ADI_FEE_SUCCESS != feeResult)
+    {
+        test_Fail("adi_FEE_SetParityChecking(OFF) failed\n");
+    }
+
+    NVIC_ClearPendingIRQ(PARITY_IRQn); /* Clear any latched parity interrupt */
+
+    /* Now generate the correct parity information and write it to flash.
+    */
+    while (wordsProcessed < nWords)    /* For each word in specified region */
+    {
+        uint32_t nParityWord = 0xFFFFFFFFu;       /* aligned word for write */
+
+        /* Prepare the next aligned word to write to flash */
+        while((offset < 32u) && (wordsProcessed < nWords))
+        {
+            uint32_t dataWord = *pFlashWord++;
+            uint32_t parityBit = 1u;
+
+            /* For every set bit in dataWord, toggle the parity bit */
+            while(0u != dataWord)
+            {
+                parityBit ^= (1u & dataWord); /* no-op if bottom bit is zero */
+                dataWord >>= 1;               /* shift the next bit down */
+            }
+
+            /* Now use the parity bit to toggle the appropriate bit in the parity word.
+             * The parity word starts out as all-1s (so that unchanged bits have no effect
+             * when written) and gets toggled to zero if parityBit is 1. This is why
+             * parityBit is initialised to 1, above. If there are an even number of set bits
+             * dataWord then parityBit will still be 1 and will toggle the bit in nParityWord
+             * to zero, i.e. the hardware expects *even* parity.
+             */
+            nParityWord ^= (parityBit << offset);
+            wordsProcessed++;
+            offset++;
+        }
+
+        offset = 0; /* start at the beginning of the next word */
+
+        /* Write the word to the flash memory */
+        writeFlash(hDevice, false, addr, 4, (uint8_t*)&nParityWord);
+
+        /* If the word has been successfully written to flash then increment the destination address */
+        addr += 4;
+    }
+
+    /* Turn parity checking back on for the remainder of program execution */
+    feeResult = adi_FEE_SetParityChecking(hDevice, ADI_FEE_PARITY_ENABLE_INTERRUPT);
+
+    if (ADI_FEE_SUCCESS != feeResult)
+    {
+        test_Fail("adi_FEE_SetParityChecking(ON) failed\n");
+    }
+
+    feeResult = adi_FEE_UnInit(hDevice);
+
+    if (ADI_FEE_SUCCESS != feeResult)
+    {
+        test_Fail("adi_FEE_UnInit() failed\n");
+    }
+
+    test_Perf("Parity checking test complete, parity checking now enabled");
+}
+
+static int testFlash(char *psDesc,
+                     ADI_FEE_DEV_ID_TYPE const devID,
+                     bool_t useDMA,
+                     uint32_t const baseAddr,
+                     uint32_t kiloBytes,
+                     uint32_t iterations)
+{
+    ADI_FEE_RESULT_TYPE feeResult;
+    ADI_FEE_DEV_HANDLE  hDevice;
+    uint32_t flashSize = kiloBytes*1024u;
+	uint32_t rnd = RAND_MAX;;
+    uint32_t count = 0u;
+    static uint8_t buffer[4096];
+    uint32_t i;
+    uint32_t forwardSig, reverseSig;
+
+    /* Fill source buffer */
+    for (i = 0u;
+         i < sizeof(buffer);
+         ++i)
+    {
+        buffer[i] = (uint8_t)(i % 255);
+    }
+
+    test_Perf(psDesc);
+
+    /* Initialize flash driver */
+    feeResult = adi_FEE_Init(devID, true, &hDevice);
+
+    if (ADI_FEE_SUCCESS != feeResult)
+    {
+      test_Fail("adi_FEE_Init() failed\n");
+    }
+
+    /* Note: parity checking is turned off, for the specified flash controller,
+     * by adi_FEE_Init(). If not then we would need to explicitly disable parity
+     * checking here to avoid parity errors on data reads from the flash, as
+     * we do not update the parity bits when writing to the flash region for
+     * testing.
+     */
+
+#if (1 == USE_TIMERS)
+    hAbortFlashDevice = hDevice;
+    feeResult = adi_FEE_SetInterruptAbort(hDevice, WUT_IRQn, 1);
+
+    if (ADI_FEE_SUCCESS != feeResult)
+    {
+        sprintf(strbuf, "adi_FEE_SetInterruptAbort(%ld) failed with %d\n", SysTick_IRQn, feeResult);
+        test_Fail(strbuf);
+    }
+#endif /* (1 == USE_TIMERS) */
+
+    checkAndErase(hDevice, baseAddr, flashSize);
+
+    //assert(0x3FFFFFFF == RAND_MAX);
+
+    /* Check that the flash array is all 0xFFFFFFFF */
+    verifyFlashErased(baseAddr, flashSize);
+
+    for(count = 1; count <= iterations; ++count)
+    {
+        uint32_t relAddr = rand() % (flashSize - 8);
+        uint32_t limit = flashSize - relAddr - 8;
+        uint32_t length = rnd;
+
+        if (limit > 4095)
+            limit = 4095;
+
+        length = (rand() % limit);
+        length >>= (rand() % 12);
+        length += 1;
+
+        if (ADI_FEE_DEVID_GP == devID)
+        {
+            /* Round down/up to 4-byte boundaries, so we can use DMA */
+            relAddr &= ~3u;
+            length = (length + 3) & ~3u;
+        }
+
+        assert(relAddr < 0x20000u);
+		assert(length > 0u);
+        assert(length <= 4096u);
+
+        if (++totalCount <= skipCount)
+        {
+            continue;
+        }
+
+        sprintf(strbuf, "%3d: Testing absAddr = 0x%08lX, length = %lu",
+                totalCount, baseAddr + relAddr, length);
+        test_Perf(strbuf);
+
+        writeFlash(hDevice, useDMA, baseAddr + relAddr, length, buffer);
+        verifyFlash(baseAddr, flashSize - 8u, relAddr, length, 0u);
+
+        /* check the flash signature */
+        checkSignatures(hDevice, baseAddr, flashSize, ADI_FEE_SIGN_FORWARD, &forwardSig);
+
+        if (forwardSig != crcBlock(baseAddr, baseAddr + flashSize - 12u, +4, IEEE_802_3_POLYNOMIAL, 0xFFFFFFFFu))
+        {
+            test_Fail("Forward signature doesn't match calculated CRC");
+        }
+
+        checkSignatures(hDevice, baseAddr, flashSize, ADI_FEE_SIGN_REVERSE, &reverseSig);
+
+        if (reverseSig != crcBlock(baseAddr + flashSize - 12u, baseAddr, -4, IEEE_802_3_POLYNOMIAL, 0xFFFFFFFFu))
+        {
+            test_Fail("Reverse signature doesn't match calculated CRC");
+        }
+
+        /* We expect different signatures for the forward and reverse directions. It is
+         * Possible for them to be the same, but this is unlikely enough that we should
+         * be able to discount the possibility.
+        */
+        if (forwardSig == reverseSig)
+        {
+            test_Fail("Forward and reverse signatures are the same");
+        }
+
+        if (ADI_FEE_DEVID_0 == devID)
+        {
+            /* For flash controller 0 we don't use mass erase,
+             * as our own code will be in the lower part of it.
+             */
+            erasePages(hDevice, baseAddr + relAddr, length);
+            eraseSignaturePage(hDevice, baseAddr, flashSize);
+        }
+        else
+        {
+            /* For flash controller 1 or the GPF controller we
+             * can use the mass erase.
+             */
+            massErase(hDevice);
+        }
+
+        verifyFlashErased(baseAddr, flashSize);
+    }
+
+    /* If we've just finished testing flash controller 0 then turn parity checking back
+     * on for the remainder of program execution. Parity checking has to remain off during
+     * testing, to avoid parity errors on data reads from the flash, but turning it on
+     * here allows subsequent instruction fetches from flash 0 to be parity-checked.
+     */
+    if (ADI_FEE_DEVID_0 == devID)
+    {
+        feeResult = adi_FEE_SetParityChecking(hDevice, ADI_FEE_PARITY_ENABLE_INTERRUPT);
+
+        if (ADI_FEE_SUCCESS != feeResult)
+        {
+            test_Fail("adi_FEE_SetParityChecking(ON) failed\n");
+        }
+    }
+
+    feeResult = adi_FEE_UnInit(hDevice);
+
+    if (ADI_FEE_SUCCESS != feeResult)
+    {
+        test_Fail("adi_FEE_UnInit() failed\n");
+    }
+
+    test_Perf("testFlash finished.");
 
     return 0;
 }
+
+void HardFault_Handler(void)
+{
+    test_Fail("Hard fault");
+}
+
+void BusFault_Handler(void)
+{
+    test_Fail("Bus fault");
+}
+
+void Parity_Int_Handler(void)
+{
+    if (parityErrorOccurred)
+    {
+         uint32_t errAddrLo = pADI_FEE0->FEEPARADRL;
+         uint32_t errAddrHi = pADI_FEE0->FEEPARADRH;
+
+         /* The first parity error was expected, this one isn't */
+         sprintf(strbuf, "FLASH parity error, address = 0x%04x%04x", errAddrHi, errAddrLo);
+         test_Fail(strbuf);
+    }
+    else
+    {
+        /* This is an expected parity error */
+        parityErrorOccurred = true;
+        NVIC_DisableIRQ(PARITY_IRQn);
+   }
+}
+
+
+
+#if (1 == USE_TIMERS)
+/**
+ * @brief  Interrupt handler for SysTick example program
+ *
+ * @return none
+ *
+ * SysTick Handler is called whenever SysTick interrupt occurs.
+ * In this example, the handler increments the interrupt count
+ */
+void SysTick_Handler(void)
+{
+    /* bump Count up to COUNT  */
+    if (COUNT != tickCount)
+        tickCount += 1;
+
+    if (NULL != hAbortFlashDevice)
+    {
+        adi_FEE_Abort(hAbortFlashDevice);
+    }
+}
+
+static void wutCallback(void* hWut, uint32_t Event, void* pArg)
+{
+    ++wakeCount;
+    pADI_WUT->T2CLRI |= T2CLRI_WUFB_CLR;
+}
+
+static void InitializeWUT(void)
+{
+    /* Initialise the wakeup timer */
+    if( adi_WUT_Init(ADI_WUT_DEVID_0, &hWUT) != 0 ) {
+        FAIL("adi_WUT_Init failed");
+    }
+
+    /* install WUT callback on all interrupts */
+    if (adi_WUT_RegisterCallback(hWUT, wutCallback, ADI_WUT_TARGET_MASK)) {
+        FAIL("adi_WUT_RegisterCallback failed");
+    }
+
+    /* Enable Wakeup timer in NVIC */
+    NVIC_EnableIRQ(WUT_IRQn);
+
+    /* select UCLK clock source */
+    if( adi_WUT_SetClockSelect(hWUT, ADI_WUT_CLK_PCLK) != 0 ) {
+        FAIL("adi_WUT_SetClockSelect failed");
+    }
+
+    /* No pre-scaling */
+    if( adi_WUT_SetPrescaler(hWUT, (ADI_WUT_PRESCALER_TYPE)T2CON_PRE_DIV256) != 0 ) {
+        FAIL("adi_WUT_SetPrescaler failed");
+    }
+
+    /* select free-running mode */
+    if( adi_WUT_SetTimerMode(hWUT, ADI_WUT_MODE_PERIODIC) != 0 ) {
+        FAIL("adi_WUT_SetTimerMode failed");
+    }
+
+    /* preload B comparator */
+    if( adi_WUT_SetComparator(hWUT, ADI_WUT_COMPB, LOADB) != 0) {
+        FAIL("adi_WUT_SetComparator failed");
+    }
+    /* enable Binterrupt */
+    if( adi_WUT_SetInterruptEnable(hWUT, ADI_WUT_COMPB, true) != 0 ) {
+        FAIL("adi_WUT_SetInterruptEnable failed");
+    }
+}
+
+#endif /* (1 == USE_TIMERS) */
+
+
+
+
+
+//
+//
+//
+//
+//
+//int32_t adi_initpinmux(void) {
+//    /* Port Control MUX registers */
+//    *((volatile uint32_t *)REG_GPIO0_GPCON) = UART0_TX_PORTP0_MUX | UART0_RX_PORTP0_MUX;
+//
+//
+//    return 0;
+//}
 
 /* callbacks */
 void rtcCallback (void *pCBParam, uint32_t Event, void *EventArg);
@@ -275,200 +1086,264 @@ int main(void) {
     /* Initialize system */
     SystemInit();
 
-    /* Change the system clock source to HFXTAL and change clock frequency to 16MHz     */
-    /* Requirement for AFE (ACLK)                                                       */
-    if (ADI_SYS_SUCCESS != SystemTransitionClocks(ADI_SYS_CLOCK_TRIGGER_MEASUREMENT_ON))
+
+    // Change HCLK clock divider to 1 for a 16MHz clock
+    if (ADI_SYS_SUCCESS != SetSystemClockDivider(ADI_SYS_CLOCK_CORE, 1))
     {
-        FAIL("SystemTransitionClocks");
+            test_Fail("SetSystemClockDivider() failed");
     }
 
-    /* SPLL with 32MHz used, need to divide by 2 */
-    SetSystemClockDivider(ADI_SYS_CLOCK_UART, 2);
-    
-    /* Test initialization */
+    // Change PCLK clock divider to 1 for a 16MHz clock
+    if (ADI_SYS_SUCCESS != SetSystemClockDivider (ADI_SYS_CLOCK_UART, 1))
+    {
+            test_Fail("SetSystemClockDivider() failed");
+    }
+
+    /* test system initialization */
     test_Init();
 
-    /* Initialize static pinmuxing */
-    adi_initpinmux();
+    /* NVIC initialization */
+    NVIC_SetPriorityGrouping(12);
 
-    /* Initialize the UART for transferring measurement data out */
-    if (ADI_UART_SUCCESS != uart_Init())
-    {
-        FAIL("uart_Init");
+#if (1 == USE_TIMERS)
+    /* SysTick initialization */
+    SysTick_Config(1000000);
+
+    /* SysTick_Config() hardcodes priority. We override this. */
+    NVIC_SetPriority(SysTick_IRQn, 14);
+
+    /* Wakeup timer initialization */
+    InitializeWUT();
+
+    if( adi_WUT_SetTimerEnable(hWUT, true) != 0 ) {
+        test_Fail("adi_WUT_SetTimerEnable failed");
     }
+#endif /* (1 == USE_TIMERS) */
 
-    /* Initialize the AFE API */
-    if (ADI_AFE_SUCCESS != adi_AFE_Init(&hDevice))
-    {
-        FAIL("Init");
-    }
-
-    /* Set RCAL and RTIA values */
-    if (ADI_AFE_SUCCESS != adi_AFE_SetRcal(hDevice, RCAL))
-    {
-        FAIL("adi_AFE_SetRcal");
-    }
-    if (ADI_AFE_SUCCESS != adi_AFE_SetRtia(hDevice, RTIA))
-    {
-        FAIL("adi_AFE_SetTia");
-    }
+    testParityChecking(ADI_FEE_DEVID_0, 0x00000000u, 0x00000000u, 0x8000u, 0x0003E000u);
+    testParityChecking(ADI_FEE_DEVID_1, 0x00040000u, 0x00040000u, 0x7C00u, 0x0005F000u);
 
 
-    delay(2000000);
+    /* We *want* a repeatable sequence of psuedo-random numbers, so that
+     * the flash address ranges tested are the same on each run. Since
+     * the rand seed starts at zero by default this call only serves to
+     * make this explicit and visible.
+     */
+    srand(0);
 
+    /* Test flash controller 0 (upper half only, minus the parity area = 120k) */
+    testFlash("Testing flash controller 0", ADI_FEE_DEVID_0, false, 0x00020000u, 120, 10);
 
-    /* AFE power up */
-    if (ADI_AFE_SUCCESS != adi_AFE_PowerUp(hDevice))
-    {
-        FAIL("adi_AFE_PowerUp");
-    }
+    /* Test flash controller 1 (all) */
+    testFlash("Testing flash controller 1", ADI_FEE_DEVID_1, true, 0x00040000u, 128, 10);
 
-    /* Delay to ensure Vbias is stable */
-    delay(2000000);
+    /* Test GP flash controller (all) using PIO*/
+    testFlash("Testing GP flash controller (PIO)", ADI_FEE_DEVID_GP, false, 0x20080000u, 16, 10);
 
-    /* Temp Channel Calibration */
-    if (ADI_AFE_SUCCESS != adi_AFE_TempSensChanCal(hDevice))
-    {
-        PRINT("adi_AFE_TempSensChanCal");
-    }
-    
-    /* Auxiliary Channel Calibration */
-    if (ADI_AFE_SUCCESS != adi_AFE_AuxChanCal(hDevice))
-    {
-        PRINT("adi_AFE_AuxChanCal");
-    }
+#if (1 == ADI_FEE_CFG_GPF_DMA_SUPPORT)
+    /* Test GP flash controller (all) using DMA*/
+    testFlash("Testing GP flash controller (DMA)", ADI_FEE_DEVID_GP, true, 0x20080000u, 16, 10);
+#endif /* (1 == ADI_FEE_CFG_GPF_DMA_SUPPORT) */
 
-    /* Excitation Channel Power-Up */
-    if (ADI_AFE_SUCCESS != adi_AFE_ExciteChanPowerUp(hDevice))
-    {
-        FAIL("adi_AFE_ExciteChanPowerUp");
-    }
+    /* If we got here then nothing has failed */
+    test_Pass();
 
-    /* TempCal results will be used to set the TIA calibration registers. These */
-    /* values will ensure the ratio between current and voltage is exactly 1.5  */
-    if (ADI_AFE_SUCCESS != adi_AFE_ReadCalibrationRegister(hDevice, ADI_AFE_CAL_REG_ADC_GAIN_TEMP_SENS, &gain_code))
-    {
-        FAIL("adi_AFE_ReadCalibrationRegister, gain");
-    }
-    if (ADI_AFE_SUCCESS != adi_AFE_WriteCalibrationRegister(hDevice, ADI_AFE_CAL_REG_ADC_GAIN_TIA, gain_code))
-    {
-        FAIL("adi_AFE_WriteCalibrationRegister, gain");
-    }
-    if (ADI_AFE_SUCCESS != adi_AFE_ReadCalibrationRegister(hDevice, ADI_AFE_CAL_REG_ADC_OFFSET_TEMP_SENS, &offset_code))
-    {
-        FAIL("adi_AFE_ReadCalibrationRegister, offset");
-    }
-    if (ADI_AFE_SUCCESS != adi_AFE_WriteCalibrationRegister(hDevice, ADI_AFE_CAL_REG_ADC_OFFSET_TIA, offset_code))
-    {
-        FAIL("adi_AFE_WriteCalibrationRegister, offset");
-    }
-
-    /* Update FCW in the sequence */
-    seq_afe_poweritup[3] = SEQ_MMR_WRITE(REG_AFE_AFE_WG_FCW, FCW);
-    /* Update sine amplitude in the sequence */
-    seq_afe_poweritup[4] = SEQ_MMR_WRITE(REG_AFE_AFE_WG_AMPLITUDE, SINE_AMPLITUDE);
-
-    /* Recalculate CRC in software for the AC measurement, because we changed   */
-    /* FCW and sine amplitude settings.                                         */
-    adi_AFE_EnableSoftwareCRC(hDevice, true);
-
-    int run_max         = 100000000;        // do only hundred runs of each frequency sweep.
-    int run_iterator    = 0;
-    PRINT("STEP ONE\n");
-    if (ADI_AFE_SUCCESS != adi_AFE_RunSequence(hDevice, seq_afe_poweritup, (uint16_t *)dft_results, DFT_RESULTS_COUNT))
-    {
-     PRINT("AFE PROBLEM!");
-    }
-
-    //// How to create a timer? ////
-    // 16MHz clock,
-
-    /* initialize driver */
-    //rtc_Init();
-
-    //PRINT("RTC INITED\n");
-    /* calibrate */
-    //rtc_Calibrate();
-
-    //time_t rawtime;
-    // get the RTC count through the "time" CRTL function
-    //time(&rawtime);
-    //PRINT ("here\n");
-
-//    clock_t start, end;
-//    double cpu_time_used;
-//    start = clock();
-//    /* Do the work. */
-//    end = clock();
-//    cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+    return 0;
 //
-
-    /* get the time */
-    //rtc_ReportTime();
-
-    while (running) // running
-    {
-
-      fixed32_t           magnitude_result[DFT_RESULTS_COUNT / 2 - 1]={0};
-      char                msg[MSG_MAXLEN] = {0};
-      char                tmp[300] = {0};
-
-      // rtc_ReportTime();
-      /* Perform the Impedance measurement */
-//      if (ADI_AFE_SUCCESS != adi_AFE_RunSequence(hDevice, seq_afe_fast_acmeasBioZ_4wire, (uint16_t *)dft_results, DFT_RESULTS_COUNT))
+//    /* Change the system clock source to HFXTAL and change clock frequency to 16MHz     */
+//    /* Requirement for AFE (ACLK)                                                       */
+//    if (ADI_SYS_SUCCESS != SystemTransitionClocks(ADI_SYS_CLOCK_TRIGGER_MEASUREMENT_ON))
+//    {
+//        FAIL("SystemTransitionClocks");
+//    }
+//
+//    /* SPLL with 32MHz used, need to divide by 2 */
+//    SetSystemClockDivider(ADI_SYS_CLOCK_UART, 2);
+//
+//    /* Test initialization */
+//    test_Init();
+//
+//    /* Initialize static pinmuxing */
+//    adi_initpinmux();
+//
+//    /* Initialize the UART for transferring measurement data out */
+//    if (ADI_UART_SUCCESS != uart_Init())
+//    {
+//        FAIL("uart_Init");
+//    }
+//
+//    /* Initialize the AFE API */
+//    if (ADI_AFE_SUCCESS != adi_AFE_Init(&hDevice))
+//    {
+//        FAIL("Init");
+//    }
+//
+//    /* Set RCAL and RTIA values */
+//    if (ADI_AFE_SUCCESS != adi_AFE_SetRcal(hDevice, RCAL))
+//    {
+//        FAIL("adi_AFE_SetRcal");
+//    }
+//    if (ADI_AFE_SUCCESS != adi_AFE_SetRtia(hDevice, RTIA))
+//    {
+//        FAIL("adi_AFE_SetTia");
+//    }
+//
+//
+//    delay(2000000);
+//
+//
+//    /* AFE power up */
+//    if (ADI_AFE_SUCCESS != adi_AFE_PowerUp(hDevice))
+//    {
+//        FAIL("adi_AFE_PowerUp");
+//    }
+//
+//    /* Delay to ensure Vbias is stable */
+//    delay(2000000);
+//
+//    /* Temp Channel Calibration */
+//    if (ADI_AFE_SUCCESS != adi_AFE_TempSensChanCal(hDevice))
+//    {
+//        PRINT("adi_AFE_TempSensChanCal");
+//    }
+//
+//    /* Auxiliary Channel Calibration */
+//    if (ADI_AFE_SUCCESS != adi_AFE_AuxChanCal(hDevice))
+//    {
+//        PRINT("adi_AFE_AuxChanCal");
+//    }
+//
+//    /* Excitation Channel Power-Up */
+//    if (ADI_AFE_SUCCESS != adi_AFE_ExciteChanPowerUp(hDevice))
+//    {
+//        FAIL("adi_AFE_ExciteChanPowerUp");
+//    }
+//
+//    /* TempCal results will be used to set the TIA calibration registers. These */
+//    /* values will ensure the ratio between current and voltage is exactly 1.5  */
+//    if (ADI_AFE_SUCCESS != adi_AFE_ReadCalibrationRegister(hDevice, ADI_AFE_CAL_REG_ADC_GAIN_TEMP_SENS, &gain_code))
+//    {
+//        FAIL("adi_AFE_ReadCalibrationRegister, gain");
+//    }
+//    if (ADI_AFE_SUCCESS != adi_AFE_WriteCalibrationRegister(hDevice, ADI_AFE_CAL_REG_ADC_GAIN_TIA, gain_code))
+//    {
+//        FAIL("adi_AFE_WriteCalibrationRegister, gain");
+//    }
+//    if (ADI_AFE_SUCCESS != adi_AFE_ReadCalibrationRegister(hDevice, ADI_AFE_CAL_REG_ADC_OFFSET_TEMP_SENS, &offset_code))
+//    {
+//        FAIL("adi_AFE_ReadCalibrationRegister, offset");
+//    }
+//    if (ADI_AFE_SUCCESS != adi_AFE_WriteCalibrationRegister(hDevice, ADI_AFE_CAL_REG_ADC_OFFSET_TIA, offset_code))
+//    {
+//        FAIL("adi_AFE_WriteCalibrationRegister, offset");
+//    }
+//
+//    /* Update FCW in the sequence */
+//    seq_afe_poweritup[3] = SEQ_MMR_WRITE(REG_AFE_AFE_WG_FCW, FCW);
+//    /* Update sine amplitude in the sequence */
+//    seq_afe_poweritup[4] = SEQ_MMR_WRITE(REG_AFE_AFE_WG_AMPLITUDE, SINE_AMPLITUDE);
+//
+//    /* Recalculate CRC in software for the AC measurement, because we changed   */
+//    /* FCW and sine amplitude settings.                                         */
+//    adi_AFE_EnableSoftwareCRC(hDevice, true);
+//
+//    int run_max         = 100000000;        // do only hundred runs of each frequency sweep.
+//    int run_iterator    = 0;
+//    PRINT("STEP ONE\n");
+//    if (ADI_AFE_SUCCESS != adi_AFE_RunSequence(hDevice, seq_afe_poweritup, (uint16_t *)dft_results, DFT_RESULTS_COUNT))
+//    {
+//     PRINT("AFE PROBLEM!");
+//    }
+//
+//    //// How to create a timer? ////
+//    // 16MHz clock,
+//
+//    /* initialize driver */
+//    //rtc_Init();
+//
+//    //PRINT("RTC INITED\n");
+//    /* calibrate */
+//    //rtc_Calibrate();
+//
+//    //time_t rawtime;
+//    // get the RTC count through the "time" CRTL function
+//    //time(&rawtime);
+//    //PRINT ("here\n");
+//
+////    clock_t start, end;
+////    double cpu_time_used;
+////    start = clock();
+////    /* Do the work. */
+////    end = clock();
+////    cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+////
+//
+//    /* get the time */
+//    //rtc_ReportTime();
+//
+//    while (running) // running
+//    {
+//
+//      fixed32_t           magnitude_result[DFT_RESULTS_COUNT / 2 - 1]={0};
+//      char                msg[MSG_MAXLEN] = {0};
+//      char                tmp[300] = {0};
+//
+//      // rtc_ReportTime();
+//      /* Perform the Impedance measurement */
+////      if (ADI_AFE_SUCCESS != adi_AFE_RunSequence(hDevice, seq_afe_fast_acmeasBioZ_4wire, (uint16_t *)dft_results, DFT_RESULTS_COUNT))
+////      {
+////        FAIL("Impedance Measurement");
+////      }
+//
+//      if (ADI_AFE_SUCCESS != adi_AFE_RunSequence(hDevice, seq_afe_fast_meas_4wire, (uint16_t *)dft_results, DFT_RESULTS_COUNT))
 //      {
 //        FAIL("Impedance Measurement");
 //      }
-
-      if (ADI_AFE_SUCCESS != adi_AFE_RunSequence(hDevice, seq_afe_fast_meas_4wire, (uint16_t *)dft_results, DFT_RESULTS_COUNT))
-      {
-        FAIL("Impedance Measurement");
-      }
-
-      /* Convert DFT results to 1.15 and 1.31 formats.  */
-      convert_dft_results(dft_results, dft_results_q15, dft_results_q31);
-      
-      /* Magnitude calculation */
-      /* Use CMSIS function */
-      arm_cmplx_mag_q31(dft_results_q31, magnitude, DFT_RESULTS_COUNT / 2);
-      
-      /* Calculate final magnitude value, calibrated with RTIA the gain of the instrumenation amplifier */
-      rtiaAndGain = (uint32_t)((RTIA * 1.5) / INST_AMP_GAIN);
-      magnitude_result[0] = calculate_magnitude(magnitude[1], magnitude[0], rtiaAndGain);
-      //
-      sprintf_fixed32(tmp, magnitude_result[0]);
-      strcat(msg,tmp);
-      strcat(msg," \r\n");
-      PRINT(msg);
-      
-      run_iterator++;
-      if (run_iterator >= run_max) {
-        running = 0;
-        break;
-      } // THIS ALLOWS THE CODE TO BREAK AFTER RUNNING FOR A WHILE.
-
-
-    }
-
-    /* Restore to using default CRC stored with the sequence */
-    // adi_AFE_EnableSoftwareCRC(hDevice, false);
-
-    /* AFE Power Down */
-    if (ADI_AFE_SUCCESS != adi_AFE_PowerDown(hDevice))
-    {
-        FAIL("PowerDown");
-    }
-
-    /* Uninitialize the AFE API */
-    if (ADI_AFE_SUCCESS != adi_AFE_UnInit(hDevice))
-    {
-        FAIL("Uninit");
-    }
-
-    /* Uninitilize the UART */
-    uart_UnInit();
-
-    PASS();
+//
+//      /* Convert DFT results to 1.15 and 1.31 formats.  */
+//      convert_dft_results(dft_results, dft_results_q15, dft_results_q31);
+//
+//      /* Magnitude calculation */
+//      /* Use CMSIS function */
+//      arm_cmplx_mag_q31(dft_results_q31, magnitude, DFT_RESULTS_COUNT / 2);
+//
+//      /* Calculate final magnitude value, calibrated with RTIA the gain of the instrumenation amplifier */
+//      rtiaAndGain = (uint32_t)((RTIA * 1.5) / INST_AMP_GAIN);
+//      magnitude_result[0] = calculate_magnitude(magnitude[1], magnitude[0], rtiaAndGain);
+//      //
+//      sprintf_fixed32(tmp, magnitude_result[0]);
+//      strcat(msg,tmp);
+//      strcat(msg," \r\n");
+//      PRINT(msg);
+//
+//      run_iterator++;
+//      if (run_iterator >= run_max) {
+//        running = 0;
+//        break;
+//      } // THIS ALLOWS THE CODE TO BREAK AFTER RUNNING FOR A WHILE.
+//
+//
+//    }
+//
+//    /* Restore to using default CRC stored with the sequence */
+//    // adi_AFE_EnableSoftwareCRC(hDevice, false);
+//
+//    /* AFE Power Down */
+//    if (ADI_AFE_SUCCESS != adi_AFE_PowerDown(hDevice))
+//    {
+//        FAIL("PowerDown");
+//    }
+//
+//    /* Uninitialize the AFE API */
+//    if (ADI_AFE_SUCCESS != adi_AFE_UnInit(hDevice))
+//    {
+//        FAIL("Uninit");
+//    }
+//
+//    /* Uninitilize the UART */
+//    uart_UnInit();
+//
+//    PASS();
 
 }
 
@@ -548,7 +1423,7 @@ q15_t arctan(q15_t imag, q15_t real) {
             else {
                 t         = imag - real;
                 real      = (real + imag);
-                imag      = t;              
+                imag      = t;
             }
             rotation += 1;
         }
@@ -562,7 +1437,7 @@ q15_t arctan(q15_t imag, q15_t real) {
             out += coeff[i];
             arm_mult_q15(&out, &t, &out, 1);
         }
-        
+
         /* Rotate back to original position, in multiples of pi/4 */
         /* We're using 1.15 representation, scaled by pi, so pi/4 = 0x2000 */
         out += (rotation << 13);
@@ -627,7 +1502,7 @@ fixed32_t calculate_magnitude(q31_t magnitude_1, q31_t magnitude_2, uint32_t res
     else {
         out.full = magnitude & 0xFFFFFFFF;
     }
-        
+
     return out;
 }
 
@@ -652,7 +1527,7 @@ fixed32_t calculate_phase(q15_t phase_1, q15_t phase_2) {
 /* Simple conversion of a fixed32_t variable to string format. */
 void sprintf_fixed32(char *out, fixed32_t in) {
     fixed32_t   tmp;
-    
+
     if (in.full < 0) {
         tmp.parts.fpart = (16 - in.parts.fpart) & 0x0F;
         tmp.parts.ipart = in.parts.ipart;
@@ -938,7 +1813,7 @@ void rtc_ReportTime(void) {
   PRINT("REPORTING THE TIME\n");
 
   clock_t c = clock();
-  
+
   PRINT("after clock call\n");
   double time_in_seconds = (double)c / (double)CLOCKS_PER_SECOND;
   PRINT("PRINTING IT OUT\n");
@@ -946,7 +1821,7 @@ void rtc_ReportTime(void) {
   strcat(buffer,tmp);
   strcat(buffer,"\r\n");
   PRINT(buffer);
-  
+
 }
 
 /* External interrupt callback */
@@ -1045,3 +1920,8 @@ void rtcCallback (void *pCBParam, uint32_t nEvent, void *EventArg) {
         PERF("got RTC interrupt callback with ADI_RTC_INT_SOURCE_FAIL status");
     }
 }
+
+
+
+
+

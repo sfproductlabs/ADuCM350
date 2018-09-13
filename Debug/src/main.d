@@ -21,13 +21,15 @@ src/main.o: ../src/main.c ../system/include/cmsis/arm_math.h \
  ../system/include/cmsis/DEVICE.h \
  ../system/include/cmsis/system_ADuCM350.h \
  ../system/include/ADuCM350/defADuCM350.h \
- ../system/include/ADuCM350/config/adi_wdt_config.h ../src/sequences.h \
+ ../system/include/ADuCM350/config/adi_wdt_config.h \
+ ../system/include/ADuCM350/flash.h \
+ ../system/include/ADuCM350/config/adi_fee_config.h ../src/sequences.h \
  ../system/include/ADuCM350/afe.h ../system/include/ADuCM350/dma.h \
  ../system/include/ADuCM350/uart.h \
  ../system/include/ADuCM350/config/adi_uart_config.h \
  ../system/include/ADuCM350/config/adi_afe_config.h \
  ../system/include/ADuCM350/afe_lib.h ../system/include/ADuCM350/uart.h \
- ../system/include/ADuCM350/rtc.h
+ ../system/include/ADuCM350/rtc.h ../src/crc32.h
 
 ../system/include/cmsis/arm_math.h:
 
@@ -87,6 +89,10 @@ src/main.o: ../src/main.c ../system/include/cmsis/arm_math.h \
 
 ../system/include/ADuCM350/config/adi_wdt_config.h:
 
+../system/include/ADuCM350/flash.h:
+
+../system/include/ADuCM350/config/adi_fee_config.h:
+
 ../src/sequences.h:
 
 ../system/include/ADuCM350/afe.h:
@@ -104,3 +110,5 @@ src/main.o: ../src/main.c ../system/include/cmsis/arm_math.h \
 ../system/include/ADuCM350/uart.h:
 
 ../system/include/ADuCM350/rtc.h:
+
+../src/crc32.h:
