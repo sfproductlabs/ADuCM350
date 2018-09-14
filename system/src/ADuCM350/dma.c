@@ -33,8 +33,8 @@ License Agreement.
 /* =============== IMPORTANT NOTE =====================
    In ADucRFxx the following dma signalling options are not valid
 
-   • Done signaling and
-   • Wait on request signaling
+   ï¿½ Done signaling and
+   ï¿½ Wait on request signaling
 
    The inputs signal stall, wait on request to dma are tied to zero in the design
 
@@ -80,7 +80,10 @@ static ADI_DMA_RESULT_TYPE ValidateParams(ADI_DMA_TRANSFER_TYPE *pTransfer);
 #elif defined (__CC_ARM)
     __align(CCD_ALIGN)                /* Keil */
 #else
-    #pragma message("WARNING: NO ALIGHMENT DEFINED FOR DMA DESCRIPTOR BLOCKS")
+//AG:
+	__attribute__((aligned(CCD_ALIGN)))
+
+//    #pragma message("WARNING: NO ALIGHMENT DEFINED FOR DMA DESCRIPTOR BLOCKS")
 #endif
 
 /* ALIGNED: DMA channel control data array declaration */
@@ -500,6 +503,10 @@ ADI_DMA_RESULT_TYPE adi_DMA_SubmitTransfer(ADI_DMA_TRANSFER_TYPE* pTransfer)
 			/* user pointer is buffer END address and DMA decrements and stops at pointer MINUS (N-1)*size */
 			pCCD->DMASRCEND -= ((pTransfer->DataLength - 1ul) << (pTransfer->SrcInc - ADI_DMA_DECR_BYTE));
     		break;
+    		//AG:
+		case ADI_DMA_DECR_NONE:
+		case ADI_DMA_INCR_NONE:
+			break;
 
 	}
 
@@ -519,6 +526,10 @@ ADI_DMA_RESULT_TYPE adi_DMA_SubmitTransfer(ADI_DMA_TRANSFER_TYPE* pTransfer)
 			/* user pointer is buffer END address and DMA decrements and stops at pointer MINUS (N-1)*size */
 			pCCD->DMADSTEND -= ((pTransfer->DataLength - 1ul) << (pTransfer->DstInc - ADI_DMA_DECR_BYTE));
     		break;
+    		//AG:
+		case ADI_DMA_DECR_NONE:
+		case ADI_DMA_INCR_NONE:
+			break;
 
 	}
 	ADI_EXIT_CRITICAL_REGION();

@@ -64,7 +64,7 @@ SECTIONS
         __vectors_start = ABSOLUTE(.) ;
         __vectors_start__ = ABSOLUTE(.) ; /* STM specific definition */
         KEEP(*(.isr_vector))     	/* Interrupt vectors */
-        
+                
 		KEEP(*(.cfmconfig))			/* Freescale configuration words */   
 		     
         /* 
@@ -75,6 +75,8 @@ SECTIONS
         *(.after_vectors .after_vectors.*)	/* Startup code and ISR */
 
     } >FLASH
+    
+    
     
     .checksums : ALIGN(4)
     

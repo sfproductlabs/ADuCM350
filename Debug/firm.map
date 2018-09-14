@@ -4895,7 +4895,7 @@ END GROUP
                 0x0000000020003c00                __Main_Stack_Limit = (__stack - __Main_Stack_Size)
                 [!provide]                        PROVIDE (_Main_Stack_Limit, __Main_Stack_Limit)
                 0x0000000000000100                _Minimum_Stack_Size = 0x100
-                0x00000000200017fc                PROVIDE (_Heap_Begin, _end_noinit)
+                0x0000000020001a20                PROVIDE (_Heap_Begin, _end_noinit)
                 0x0000000020003c00                PROVIDE (_Heap_Limit, (__stack - __Main_Stack_Size))
 
 .isr_vector     0x0000000000000000      0x392
@@ -4942,8 +4942,8 @@ END GROUP
                 0x0000000000000814        0x4 LONG 0x10000000 (ADDR (.data_CCMRAM) + SIZEOF (.data_CCMRAM))
                 0x0000000000000818                __data_regions_array_end = .
                 0x0000000000000818                __bss_regions_array_start = .
-                0x0000000000000818        0x4 LONG 0x2000010c ADDR (.bss)
-                0x000000000000081c        0x4 LONG 0x200017fc (ADDR (.bss) + SIZEOF (.bss))
+                0x0000000000000818        0x4 LONG 0x20000200 ADDR (.bss)
+                0x000000000000081c        0x4 LONG 0x20001a20 (ADDR (.bss) + SIZEOF (.bss))
                 0x0000000000000820        0x4 LONG 0x10000000 ADDR (.bss_CCMRAM)
                 0x0000000000000824        0x4 LONG 0x10000000 (ADDR (.bss_CCMRAM) + SIZEOF (.bss_CCMRAM))
                 0x0000000000000828                __bss_regions_array_end = .
@@ -5663,104 +5663,105 @@ END GROUP
 .bss_CCMRAM     0x0000000010000000        0x0
  *(.bss.CCMRAM .bss.CCMRAM.*)
 
-.bss            0x000000002000010c     0x16f0
-                0x000000002000010c                __bss_start__ = .
-                0x000000002000010c                _sbss = .
+.bss            0x0000000020000200     0x1820
+                0x0000000020000200                __bss_start__ = .
+                0x0000000020000200                _sbss = .
  *(.bss_begin .bss_begin.*)
- .bss_begin     0x000000002000010c        0x4 ./system/src/newlib/_startup.o
+ .bss_begin     0x0000000020000200        0x4 ./system/src/newlib/_startup.o
  *(.bss .bss.*)
  .bss.current_heap_end.3955
-                0x0000000020000110        0x4 ./system/src/newlib/_sbrk.o
+                0x0000000020000204        0x4 ./system/src/newlib/_sbrk.o
  .bss.name.4303
-                0x0000000020000114        0x1 ./system/src/newlib/_syscalls.o
- *fill*         0x0000000020000115        0x3 
- .bss.buf.5199  0x0000000020000118       0x80 ./system/src/diag/Trace.o
+                0x0000000020000208        0x1 ./system/src/newlib/_syscalls.o
+ *fill*         0x0000000020000209        0x3 
+ .bss.buf.5199  0x000000002000020c       0x80 ./system/src/diag/Trace.o
  .bss.gpioClock
-                0x0000000020000198        0x4 ./system/src/cmsis/system_ADuCM350.o
- .bss.hfClock   0x000000002000019c        0x4 ./system/src/cmsis/system_ADuCM350.o
+                0x000000002000028c        0x4 ./system/src/cmsis/system_ADuCM350.o
+ .bss.hfClock   0x0000000020000290        0x4 ./system/src/cmsis/system_ADuCM350.o
  .bss.privateIntOccFlag
-                0x00000000200001a0        0x1 ./system/src/cmsis/system_ADuCM350.o
+                0x0000000020000294        0x1 ./system/src/cmsis/system_ADuCM350.o
  .bss.bufferInitialized.7021
-                0x00000000200001a1        0x1 ./system/src/ADuCM350/afe.o
- *fill*         0x00000000200001a2        0x2 
+                0x0000000020000295        0x1 ./system/src/ADuCM350/afe.o
+ *fill*         0x0000000020000296        0x2 
  .bss.pNextBuffer.7022
-                0x00000000200001a4        0x4 ./system/src/ADuCM350/afe.o
+                0x0000000020000298        0x4 ./system/src/ADuCM350/afe.o
  .bss.gBEEP_DevData
-                0x00000000200001a8       0x14 ./system/src/ADuCM350/beep.o
-                0x00000000200001a8                gBEEP_DevData
+                0x000000002000029c       0x14 ./system/src/ADuCM350/beep.o
+                0x000000002000029c                gBEEP_DevData
  .bss.CT_DevData
-                0x00000000200001bc       0x14 ./system/src/ADuCM350/captouch.o
+                0x00000000200002b0       0x14 ./system/src/ADuCM350/captouch.o
  .bss.DMA_DevData
-                0x00000000200001d0        0xc ./system/src/ADuCM350/dma.o
-                0x00000000200001d0                DMA_DevData
+                0x00000000200002c4        0xc ./system/src/ADuCM350/dma.o
+                0x00000000200002c4                DMA_DevData
+ *fill*         0x00000000200002d0      0x130 
  .bss.gChannelControlDataArray
-                0x00000000200001dc      0x200 ./system/src/ADuCM350/dma.o
+                0x0000000020000400      0x200 ./system/src/ADuCM350/dma.o
  .bss.pDMABuffer
-                0x00000000200003dc        0x4 ./system/src/ADuCM350/flash.o
+                0x0000000020000600        0x4 ./system/src/ADuCM350/flash.o
  .bss.adi_GPIO_Device
-                0x00000000200003e0       0x5c ./system/src/ADuCM350/gpio.o
+                0x0000000020000604       0x5c ./system/src/ADuCM350/gpio.o
  .bss.gGPT_DevData
-                0x000000002000043c       0x30 ./system/src/ADuCM350/gpt.o
-                0x000000002000043c                gGPT_DevData
+                0x0000000020000660       0x30 ./system/src/ADuCM350/gpt.o
+                0x0000000020000660                gGPT_DevData
  .bss.gRNG_DevData
-                0x000000002000046c       0x14 ./system/src/ADuCM350/rng.o
-                0x000000002000046c                gRNG_DevData
+                0x0000000020000690       0x14 ./system/src/ADuCM350/rng.o
+                0x0000000020000690                gRNG_DevData
  .bss.WDT_DevData
-                0x0000000020000480        0x3 ./system/src/ADuCM350/wdt.o
- *fill*         0x0000000020000483        0x1 
+                0x00000000200006a4        0x3 ./system/src/ADuCM350/wdt.o
+ *fill*         0x00000000200006a7        0x1 
  .bss.WUT_DevData
-                0x0000000020000484       0x14 ./system/src/ADuCM350/wut.o
+                0x00000000200006a8       0x14 ./system/src/ADuCM350/wut.o
  .bss.buffer.11116
-                0x0000000020000498     0x1000 ./src/main.o
+                0x00000000200006bc     0x1000 ./src/main.o
  .bss.hAbortFlashDevice
-                0x0000000020001498        0x4 ./src/main.o
- .bss.hWUT      0x000000002000149c        0x4 ./src/main.o
+                0x00000000200016bc        0x4 ./src/main.o
+ .bss.hWUT      0x00000000200016c0        0x4 ./src/main.o
  .bss.parityErrorOccurred
-                0x00000000200014a0        0x1 ./src/main.o
- *fill*         0x00000000200014a1        0x3 
- .bss.strbuf    0x00000000200014a4      0x100 ./src/main.o
+                0x00000000200016c4        0x1 ./src/main.o
+ *fill*         0x00000000200016c5        0x3 
+ .bss.strbuf    0x00000000200016c8      0x100 ./src/main.o
  .bss.tickCount
-                0x00000000200015a4        0x4 ./src/main.o
+                0x00000000200017c8        0x4 ./src/main.o
  .bss.totalCount
-                0x00000000200015a8        0x4 ./src/main.o
+                0x00000000200017cc        0x4 ./src/main.o
  .bss.wakeCount
-                0x00000000200015ac        0x4 ./src/main.o
- .bss           0x00000000200015b0        0x8 /usr/lib/gcc/arm-none-eabi/6.3.1/../../../arm-none-eabi/lib/thumb/v7-m/libc_nano.a(lib_a-nano-mallocr.o)
-                0x00000000200015b0                __malloc_free_list
-                0x00000000200015b4                __malloc_sbrk_start
- .bss           0x00000000200015b8       0xb0 /usr/lib/gcc/arm-none-eabi/6.3.1/../../../arm-none-eabi/lib/thumb/v7-m/librdimon.a(rdimon-syscalls.o)
+                0x00000000200017d0        0x4 ./src/main.o
+ .bss           0x00000000200017d4        0x8 /usr/lib/gcc/arm-none-eabi/6.3.1/../../../arm-none-eabi/lib/thumb/v7-m/libc_nano.a(lib_a-nano-mallocr.o)
+                0x00000000200017d4                __malloc_free_list
+                0x00000000200017d8                __malloc_sbrk_start
+ .bss           0x00000000200017dc       0xb0 /usr/lib/gcc/arm-none-eabi/6.3.1/../../../arm-none-eabi/lib/thumb/v7-m/librdimon.a(rdimon-syscalls.o)
  *(COMMON)
- COMMON         0x0000000020001668        0x4 ./system/src/newlib/_syscalls.o
-                0x0000000020001668                errno
- COMMON         0x000000002000166c       0x60 ./system/src/ADuCM350/afe.o
-                0x000000002000166c                AFE_DevData
- COMMON         0x00000000200016cc       0x30 ./system/src/ADuCM350/crc.o
-                0x00000000200016cc                CRC_DevData
-                0x00000000200016e4                gDmaDescriptor
- COMMON         0x00000000200016fc       0xfc ./system/src/ADuCM350/spi.o
-                0x00000000200016fc                SPI_DevData
+ COMMON         0x000000002000188c        0x4 ./system/src/newlib/_syscalls.o
+                0x000000002000188c                errno
+ COMMON         0x0000000020001890       0x60 ./system/src/ADuCM350/afe.o
+                0x0000000020001890                AFE_DevData
+ COMMON         0x00000000200018f0       0x30 ./system/src/ADuCM350/crc.o
+                0x00000000200018f0                CRC_DevData
+                0x0000000020001908                gDmaDescriptor
+ COMMON         0x0000000020001920       0xfc ./system/src/ADuCM350/spi.o
+                0x0000000020001920                SPI_DevData
  *(.bss_end .bss_end.*)
- .bss_end       0x00000000200017f8        0x4 ./system/src/newlib/_startup.o
-                0x00000000200017fc                . = ALIGN (0x4)
-                0x00000000200017fc                __bss_end__ = .
-                0x00000000200017fc                _ebss = .
+ .bss_end       0x0000000020001a1c        0x4 ./system/src/newlib/_startup.o
+                0x0000000020001a20                . = ALIGN (0x4)
+                0x0000000020001a20                __bss_end__ = .
+                0x0000000020001a20                _ebss = .
 
 .noinit_CCMRAM
  *(.noinit.CCMRAM .noinit.CCMRAM.*)
 
-.noinit         0x00000000200017fc        0x0
-                0x00000000200017fc                _noinit = .
+.noinit         0x0000000020001a20        0x0
+                0x0000000020001a20                _noinit = .
  *(.noinit .noinit.*)
-                0x00000000200017fc                . = ALIGN (0x4)
-                0x00000000200017fc                _end_noinit = .
-                0x00000000200017fc                PROVIDE (end, _end_noinit)
+                0x0000000020001a20                . = ALIGN (0x4)
+                0x0000000020001a20                _end_noinit = .
+                0x0000000020001a20                PROVIDE (end, _end_noinit)
                 [!provide]                        PROVIDE (_end, _end_noinit)
                 [!provide]                        PROVIDE (__end, _end_noinit)
                 [!provide]                        PROVIDE (__end__, _end_noinit)
 
-._check_stack   0x00000000200017fc      0x100
-                0x00000000200018fc                . = (. + _Minimum_Stack_Size)
- *fill*         0x00000000200017fc      0x100 
+._check_stack   0x0000000020001a20      0x100
+                0x0000000020001b20                . = (. + _Minimum_Stack_Size)
+ *fill*         0x0000000020001a20      0x100 
 
 .b1text
  *(.b1text)
