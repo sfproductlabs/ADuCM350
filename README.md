@@ -1,6 +1,11 @@
 # Firmware Compiler and Linker for the ADuCM350
 
 * Install Open MCU Eclipse
+```
+Version: Oxygen.3a Release (4.7.3a)
+Build id: 20180405-1200
+and the GNU MCU Eclipse Plugin.
+```
 * Download the latest gnu-arm compiler (gcc-arm-none-eabi-7-2017-q4-major)
 * Tell eclipse where to find the compiler
 * Connect your segger to the Eclipse Debugger
