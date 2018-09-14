@@ -6,6 +6,11 @@
 * Connect your segger to the Eclipse Debugger
 * Run!
 
+If you use debian you might be able to just run my eclipse with this repo:
+```
+https://github.com/dioptre/eclipse
+```
+
 # Mbed Alternative (mbed branch of this repository)
 
 * https://github.com/dioptre/firm/tree/mbed
