@@ -1,7 +1,0 @@
-{
-    "name": "rtos",
-    "config": {
-        "present": 1
-    },
-    "macros": ["_RTE_"]
-}

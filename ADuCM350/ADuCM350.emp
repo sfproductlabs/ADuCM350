@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<emIDE_project_file>
+	<FileVersion major="1" minor="7" />
+	<Project>
+		<Option title="ADuCM350" />
+		<Option pch_mode="2" />
+		<Option compiler="armelfgcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/ADuCM350" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="armelfgcc" />
+				<Compiler>
+					<Add option="-mthumb" />
+					<Add option="-g" />
+					<Add option="-mcpu=cortex-m3" />
+					<Add option="-std=gnu99" />
+					<Add option="-DDEBUG=1" />
+					<Add option="-D__GNUC__" />
+					<Add directory="Inc" />
+				</Compiler>
+				<Linker>
+					<Add option="-Wl,-Map" />
+					<Add option="-Wl,${TARGET_OUTPUT_FILE}.map" />
+					<Add option="-Wl,--gc-sections" />
+					<Add option="-n" />
+					<Add option="-Wl,-cref" />
+					<Add option="-mcpu=cortex-m3" />
+					<Add option="-mthumb" />
+					<Add option="-TSetup/Flash.ld" />
+					<Add library="m" />
+					<Add library="c" />
+					<Add library="g" />
+					<Add library="rdimon" />
+					<Add library="nosys" />
+					<Add library="arm_cortexM3l_math" />
+					<Add directory="Lib" />
+				</Linker>
+				<PostOutput>
+					<ConvertedOutput PostOutputCreate="0" />
+					<ConvertedOutput PostOutputType="HEX" />
+					<ConvertedOutput PostOutputFile="${TARGET_OUTPUT_DIR}${TARGET_OUTPUT_BASENAME}" />
+				</PostOutput>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/ADuCM350" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="armelfgcc" />
+				<Compiler>
+					<Add option="-mcpu=cortex-m3" />
+					<Add option="-mthumb" />
+					<Add option="-g" />
+					<Add option="-O2" />
+					<Add directory="Inc" />
+				</Compiler>
+				<Linker>
+					<Add option="-Wl,-Map" />
+					<Add option="-Wl,${TARGET_OUTPUT_FILE}.map" />
+					<Add option="-Wl,--gc-sections" />
+					<Add option="-n" />
+					<Add option="-Wl,-cref" />
+					<Add option="-mcpu=cortex-m3" />
+					<Add option="-mthumb" />
+					<Add option=" -TSetup/Flash.ld" />
+					<Add option="-s" />
+				</Linker>
+				<PostOutput>
+					<ConvertedOutput PostOutputCreate="0" />
+					<ConvertedOutput PostOutputType="HEX" />
+					<ConvertedOutput PostOutputFile="${TARGET_OUTPUT_DIR}${TARGET_OUTPUT_BASENAME}" />
+				</PostOutput>
+			</Target>
+		</Build>
+		<PostOutput>
+			<ConvertedOutput PostOutputCreate="0" />
+			<ConvertedOutput PostOutputType="HEX" />
+			<ConvertedOutput PostOutputFile="${TARGET_OUTPUT_DIR}${TARGET_OUTPUT_BASENAME}" />
+		</PostOutput>
+		<Unit filename="Doc/README.txt" />
+		<Unit filename="Setup/Flash.ld" />
+		<Unit filename="Setup/startup.S" />
+		<Unit filename="Src/FlashTest.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Src/PinMux.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Src/PinMux.dat" />
+		<Unit filename="Src/crc32.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Src/main.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Src/system/ADuCM350/README_DRIVERS.txt" />
+		<Unit filename="Src/system/ADuCM350/adi_int.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Src/system/ADuCM350/adi_nvic.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Src/system/ADuCM350/afe.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Src/system/ADuCM350/afe_lib.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Src/system/ADuCM350/beep.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Src/system/ADuCM350/captouch.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Src/system/ADuCM350/captouch_lib.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Src/system/ADuCM350/dma.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Src/system/ADuCM350/flash.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Src/system/ADuCM350/gpio.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Src/system/ADuCM350/gpt.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Src/system/ADuCM350/i2c.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Src/system/ADuCM350/i2s.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Src/system/ADuCM350/lcd.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Src/system/ADuCM350/metrics.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Src/system/ADuCM350/pdi.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Src/system/ADuCM350/rng.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Src/system/ADuCM350/rtc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Src/system/ADuCM350/spi.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Src/system/ADuCM350/startup.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Src/system/ADuCM350/system.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Src/system/ADuCM350/uart.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Src/system/ADuCM350/wdt.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Src/system/ADuCM350/wut.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Src/system/diag/Trace.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Src/system/diag/trace_impl.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Src/system/newlib/README.txt" />
+		<Unit filename="Src/system/newlib/_cxx.cpp" />
+		<Unit filename="Src/system/newlib/_exit.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Src/system/newlib/_sbrk.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Src/system/newlib/_startup.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Src/system/newlib/_syscalls.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Src/system/newlib/assert.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="Src/test_common.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Extensions>
+			<projectwizard TargetDevice="ADuCM350" />
+			<code_completion />
+			<debugger>
+				<remote_debugging>
+					<options conn_type="1806320574" ip_address="localhost" ip_port="2331" remote_server="J-Link GDB Server" Break_at_Main="0" Break_at_Main_Symbol="main" />
+				</remote_debugging>
+				<remote_debugging target="Debug">
+					<options conn_type="0" serial_baud="115200" ip_address="localhost" ip_port="2331" remote_server="Other (External tool)" Break_at_Main="1" Break_at_Main_Symbol="main" additional_cmds="monitor reset&#x0A;load" />
+				</remote_debugging>
+			</debugger>
+			<J-Link>
+				<GDBServer TargetName="Debug">
+					<CmdOption UseGDBServer="0" />
+					<CmdOption TargetDevice="ADuCM350" />
+					<CmdOption TargetInterface="0" />
+					<CmdOption InterfaceSpeed="4000" />
+					<CmdOption TargetEndian="0" />
+					<CmdOption OverrideExe="0" Filename="" />
+					<CmdOption StartServer="1" />
+					<CmdOption CloseServer="1" />
+					<CmdOption ServerIP="localhost" />
+					<CmdOption ServerPort="2331" />
+					<CmdOption UseAdvancedOptions="0" />
+					<CmdOption SelectJLink="" />
+					<CmdOption InitRegs="1" />
+					<CmdOption LocalhostOnly="1" />
+					<CmdOption Log="0" Filename="" />
+					<CmdOption Silent="0" />
+					<CmdOption StayOnTop="0" />
+					<CmdOption VerifyDownload="0" />
+					<CmdOption NoTargetTimeout="0" />
+					<CmdOption JTAGConf="0" IRPre="0" DRPre="0" />
+					<CmdOption JLinkScript="0" Filename="" />
+					<CmdOption JLinkSettings="0" Filename="" />
+					<CmdOption GDBInit="0" Filename="" />
+					<CmdOption AdditionalOptions="" />
+				</GDBServer>
+			</J-Link>
+		</Extensions>
+	</Project>
+</emIDE_project_file>

@@ -1,0 +1,623 @@
+# depslib dependency file v1.0
+1536878131 source:c:\test\aducm350\setup\startup.s
+
+1536889348 source:c:\test\aducm350\src\main.c
+
+1424713748 source:c:\test\aducm350\src\crc32.c
+	"crc32.h"
+	<stdlib.h>
+	<stdint.h>
+
+1424713748 c:\test\aducm350\src\crc32.h
+	<stdlib.h>
+	<stdint.h>
+
+1424713748 source:c:\users\a\desktop\test\src\crc32.c
+	"crc32.h"
+	<stdlib.h>
+	<stdint.h>
+
+1424713748 c:\users\a\desktop\test\src\crc32.h
+	<stdlib.h>
+	<stdint.h>
+
+1536889231 source:c:\test\aducm350\src\flashtest.c
+	<stdint.h>
+	<stdio.h>
+	<stdlib.h>
+	<assert.h>
+	"wut.h"
+	"test_common.h"
+	<flash.h>
+	<ADuCM350_device.h>
+	"misra.h"
+	"crc32.h"
+	"misra.h"
+
+1536883054 c:\test\aducm350\inc\wut.h
+	"device.h"
+	"adi_int.h"
+	"config/adi_wut_config.h"
+
+1534222142 c:\test\aducm350\inc\device.h
+	"adi_rtos.h"
+	"misra.h"
+	"macros.h"
+	"adi_sid_cm350.h"
+	"adi_nvic.h"
+	"adi_version.h"
+	<core_cm3.h>
+	"system_ADuCM350.h"
+	"ADuCM350.h"
+
+1534901933 c:\test\aducm350\inc\adi_rtos.h
+	"adi_int.h"
+	"adi_osal.h"
+
+1534222142 c:\test\aducm350\inc\adi_int.h
+	<stdint.h>
+	<stdbool.h>
+
+1534222142 c:\test\aducm350\inc\misra.h
+
+1534222142 c:\test\aducm350\inc\macros.h
+	"defADuCM350.h"
+
+1534222142 c:\test\aducm350\inc\defaducm350.h
+
+1534222142 c:\test\aducm350\inc\adi_sid_cm350.h
+
+1534222142 c:\test\aducm350\inc\adi_nvic.h
+	<stdint.h>
+	<stdbool.h>
+
+1534222142 c:\test\aducm350\inc\adi_version.h
+
+1534222142 c:\test\aducm350\inc\core_cm3.h
+	<stdint.h>
+	"core_cmInstr.h"
+	"core_cmFunc.h"
+
+1534222142 c:\test\aducm350\inc\core_cminstr.h
+	"cmsis_armcc.h"
+	"cmsis_armcc_V6.h"
+	"cmsis_gcc.h"
+	<cmsis_iar.h>
+	<cmsis_ccs.h>
+	<cmsis_csm.h>
+
+1534222142 c:\test\aducm350\inc\cmsis_armcc.h
+
+1534222142 c:\test\aducm350\inc\cmsis_armcc_v6.h
+
+1534222142 c:\test\aducm350\inc\cmsis_gcc.h
+
+1534222142 c:\test\aducm350\inc\core_cmfunc.h
+	"cmsis_armcc.h"
+	"cmsis_armcc_V6.h"
+	"cmsis_gcc.h"
+	<cmsis_iar.h>
+	<cmsis_ccs.h>
+	<cmsis_csm.h>
+
+1534878847 c:\test\aducm350\inc\system_aducm350.h
+	<stddef.h>
+	"device.h"
+	"gpt.h"
+	"wut.h"
+	"gpio.h"
+
+1536883045 c:\test\aducm350\inc\gpt.h
+	"device.h"
+	"adi_int.h"
+	"config/adi_gpt_config.h"
+
+1534222142 c:\test\aducm350\inc\gpio.h
+	"device.h"
+	"adi_int.h"
+
+1534222142 c:\test\aducm350\inc\aducm350.h
+	"DEVICE.h"
+	<stdint.h>
+	"defADuCM350.h"
+
+1534222142 c:\test\aducm350\src\test_common.h
+	"wdt.h"
+
+1536883061 c:\test\aducm350\inc\wdt.h
+	"device.h"
+	"config/adi_wdt_config.h"
+
+1534222142 c:\test\aducm350\inc\flash.h
+	"device.h"
+	"config/adi_fee_config.h"
+
+1534222142 c:\test\aducm350\inc\config\adi_fee_config.h
+
+1424713766 c:\test\aducm350\inc\aducm350_device.h
+	<stdint.h>
+	"defADuCM350.h"
+
+1424713748 source:c:\test\aducm350\src\pinmux.c
+	"device.h"
+
+1534734346 source:c:\test\aducm350\src\test_common.c
+	<stdint.h>
+	<stdio.h>
+	<stdlib.h>
+	<stddef.h>
+	<string.h>
+	"test_common.h"
+
+1534222142 c:\test\aducm350\inc\config\adi_gpt_config.h
+
+1534222142 c:\test\aducm350\inc\config\adi_wut_config.h
+
+1534222142 c:\test\aducm350\inc\config\adi_wdt_config.h
+
+1424713766 source:c:\test\aducm350\src\system\aducm350\adi_int.c
+	<adi_osal.h>
+	<adi_int.h>
+	<device.h>
+	<adi_nvic.h>
+
+1424713768 source:c:\test\aducm350\src\system\aducm350\adi_nvic.c
+	<device.h>
+	<adi_nvic.h>
+
+1424713768 source:c:\test\aducm350\src\system\aducm350\afe.c
+	"misra.h"
+	<stdlib.h>
+	"dma.h"
+	"afe.h"
+	"misra.h"
+
+1534222142 c:\test\aducm350\inc\dma.h
+	"device.h"
+
+1534222142 c:\test\aducm350\inc\afe.h
+	"device.h"
+	"dma.h"
+	"uart.h"
+	"adi_int.h"
+	"config/adi_afe_config.h"
+
+1534222142 c:\test\aducm350\inc\uart.h
+	"device.h"
+	"config/adi_uart_config.h"
+
+1534222142 c:\test\aducm350\inc\config\adi_uart_config.h
+
+1534878847 c:\test\aducm350\inc\config\adi_afe_config.h
+
+1424713768 source:c:\test\aducm350\src\system\aducm350\afe_lib.c
+	"misra.h"
+	<stdlib.h>
+	"afe.h"
+	"afe_lib.h"
+	"afe_sequences.h"
+	"uart.h"
+	"misra.h"
+
+1534222142 c:\test\aducm350\inc\afe_lib.h
+
+1534222142 c:\test\aducm350\inc\afe_sequences.h
+
+1424713768 source:c:\test\aducm350\src\system\aducm350\beep.c
+	<stdlib.h>
+	"misra.h"
+	"adi_int.h"
+	"beep.h"
+	"misra.h"
+
+1534222142 c:\test\aducm350\inc\beep.h
+	"device.h"
+	"config/adi_beep_config.h"
+
+1534222142 c:\test\aducm350\inc\config\adi_beep_config.h
+
+1424713768 source:c:\test\aducm350\src\system\aducm350\captouch.c
+	"misra.h"
+	<stddef.h>
+	<string.h>
+	"captouch.h"
+	"gpio.h"
+
+1534222142 c:\test\aducm350\inc\captouch.h
+	"device.h"
+	"config/adi_ct_config.h"
+
+1534222142 c:\test\aducm350\inc\config\adi_ct_config.h
+
+1536885004 source:c:\test\aducm350\src\system\aducm350\captouch_lib.c
+	"misra.h"
+	<stddef.h>
+	<string.h>
+	<stdlib.h>
+	"captouch.h"
+	"captouch_lib.h"
+	"gpio.h"
+
+1534222142 c:\test\aducm350\inc\captouch_lib.h
+	"device.h"
+
+1536885013 source:c:\test\aducm350\src\system\aducm350\crc.c
+	"misra.h"
+	<stdlib.h>
+	"crc.h"
+	"dma.h"
+	"config/adi_crc_config.h"
+	"misra.h"
+
+1534222142 c:\test\aducm350\inc\crc.h
+	"device.h"
+
+1534222142 c:\test\aducm350\inc\config\adi_crc_config.h
+
+1424713768 source:c:\test\aducm350\src\system\aducm350\dma.c
+	"misra.h"
+	"dma.h"
+	"stdio.h"
+	"misra.h"
+
+1536885025 source:c:\test\aducm350\src\system\aducm350\flash.c
+	<stddef.h>
+	"misra.h"
+	<device.h>
+	"dma.h"
+	"config/adi_fee_config.h"
+	"flash.h"
+	"misra.h"
+	"adi_rtos.h"
+
+1424713768 source:c:\test\aducm350\src\system\aducm350\gpio.c
+	"misra.h"
+	"gpio.h"
+	"misra.h"
+
+1424713768 source:c:\test\aducm350\src\system\aducm350\gpt.c
+	"misra.h"
+	<stdlib.h>
+	"gpt.h"
+	"misra.h"
+
+1424713766 c:\test\aducm350\inc\adi_osal.h
+	<stdint.h>
+	<stdbool.h>
+	<adi_types.h>
+
+1534222142 c:\test\aducm350\inc\adi_types.h
+	<stdint.h>
+	<stdbool.h>
+
+1424713748 c:\test\aducm350\inc\crc32.h
+	<stdlib.h>
+	<stdint.h>
+
+1534222142 c:\test\aducm350\inc\test_common.h
+	"wdt.h"
+
+1536887274 source:c:\test\aducm350\src\system\aducm350\i2c.c
+	"misra.h"
+	<stdlib.h>
+	"adi_int.h"
+	"i2c.h"
+	"dma.h"
+	"gpio.h"
+	"misra.h"
+
+1534222142 c:\test\aducm350\inc\i2c.h
+	"device.h"
+	"config/adi_i2c_config.h"
+
+1534222142 c:\test\aducm350\inc\config\adi_i2c_config.h
+
+1424713768 source:c:\test\aducm350\src\system\aducm350\i2s.c
+	"misra.h"
+	<stdlib.h>
+	"I2S.h"
+	"dma.h"
+	"misra.h"
+
+1536887287 c:\test\aducm350\inc\i2s.h
+	"device.h"
+	"adi_int.h"
+	"config/adi_i2s_config.h"
+
+1534222142 c:\test\aducm350\inc\config\adi_i2s_config.h
+
+1536887359 source:c:\test\aducm350\src\system\aducm350\lcd.c
+	"misra.h"
+	<stddef.h>
+	<string.h>
+	"lcd.h"
+	"misra.h"
+
+1536887295 c:\test\aducm350\inc\lcd.h
+	"device.h"
+	"adi_int.h"
+	"config/adi_lcd_config.h"
+
+1534222142 c:\test\aducm350\inc\config\adi_lcd_config.h
+
+1424713768 source:c:\test\aducm350\src\system\aducm350\metrics.c
+	"misra.h"
+	<stdlib.h>
+	"metrics.h"
+	"misra.h"
+
+1534222142 c:\test\aducm350\inc\metrics.h
+	"device.h"
+
+1424713768 source:c:\test\aducm350\src\system\aducm350\pdi.c
+	"misra.h"
+	<stdlib.h>
+	"pdi.h"
+	"misra.h"
+
+1534222142 c:\test\aducm350\inc\pdi.h
+	"device.h"
+	"config/adi_pdi_config.h"
+
+1534222142 c:\test\aducm350\inc\config\adi_pdi_config.h
+
+1424713768 source:c:\test\aducm350\src\system\aducm350\rng.c
+	<stdlib.h>
+	"misra.h"
+	"adi_int.h"
+	"rng.h"
+	"misra.h"
+
+1534222142 c:\test\aducm350\inc\rng.h
+	"device.h"
+	"config/adi_rng_config.h"
+
+1534222142 c:\test\aducm350\inc\config\adi_rng_config.h
+
+1424713768 source:c:\test\aducm350\src\system\aducm350\rtc.c
+	<stdlib.h>
+	"misra.h"
+	"rtc.h"
+	"startup.h"
+	"adi_rtos.h"
+	"misra.h"
+
+1534222142 c:\test\aducm350\inc\rtc.h
+	"device.h"
+	"adi_int.h"
+
+1534222142 c:\test\aducm350\inc\startup.h
+	"device.h"
+
+1536887372 source:c:\test\aducm350\src\system\aducm350\spi.c
+	"misra.h"
+	<stdlib.h>
+	"spi.h"
+	"gpio.h"
+	"dma.h"
+	"config/adi_spi_config.h"
+	"misra.h"
+
+1534222142 c:\test\aducm350\inc\spi.h
+	"device.h"
+
+1534222142 c:\test\aducm350\inc\config\adi_spi_config.h
+
+1424713768 source:c:\test\aducm350\src\system\aducm350\system.c
+	<stdint.h>
+	"system.h"
+
+1424713766 c:\test\aducm350\inc\system.h
+	<stddef.h>
+	"device.h"
+	"gpt.h"
+	"wut.h"
+	"gpio.h"
+
+1424713768 source:c:\test\aducm350\src\system\aducm350\uart.c
+	"misra.h"
+	<stddef.h>
+	<string.h>
+	"uart.h"
+	"gpio.h"
+	"misra.h"
+
+1424713768 source:c:\test\aducm350\src\system\aducm350\wdt.c
+	"misra.h"
+	<stddef.h>
+	"wdt.h"
+	"startup.h"
+	"adi_rtos.h"
+	"misra.h"
+
+1424713768 source:c:\test\aducm350\src\system\aducm350\wut.c
+	"misra.h"
+	<stddef.h>
+	"wut.h"
+	"adi_rtos.h"
+	"misra.h"
+
+1534222142 source:c:\test\aducm350\src\system\cortexm\_initialize_hardware.c
+	"cmsis_device.h"
+
+1534222142 c:\test\aducm350\inc\cmsis_device.h
+	"ADuCM350.h"
+
+1534222142 source:c:\test\aducm350\src\system\cortexm\_reset_hardware.c
+	"cmsis_device.h"
+
+1536891821 source:c:\test\aducm350\src\system\aducm350\startup.c
+	"startup.h"
+	<os_cpu.h>
+
+1534222142 source:c:\test\aducm350\src\system\diag\trace.c
+	<stdio.h>
+	<stdarg.h>
+	"diag/Trace.h"
+	"string.h"
+
+1534222142 source:c:\test\aducm350\src\system\diag\trace_impl.c
+	"cmsis_device.h"
+	"diag/Trace.h"
+	"arm/semihosting.h"
+
+1536888459 source:c:\test\aducm350\src\system\newlib\_cxx.cpp
+	<cstdlib>
+	<sys/types.h>
+	"Trace.h"
+
+1534222142 c:\test\aducm350\inc\trace.h
+	<unistd.h>
+
+1534788804 c:\test\aducm350\inc\unistd.h
+	<sys/unistd.h>
+
+1536888470 source:c:\test\aducm350\src\system\newlib\_exit.c
+	<stdlib.h>
+	"Trace.h"
+
+1534222142 source:c:\test\aducm350\src\system\newlib\_sbrk.c
+	<sys/types.h>
+	<errno.h>
+
+1534901608 source:c:\test\aducm350\src\system\newlib\_startup.c
+	<stdint.h>
+	<sys/types.h>
+
+1534222142 source:c:\test\aducm350\src\system\newlib\_syscalls.c
+	<_ansi.h>
+	<_syslist.h>
+	<errno.h>
+	<sys/stat.h>
+	<sys/time.h>
+	<sys/times.h>
+	<limits.h>
+	<signal.h>
+	<_ansi.h>
+	<stdint.h>
+	<sys/stat.h>
+	<sys/fcntl.h>
+	<stdio.h>
+	<string.h>
+	<time.h>
+	<sys/time.h>
+	<sys/times.h>
+	<errno.h>
+	<reent.h>
+	<unistd.h>
+	<sys/wait.h>
+	<ctype.h>
+	<signal.h>
+	"arm/semihosting.h"
+
+1534815854 c:\test\aducm350\inc\reent.h
+	<_ansi.h>
+	<stddef.h>
+	<sys/_types.h>
+	<sys/types.h>
+	<sys/custom_file.h>
+	<assert.h>
+
+1536888478 source:c:\test\aducm350\src\system\newlib\assert.c
+	<assert.h>
+	<stdlib.h>
+	<stdint.h>
+	"Trace.h"
+
+1424713766 source:c:\test\aducm350\src\system\osal\adi_osal_arch_c.c
+	<stdlib.h>
+	<limits.h>
+	"adi_osal.h"
+	"adi_osal_arch.h"
+	"adi_osal_arch_internal.h"
+	"osal_common.h"
+
+1424713766 c:\test\aducm350\inc\adi_osal_arch.h
+
+1424713766 c:\test\aducm350\inc\adi_osal_arch_internal.h
+	<adi_osal.h>
+	<adi_osal_arch.h>
+	<device.h>
+
+1424713766 c:\test\aducm350\inc\osal_common.h
+	"adi_osal.h"
+
+1424713766 source:c:\test\aducm350\src\system\osal\adi_osal_arch_int_table.c
+	"adi_osal.h"
+	<adi_osal_arch.h>
+
+1424713766 source:c:\test\aducm350\src\system\osal\adi_osal_noos.c
+	<stdlib.h>
+	<limits.h>
+	"adi_osal.h"
+	"osal_common.h"
+	"osal_noos.h"
+	"version.h"
+
+1424713766 c:\test\aducm350\inc\osal_noos.h
+	<adi_osal_arch_internal.h>
+	"adi_osal.h"
+	"osal_common.h"
+
+1424713766 c:\test\aducm350\inc\version.h
+
+1424713766 source:c:\test\aducm350\src\system\osal\adi_osal_noos_active.c
+	<sysreg.h>
+	"adi_osal.h"
+
+1424713766 source:c:\test\aducm350\src\system\osal\adi_osal_noos_critical.c
+	<sysreg.h>
+	"adi_osal.h"
+	"osal_noos.h"
+	"osal_common.h"
+
+1424713766 source:c:\test\aducm350\src\system\osal\adi_osal_noos_event.c
+	<stdlib.h>
+	"adi_osal.h"
+	"osal_noos.h"
+	"osal_common.h"
+
+1424713766 source:c:\test\aducm350\src\system\osal\adi_osal_noos_init.c
+	<stdlib.h>
+	"adi_osal.h"
+	"osal_common.h"
+	"osal_noos.h"
+
+1424713766 source:c:\test\aducm350\src\system\osal\adi_osal_noos_mutex.c
+	<stdlib.h>
+	"adi_osal.h"
+	"osal_noos.h"
+	"osal_common.h"
+
+1424713766 source:c:\test\aducm350\src\system\osal\adi_osal_noos_prof.c
+	"adi_osal.h"
+	"osal_noos.h"
+	"osal_common.h"
+	<stdlib.h>
+
+1424713766 source:c:\test\aducm350\src\system\osal\adi_osal_noos_rtl_lock.c
+	"adi_osal.h"
+
+1424713766 source:c:\test\aducm350\src\system\osal\adi_osal_noos_sem.c
+	<stdlib.h>
+	"adi_osal.h"
+	"osal_noos.h"
+	"osal_common.h"
+
+1424713766 source:c:\test\aducm350\src\system\osal\adi_osal_noos_thread.c
+	"adi_osal.h"
+	"osal_noos.h"
+	"osal_common.h"
+	<string.h>
+
+1424713766 source:c:\test\aducm350\src\system\osal\adi_osal_noos_timing.c
+	"adi_osal.h"
+	"osal_noos.h"
+	"osal_common.h"
+
+1424713766 source:c:\test\aducm350\src\system\osal\adi_osal_noos_tls.c
+	<stdlib.h>
+	"adi_osal.h"
+	"osal_noos.h"
+	"osal_common.h"
+

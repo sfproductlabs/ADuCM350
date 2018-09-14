@@ -1,0 +1,10 @@
+<pinmux-xml-export version="1.0" processor="ADuCM350" vm="pinmux_cortex.vm">
+  <peripheral name="UART0" description="UART0 Module">
+    <signal name="Tx" port="P0" pin="6" bit="12" mux="2"></signal>
+    <signal name="Rx" port="P0" pin="7" bit="14" mux="2"></signal>
+  </peripheral>
+  <gpio name="P0">
+    <signal name="P0_06" port="P0" pin="6" bit="12"></signal>
+    <signal name="P0_07" port="P0" pin="7" bit="14"></signal>
+  </gpio>
+</pinmux-xml-export>
