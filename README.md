@@ -27,5 +27,8 @@ https://github.com/dioptre/eclipse
 * Create your own branch and push to here
 ```
 git checkout -b mybranch
+git add -A :/
+git commit -am "my branch is great"
+git push origin mybranch
 ```
 
