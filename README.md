@@ -10,3 +10,9 @@
 
 * https://github.com/dioptre/firm/tree/mbed
 
+# Contributions
+* Create your own branch and push to here
+```
+git checkout -b mybranch
+```
+
