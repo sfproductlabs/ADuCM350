@@ -14,6 +14,10 @@ https://github.com/dioptre/eclipse
 
 * https://github.com/dioptre/firm/tree/mbed
 
+# emIDE Alternative (emide branch of this repository)
+
+* https://github.com/dioptre/firm/tree/emide
+
 # Contributions
 * Create your own branch and push to here
 ```
