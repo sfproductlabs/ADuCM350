@@ -20,7 +20,7 @@ https://github.com/dioptre/eclipse
 * https://github.com/dioptre/firm/tree/mbed
 
 # emIDE Alternative (emide branch of this repository)
-
+## WARNING DANGEROUS AND UNSTABLE
 * https://github.com/dioptre/firm/tree/emide
 
 # Contributions
