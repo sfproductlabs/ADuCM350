@@ -20,7 +20,7 @@
 
 /*! \file ADuCM350_device.h */
 
-// added by MVB
+// added by MVB, NOTE AG
 #include "DEVICE.h"
 /* pickup integer types */
 #include <stdint.h>

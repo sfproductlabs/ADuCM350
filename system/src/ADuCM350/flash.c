@@ -461,15 +461,16 @@ ADI_INT_HANDLER(GPFlash_Int_Handler)
  *
  * @sa      waitForInterrupt()
  */
-ADI_INT_HANDLER(DMA_CRC_Int_Handler)
-{
-#if (ADI_CFG_ENABLE_RTOS_SUPPORT == 1)
-    adi_osal_SemPost(FEE_DevData[ADI_FEE_DEVID_GP].hSem);
-    FEE_DevData[ADI_FEE_DEVID_GP].interruptFlag = true;
-#else
-    SystemExitLowPowerMode(&FEE_DevData[ADI_FEE_DEVID_GP].interruptFlag);
-#endif /* (ADI_CFG_ENABLE_RTOS_SUPPORT == 1) */
-}
+//AG
+//ADI_INT_HANDLER(DMA_CRC_Int_Handler)
+//{
+//#if (ADI_CFG_ENABLE_RTOS_SUPPORT == 1)
+//    adi_osal_SemPost(FEE_DevData[ADI_FEE_DEVID_GP].hSem);
+//    FEE_DevData[ADI_FEE_DEVID_GP].interruptFlag = true;
+//#else
+//    SystemExitLowPowerMode(&FEE_DevData[ADI_FEE_DEVID_GP].interruptFlag);
+//#endif /* (ADI_CFG_ENABLE_RTOS_SUPPORT == 1) */
+//}
 
 #endif /* (1 == ADI_FEE_CFG_GPF_DMA_SUPPORT) */
 

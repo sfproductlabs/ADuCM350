@@ -25,7 +25,7 @@ License Agreement.
 
 #include "device.h"
 #include "adi_int.h"
-#include "adi_lcd_config.h"
+#include "config/adi_lcd_config.h"
 
 #define ADI_LCD_MAX_BIAS_LEVEL    31         /*!< Maximum bias level supported by LCD             */
 

@@ -18,7 +18,7 @@ License Agreement.
 #include "newlib/sys/reent.h"
 #include "startup.h"
 
-//#include "cortexm/ExceptionHandlers.h"
+#include "cortexm/ExceptionHandlers.h"
 
 //#ifdef _USING_UCOS_II_
 //#include <os_cpu.h>
@@ -205,9 +205,9 @@ extern int main(void);
 //*****************************************************************************
 #ifdef __GNUC__
 extern unsigned long _etext;
-extern unsigned long _data;
+extern unsigned long _sdata;
 extern unsigned long _edata;
-extern unsigned long _bss ;
+extern unsigned long _sbss ;
 extern unsigned long _ebss;
 #endif
 
@@ -253,13 +253,13 @@ WEAK_FUNC (void ResetISR (void)) {
 
     // Copy initialised data from flash into RAM
     pulSrc = &_etext;
-    for(pulDest = &_data; pulDest < &_edata; )
+    for(pulDest = &_sdata; pulDest < &_edata; )
     {
         *pulDest++ = *pulSrc++;
     }
 
     // Clear the bss segment
-    for(pulDest = &_bss; pulDest < &_ebss; )
+    for(pulDest = &_sbss; pulDest < &_ebss; )
     {
         *pulDest++ = 0;
     }

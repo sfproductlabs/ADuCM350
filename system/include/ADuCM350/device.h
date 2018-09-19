@@ -316,7 +316,7 @@ typedef uint8_t  bool_t;
 
 
 /* include CODA-generated device memory maps */
-#include "ADuCM350_device.h"
+#include "ADuCM350.h"
 
 /* RECONCILE MINOR NAME CHANGES BETWEEN OLD-STYLE MAPPINGS AND CODA-BASED DEFINES */
 
