@@ -12,8 +12,8 @@ License Agreement.
  *****************************************************************************
  * @file:    system.c
  * @brief:   System startup code for ADuCM350
- * @version: $Revision: 33058 $
- * @date:    $Date: 2015-12-17 01:26:28 -0500 (Thu, 17 Dec 2015) $
+ * @version: $Revision: 28525 $
+ * @date:    $Date: 2014-11-12 14:51:26 -0500 (Wed, 12 Nov 2014) $
  *****************************************************************************/
 
 /*! \addtogroup SYS_Driver System Interfaces
@@ -26,8 +26,9 @@ License Agreement.
 #ifdef RELOCATE_IVT
 extern void __relocated_vector_table;
 #else
-//extern void __vector_table;
-extern void __vectors_start;
+//extern void __vector_start;
+//AG MVB
+extern void __vector_table;
 #endif
 
 /*----------------------------------------------------------------------------
@@ -79,7 +80,7 @@ extern void __vectors_start;
 /*     - HCLK frequency is 1MHz                                     */
 /*     - 1 loop iteration takes 8 clock cycles                      */
 /* The ideal number is 31 * 2 us, using 70us for extra margin.      */
-#define LFXTALEN_WORKAROUND_WAIT_TIME   (70 / 8 + 1)
+#define LFXTALEN_WORKAROUND_WAIT_TIME               (70 / 8 + 1)
 
 /* Workaround for the UPLL lock issue */
 /* Under certain conditions the UPLL may not lock unless the loop filter is precharged.  */
@@ -233,7 +234,9 @@ void SystemInit (void)
 #ifdef RELOCATE_IVT
     SCB->VTOR = (uint32_t) &__relocated_vector_table;
 #else
-    SCB->VTOR = (uint32_t) &__vectors_start; // MVB
+    //SCB->VTOR = (uint32_t) &__vectors_start; // MVB
+    //AG
+    SCB->VTOR = (uint32_t) &__vector_table;
 #endif
 
     // set all three (USGFAULTENA, BUSFAULTENA, and MEMFAULTENA) fault enable bits
@@ -614,6 +617,8 @@ uint32_t GetSystemExtClkFreq (void)
 
     @details    Obtain individual peripheral clock frequencies.
 
+    @sa         adi_PWR_SetClockDivide
+    @sa         adi_PWR_GetClockDivide
     @sa         SystemSetClockDivider
 */
 uint32_t SystemGetClockFrequency (ADI_SYS_CLOCK_ID id)
@@ -761,6 +766,8 @@ ADI_SYS_RESULT_TYPE SystemEnableClock (ADI_SYS_CLOCK_GATE_ID id, bool_t bEnable)
 
     @details    Manage individual peripheral clock dividers.
 
+    @sa         adi_PWR_SetClockDivide
+    @sa         adi_PWR_GetClockDivide
     @sa         SystemGetClockFrequency
 */
 ADI_SYS_RESULT_TYPE SetSystemClockDivider (ADI_SYS_CLOCK_ID id, uint8_t div)
@@ -1047,7 +1054,7 @@ ADI_SYS_RESULT_TYPE SystemClockSourcePowerUp (ADI_SYS_CLOCK_SOURCE_ID id, ADI_SY
             ADI_EXIT_CRITICAL_REGION();            
         }
         else {
-        SystemEnableClockSource(id, true);
+            SystemEnableClockSource(id, true);
         }
 #else
         SystemEnableClockSource(id, true);
@@ -1540,6 +1547,7 @@ ADI_SYS_RESULT_TYPE SetPllFreq(ADI_SYS_CLOCK_SOURCE_ID id, ADI_SYS_CLOCK_PLL_MSE
 
     @note    Power modes 4 and 5 only support select interrupt sources to awake the processor.
 
+    @sa      adi_PWR_GetPowerMode
     @sa      SystemExitLowPowerMode
 */
 ADI_SYS_RESULT_TYPE SystemEnterLowPowerMode (const ADI_SYS_POWER_MODE PowerMode,
@@ -1745,7 +1753,7 @@ typedef struct {
 
 /* force table placement into flash using the "const" qualifer */
 static const StateTableEntryType StateTransitionTable[] = {
-
+    
 /*  from-state                              input-event                             to-state                                action                  */
     {ADI_SYS_CLOCK_STATE_MINIMAL,           ADI_SYS_CLOCK_TRIGGER_MEASUREMENT_ON,   ADI_SYS_CLOCK_STATE_MEASUREMENT,        aEnterMeasurementState,      },
     {ADI_SYS_CLOCK_STATE_MINIMAL,           ADI_SYS_CLOCK_TRIGGER_MEASUREMENT_OFF,  ADI_SYS_CLOCK_STATE_INVALID,            ADI_SYS_CLOCK_STATE_INVALID, },

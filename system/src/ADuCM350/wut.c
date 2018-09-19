@@ -12,8 +12,8 @@ License Agreement.
  *****************************************************************************
  * @file:    wut.c
  * @brief:   WUT Device Implementations for ADuCxxx
- * @version: $Revision: 32907 $
- * @date:    $Date: 2015-12-03 04:05:55 -0500 (Thu, 03 Dec 2015) $
+ * @version: $Revision: 28525 $
+ * @date:    $Date: 2014-11-12 14:51:26 -0500 (Wed, 12 Nov 2014) $
  *****************************************************************************/
 
 /*! \addtogroup WUT_Driver WUT Driver
@@ -251,6 +251,7 @@ ADI_WUT_RESULT_TYPE adi_WUT_UnInit(ADI_WUT_DEV_HANDLE const hDevice)
  *
  * @sa        adi_WUT_GetClockSelect().
  * @sa        adi_WUT_SetPrescaler().
+ * @sa        adi_PWR_SetLFXTALOscEnable().
  */
 ADI_WUT_RESULT_TYPE adi_WUT_SetClockSelect (ADI_WUT_DEV_HANDLE const hDevice, const ADI_WUT_CLOCK_SOURCE_TYPE ClockSource)
 {

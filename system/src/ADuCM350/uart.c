@@ -12,8 +12,8 @@ License Agreement.
  ******************************************************************************
  * @file:    uart.c
  * @brief:   UART Device Implementations for ADuCxxx
- * @version: $Revision: 33038 $
- * @date:    $Date: 2015-12-16 06:11:14 -0500 (Wed, 16 Dec 2015) $
+ * @version: $Revision: 28544 $
+ * @date:    $Date: 2014-11-13 13:09:44 -0500 (Thu, 13 Nov 2014) $
  *****************************************************************************/
 
 /** \addtogroup UART_Driver UART Driver
@@ -176,15 +176,15 @@ static ADI_UART_DEV_DATA_TYPE UART_DevData[] =
            NULL,                                        /*!< rx buffer start address    */
            0,                                           /*!< rx buffer write index      */
            0,                                           /*!< rx buffer read index       */
-           0,                                           /*!< rx buffer size             */
+           NULL,                                        /*!< rx buffer size             */
            0,                                           /*!< available bytes            */
        },
        {
            NULL,                                        /*!< tx buffer start address    */
            0,                                           /*!< tx buffer read index       */
            0,                                           /*!< tx buffer write index      */
-           0,                                           /*!< tx buffer size             */
-           0,                                           /*!< number of free elements    */
+           NULL,                                        /*!< tx buffer size             */
+           NULL,                                        /*!< number of free elements    */
        },
 #endif /* (1 == ADI_UART_CFG_INTERRUPT_MODE_SUPPORT) */
 #if defined(ADI_DEBUG)
@@ -343,6 +343,7 @@ ADI_INT_HANDLER(UART_Int_Handler)
                 * internal driver buffer is full and more data is received.
                 *
                 * NOTE: If this condition occurs applications has to adjust the rx buffer size that
+                * is passed via adi_UART_Init() call. The below while(1) is expected to be changed
                 * depending on the application requirements.
                 */
                 while(1); /* internal driver buffer overflow */
@@ -674,6 +675,7 @@ static ADI_UART_RESULT_TYPE ProcessRequest(ADI_UART_HANDLE const hDevice,
 static inline void ResetCircularBuffers(ADI_UART_HANDLE const hDevice)
 {
 #if (1 == ADI_UART_CFG_INTERRUPT_MODE_SUPPORT)
+    ADI_DISABLE_INT(hDevice->UARTIRQn);
 
     /* reset rx buffer contents */
     hDevice->RxBuffer.RdIndx = 0;
@@ -685,6 +687,7 @@ static inline void ResetCircularBuffers(ADI_UART_HANDLE const hDevice)
     hDevice->TxBuffer.WrIndx = 0;
     hDevice->TxBuffer.NumAvailable = hDevice->TxBuffer.BufSize;
 
+    ADI_ENABLE_INT(hDevice->UARTIRQn);
 #endif /* (1 == ADI_UART_CFG_INTERRUPT_MODE_SUPPORT) */
 }
 
@@ -1171,9 +1174,7 @@ ADI_UART_RESULT_TYPE adi_UART_BufFlush(ADI_UART_HANDLE const hDevice)
     while (( !(hDevice->pUartRegs->COMCON & COMCON_DISABLE)) &&
            ( !(hDevice->pUartRegs->COMLSR & COMLSR_TEMT) ));
 
-    ADI_DISABLE_INT(hDevice->UARTIRQn);
     ResetCircularBuffers(hDevice);
-    ADI_ENABLE_INT(hDevice->UARTIRQn);
 
     return(ADI_UART_SUCCESS);
 }
@@ -1243,7 +1244,6 @@ ADI_UART_RESULT_TYPE adi_UART_SetBaudRate(ADI_UART_HANDLE const hDevice, const A
 			{ 1, 1,     0 },  /* 86.4% error, nonrealizable solution */
 			{ 1, 1,     0 },  /* 93.2% error, nonrealizable solution */
 		},
-#ifndef ADI_ADUCM350    /* ADUCM350 only has maximum clock of 16 MHz */        
                 {
             /* the 20MHz table... */
 			{ 17, 3, 1699 },   /* 0.005937% error */
@@ -1254,7 +1254,7 @@ ADI_UART_RESULT_TYPE adi_UART_SetBaudRate(ADI_UART_HANDLE const hDevice, const A
 			{  1, 2, 1460 },   /* 0.010001% error */
 			{  1, 1, 730 },    /* 0.010001% error */
 		}
-#endif /* ADI_ADUCM350 */
+
 	};
 
     /* pointer to table entries */
@@ -1281,9 +1281,7 @@ ADI_UART_RESULT_TYPE adi_UART_SetBaudRate(ADI_UART_HANDLE const hDevice, const A
     /* only supporting 16MHz and 1MHz at this time... other clocks require new div table entries */
 	if        (incoming_clock == 16000000) { pMap = &DivMap[0][BaudRateIndex];
 	} else if (incoming_clock ==  1000000) { pMap = &DivMap[1][BaudRateIndex];
-#ifndef ADI_ADUCM350    /* ADUCM350 only has maximum clock of 16 MHz */
 	} else if (incoming_clock ==  20000000) { pMap = &DivMap[2][BaudRateIndex];
-#endif    
 	} else                                 { return ADI_UART_ERR_INVALID_PARAMS; }
 
 

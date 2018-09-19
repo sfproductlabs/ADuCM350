@@ -11,8 +11,8 @@ License Agreement.
 /******************************************************************************
  * @file:    lcd.c
  * @brief:   LCD API implementation file.
- * @version: $Revision: 33028 $
- * @date:    $Date: 2015-12-16 00:16:16 -0500 (Wed, 16 Dec 2015) $
+ * @version: $Revision: 28525 $
+ * @date:    $Date: 2014-11-12 14:51:26 -0500 (Wed, 12 Nov 2014) $
 ******************************************************************************/
 
  /*! \addtogroup LCD_Driver LCD Driver
@@ -55,6 +55,7 @@ typedef struct ADI_LCD_DEV_DATA_TYPE
 {
     ADI_LCD_STATE_TYPE         initState;             /*!< Device initialization state        */
     ADI_LCD_TypeDef*           pLCD;                  /*!< LCD  MMRs                          */
+    bool_t                     bBlockingMode;         /*!< Blocking-Mode flag                 */
     IRQn_Type                  LCDIntID;              /*!< LCD interrupt ID.                  */
     ADI_CALLBACK               pfCallback;            /*!< Pointer to callback funcion.       */
     void *                     pCBParam;              /*!< Callback parameter.                */

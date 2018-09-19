@@ -22,18 +22,11 @@ License Agreement.
  *  @{
  */
 
-//#include <adi_osal.h>
-
-// MVB:
-
+#include <adi_osal.h>
 
 #include <adi_int.h>
 #include <device.h>
 #include <adi_nvic.h>
-
-
-#define ADI_OSAL_SUCCESS	ADI_SYS_SUCCESS
-
 
 /**
  * @brief       Install the handler for a Coretex-M3 Interrupt.

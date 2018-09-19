@@ -12,8 +12,8 @@ License Agreement.
  ******************************************************************************
  * @file:    captouch.h
  * @brief:   Captouch Definitions for ADuCM350
- * @version: $Revision: 30127 $
- * @date:    $Date: 2015-03-09 12:05:31 -0400 (Mon, 09 Mar 2015) $
+ * @version: $Revision: 28525 $
+ * @date:    $Date: 2014-11-12 14:51:26 -0500 (Wed, 12 Nov 2014) $
 *****************************************************************************/
 
 /*! \addtogroup CT_Library

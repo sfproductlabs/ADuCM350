@@ -13,8 +13,8 @@ License Agreement.
  * @file:    adi_sid_cm350.h
  * @brief:   Defenition of interrupt IDs using which application/drivers
              register/unregister interrupt handlers.
- * @version: $Revision: 30127 $
- * @date:    $Date: 2015-03-09 12:05:31 -0400 (Mon, 09 Mar 2015) $
+ * @version: $Revision: 28525 $
+ * @date:    $Date: 2014-11-12 14:51:26 -0500 (Wed, 12 Nov 2014) $
 **********************************************************************************/
 
 

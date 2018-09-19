@@ -5,18 +5,15 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
 ../system/src/cmsis/system_ADuCM350.c \
-../system/src/cmsis/vectors_ADuCM350.c \
-../system/src/cmsis/vetors_ADuCM350_old.c 
+../system/src/cmsis/vectors_ADuCM350.c 
 
 OBJS += \
 ./system/src/cmsis/system_ADuCM350.o \
-./system/src/cmsis/vectors_ADuCM350.o \
-./system/src/cmsis/vetors_ADuCM350_old.o 
+./system/src/cmsis/vectors_ADuCM350.o 
 
 C_DEPS += \
 ./system/src/cmsis/system_ADuCM350.d \
-./system/src/cmsis/vectors_ADuCM350.d \
-./system/src/cmsis/vetors_ADuCM350_old.d 
+./system/src/cmsis/vectors_ADuCM350.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

@@ -22,7 +22,6 @@
 
 // added by MVB
 #include "DEVICE.h"
-
 /* pickup integer types */
 #include <stdint.h>
 

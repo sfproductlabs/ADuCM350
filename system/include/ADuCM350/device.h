@@ -13,8 +13,8 @@ License Agreement.
  * @file:    device.h
  * @brief:   CMSIS Cortex-M3 Core Peripheral Access Layer Header File for
  *           ADI ADuCMxxx Device Series
- * @version: $Revision: 30127 $
- * @date:    $Date: 2015-03-09 12:05:31 -0400 (Mon, 09 Mar 2015) $
+ * @version: $Revision: 28525 $
+ * @date:    $Date: 2014-11-12 14:51:26 -0500 (Wed, 12 Nov 2014) $
  *****************************************************************************/
 
 /*!  \addtogroup MMR_Layout MMR/ISR Mappings
@@ -25,8 +25,8 @@ License Agreement.
 #define __DEVICE_H__
 
 // verify presence of a supported compiler (Keil or IAR at this time)
-#if !defined(__ICCARM__) && !defined(__CC_ARM)
-// #error "No supported compiler found, please install one of the minimim required compilers."
+#if !defined(__ICCARM__) && !defined(__CC_ARM) && !defined( __GNUC__ )
+#error "No supported compiler found, please install one of the minimim required compilers."
 #endif
 
 // verify minimum required IAR compiler
@@ -49,7 +49,7 @@ License Agreement.
 #define ADI_ADUCM350  /*!< PreProcessor feature macro */
 
 /* pickup global configurations */
-//#include "adi_global_config.h"
+#include "config/adi_global_config.h"
 
 /* pickup multi thread support macros */
 #include "adi_rtos.h"
@@ -316,7 +316,7 @@ typedef uint8_t  bool_t;
 
 
 /* include CODA-generated device memory maps */
-#include "ADuCM350.h"
+#include "ADuCM350_device.h"
 
 /* RECONCILE MINOR NAME CHANGES BETWEEN OLD-STYLE MAPPINGS AND CODA-BASED DEFINES */
 

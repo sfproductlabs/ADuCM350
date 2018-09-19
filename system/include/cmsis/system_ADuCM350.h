@@ -3,8 +3,8 @@
  * @file:    system.h
  * @brief:   CMSIS Cortex-M3 Device Peripheral Access Layer Header File
  *           for the ADI ADuCxxx Device Series
- * @version: $Revision: 32908 $
- * @date:    $Date: 2015-12-03 04:38:45 -0500 (Thu, 03 Dec 2015) $
+ * @version: $Revision: 23737 $
+ * @date:    $Date: 2013-11-25 11:40:37 -0500 (Mon, 25 Nov 2013) $
  *-----------------------------------------------------------------------------
  *
  * Copyright (C) 2009-2013 ARM Limited. All rights reserved.
@@ -45,9 +45,9 @@
  extern "C" {
 #endif
 
- // added: MVB
-#define ADI_SYSTEM_CLOCK_TRANSITION 1
- // added: AG
+// added: MVB
+//#define ADI_SYSTEM_CLOCK_TRANSITION 1
+// added: AG
 //#define ADI_DEBUG 1
 //#define OS_USE_SEMIHOSTING 1
 //#define OS_USE_TRACE_SEMIHOSTING_DEBUG 0
@@ -55,7 +55,6 @@
 //or
 //#define OS_USE_TRACE_ITM 1
 //#define __ARM_ARCH_7M__
-
 /* clock IDs */
 typedef enum {
 
@@ -254,7 +253,6 @@ typedef enum
 
 /*! \enum ADI_SYS_CLOCK_STATE_TYPE
  *  Clock configuration states:
- *  - ADI_SYS_CLOCK_STATE_INVALID:          Invalid state transition
  *  - ADI_SYS_CLOCK_STATE_MINIMAL:          The state the ADuCM350 powers up in. Uses HFOSC to supply the system clock.
  *  - ADI_SYS_CLOCK_STATE_MEASUREMENT:      The measurement configuration, can be setup at build time to use either HFXTAL or SPLL as source for the system clock.
  *                                          This state does not include USB.
@@ -265,8 +263,8 @@ typedef enum
  *                                          configurations are requested asynchronously.
  */
 typedef enum {
-    ADI_SYS_CLOCK_STATE_INVALID = 0,               /* use to flag invalid state transitions */
-    ADI_SYS_CLOCK_STATE_MINIMAL = 1,
+    ADI_SYS_CLOCK_STATE_INVALID = 0,  
+    ADI_SYS_CLOCK_STATE_MINIMAL,        /* use one-based enum to avoid confusion with NULL, which is used to flag invalid state transitions */
     ADI_SYS_CLOCK_STATE_MEASUREMENT,
     ADI_SYS_CLOCK_STATE_USB,
     ADI_SYS_CLOCK_STATE_USB_MEASUREMENT,
@@ -282,7 +280,7 @@ typedef enum {
  *  - ADI_SYS_CLOCK_TRIGGER_USB_LPM:            Corresponds to "Disable USB clocks for LPM sleep" call in HRM. Controlled by the USB driver.
  */
 typedef enum {
-     ADI_SYS_CLOCK_TRIGGER_MEASUREMENT_ON = 0,
+    ADI_SYS_CLOCK_TRIGGER_MEASUREMENT_ON = 0,
     ADI_SYS_CLOCK_TRIGGER_MEASUREMENT_OFF,
     ADI_SYS_CLOCK_TRIGGER_USB_ON,
     ADI_SYS_CLOCK_TRIGGER_USB_OFF,

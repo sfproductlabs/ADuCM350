@@ -11,7 +11,7 @@
 #include "dma.h"
 #include "uart.h"
 #include "adi_int.h"
-#include "config/adi_afe_config.h"
+#include "adi_afe_config.h"
 
 /* C++ linkage */
 #ifdef __cplusplus
@@ -27,29 +27,29 @@ extern "C" {
  *****************************************************************************/
 
 typedef enum {
-    ADI_AFE_SUCCESS                     = 0,                                /*!< Generic success.                                       */
-    ADI_AFE_ERR_UNKNOWN                 = ADI_DEV_AFE_ERROR_OFFSET,         /*!< Generic error.                                         */
-    ADI_AFE_ERR_BAD_DEV_HANDLE          = ADI_DEV_AFE_ERROR_OFFSET +  1,    /*!< Invalid device handle.                                 */
-    ADI_AFE_ERR_NOT_INITIALIZED         = ADI_DEV_AFE_ERROR_OFFSET +  2,    /*!< Device not initialized.                                */
-    ADI_AFE_ERR_ALREADY_INITIALIZED     = ADI_DEV_AFE_ERROR_OFFSET +  3,    /*!< Device already initialized.                            */
-    ADI_AFE_ERR_ACLKOFF                 = ADI_DEV_AFE_ERROR_OFFSET +  4,    /*!< ACLK disabled from the clock gate.                     */
-    ADI_AFE_ERR_WRONG_ACLK_FREQUENCY    = ADI_DEV_AFE_ERROR_OFFSET +  5,    /*!< Programmed ACLK frequency is not the required 16MHz.   */
-    ADI_AFE_ERR_SEQ                     = ADI_DEV_AFE_ERROR_OFFSET +  6,    /*!< Sequencer error.                                       */
-    ADI_AFE_ERR_CMD_FIFO_UDF            = ADI_DEV_AFE_ERROR_OFFSET +  7,    /*!< Command FIFO underflow error.                          */
-    ADI_AFE_ERR_CMD_FIFO_OVF            = ADI_DEV_AFE_ERROR_OFFSET +  8,    /*!< Command FIFO overflow error.                           */
-    ADI_AFE_ERR_DATA_FIFO_UDF           = ADI_DEV_AFE_ERROR_OFFSET +  9,    /*!< Data FIFO underflow error.                             */
-    ADI_AFE_ERR_DATA_FIFO_OVF           = ADI_DEV_AFE_ERROR_OFFSET + 10,    /*!< Data FIFO overflow error.                              */
-    ADI_AFE_ERR_DMA                     = ADI_DEV_AFE_ERROR_OFFSET + 11,    /*!<                                     */
-    ADI_AFE_ERR_CRC                     = ADI_DEV_AFE_ERROR_OFFSET + 12,    /*!<                                     */
-    ADI_AFE_ERR_CALLBACK_OVERWRITE      = ADI_DEV_AFE_ERROR_OFFSET + 13,    /*!< Attempt to overwrite existing callback.                */
-    ADI_AFE_ERR_SEQ_ALREADY_INITIALIZED = ADI_DEV_AFE_ERROR_OFFSET + 14,    /*!<                                     */
-    ADI_AFE_ERR_SEQ_NOT_DISABLED        = ADI_DEV_AFE_ERROR_OFFSET + 15,    /*!<                                     */
-    ADI_AFE_ERR_SEQ_CHECK               = ADI_DEV_AFE_ERROR_OFFSET + 16,    /*!<                                     */
-    ADI_AFE_ERR_SEMAPHORE_FAILED        = ADI_DEV_AFE_ERROR_OFFSET + 17,    /*!<                                     */
-    ADI_AFE_ERR_PARAM_OUT_OF_RANGE      = ADI_DEV_AFE_ERROR_OFFSET + 18,    /*!<                                     */
-    ADI_AFE_ERR_RX_DMA_SIZE_TOO_BIG     = ADI_DEV_AFE_ERROR_OFFSET + 19,    /*!<                                     */
-    ADI_AFE_ERR_SEQ_ABORT_REQUEST       = ADI_DEV_AFE_ERROR_OFFSET + 20,    /*!<                                                            */
-    ADI_AFE_ERR_FCW_OUT_OF_RANGE        = ADI_DEV_AFE_ERROR_OFFSET + 21,    /*!< Waveform generator sinusoid frequency must be 80Hz - 80kHz */
+    ADI_AFE_SUCCESS                     = 0,                                /*!< Generic success.                                                                   */
+    ADI_AFE_ERR_UNKNOWN                 = ADI_DEV_AFE_ERROR_OFFSET,         /*!< Generic error.                                                                     */
+    ADI_AFE_ERR_BAD_DEV_HANDLE          = ADI_DEV_AFE_ERROR_OFFSET +  1,    /*!< Invalid device handle.                                                             */
+    ADI_AFE_ERR_NOT_INITIALIZED         = ADI_DEV_AFE_ERROR_OFFSET +  2,    /*!< Device not initialized.                                                            */
+    ADI_AFE_ERR_ALREADY_INITIALIZED     = ADI_DEV_AFE_ERROR_OFFSET +  3,    /*!< Device already initialized.                                                        */
+    ADI_AFE_ERR_ACLKOFF                 = ADI_DEV_AFE_ERROR_OFFSET +  4,    /*!< ACLK disabled from the clock gate.                                                 */
+    ADI_AFE_ERR_WRONG_ACLK_FREQUENCY    = ADI_DEV_AFE_ERROR_OFFSET +  5,    /*!< Programmed ACLK frequency is not the required 16MHz.                               */
+    ADI_AFE_ERR_SEQ                     = ADI_DEV_AFE_ERROR_OFFSET +  6,    /*!< Sequencer error.                                                                   */
+    ADI_AFE_ERR_CMD_FIFO_UDF            = ADI_DEV_AFE_ERROR_OFFSET +  7,    /*!< Command FIFO underflow error.                                                      */
+    ADI_AFE_ERR_CMD_FIFO_OVF            = ADI_DEV_AFE_ERROR_OFFSET +  8,    /*!< Command FIFO overflow error.                                                       */
+    ADI_AFE_ERR_DATA_FIFO_UDF           = ADI_DEV_AFE_ERROR_OFFSET +  9,    /*!< Data FIFO underflow error.                                                         */
+    ADI_AFE_ERR_DATA_FIFO_OVF           = ADI_DEV_AFE_ERROR_OFFSET + 10,    /*!< Data FIFO overflow error.                                                          */
+    ADI_AFE_ERR_DMA                     = ADI_DEV_AFE_ERROR_OFFSET + 11,    /*!<                                                                                    */
+    ADI_AFE_ERR_CRC                     = ADI_DEV_AFE_ERROR_OFFSET + 12,    /*!<                                                                                    */
+    ADI_AFE_ERR_CALLBACK_OVERWRITE      = ADI_DEV_AFE_ERROR_OFFSET + 13,    /*!< Attempt to overwrite existing callback.                                            */
+    ADI_AFE_ERR_SEQ_ALREADY_INITIALIZED = ADI_DEV_AFE_ERROR_OFFSET + 14,    /*!<                                                                                    */
+    ADI_AFE_ERR_SEQ_NOT_DISABLED        = ADI_DEV_AFE_ERROR_OFFSET + 15,    /*!<                                                                                    */
+    ADI_AFE_ERR_SEQ_CHECK               = ADI_DEV_AFE_ERROR_OFFSET + 16,    /*!<                                                                                    */
+    ADI_AFE_ERR_SEMAPHORE_FAILED        = ADI_DEV_AFE_ERROR_OFFSET + 17,    /*!<                                                                                    */
+    ADI_AFE_ERR_PARAM_OUT_OF_RANGE      = ADI_DEV_AFE_ERROR_OFFSET + 18,    /*!<                                                                                    */
+    ADI_AFE_ERR_RX_DMA_SIZE_TOO_BIG     = ADI_DEV_AFE_ERROR_OFFSET + 19,    /*!<                                                                                    */
+    ADI_AFE_ERR_SEQ_ABORT_REQUEST       = ADI_DEV_AFE_ERROR_OFFSET + 20,    /*!<                                                                                    */
+    ADI_AFE_ERR_FCW_OUT_OF_RANGE        = ADI_DEV_AFE_ERROR_OFFSET + 21,    /*!< Waveform generator sinusoid frequency must be 80Hz - 80kHz                         */
     ADI_AFE_ERR_INVALID_IRQ             = ADI_DEV_AFE_ERROR_OFFSET + 22,    /*!< IRQ is not a valid member of the ADI_AFE_INT_GROUP_TYPE enum                       */
     ADI_AFE_ERR_INVALID_WG_MODE         = ADI_DEV_AFE_ERROR_OFFSET + 23,    /*!< Wavegen mode is not a valid member of the ADI_AFE_WAVEGEN_TYPE enum                */
     ADI_AFE_ERR_INVALID_DATA_FIFO_SRC   = ADI_DEV_AFE_ERROR_OFFSET + 24,    /*!< Data FIFO source is not a valid member of the ADI_AFE_DATA_FIFO_SOURCE_TYPE enum   */
@@ -249,7 +249,7 @@ extern ADI_AFE_RESULT_TYPE      adi_AFE_ClearInterruptSource            (ADI_AFE
 extern ADI_AFE_RESULT_TYPE      adi_AFE_EnableInterruptSource           (ADI_AFE_DEV_HANDLE const       hDevice, 
                                                                          ADI_AFE_INT_GROUP_TYPE         group, 
                                                                          uint32_t                       mask,
-                                                                         bool_t bFlag);
+                                                                         bool_t                         bFlag);
 extern ADI_AFE_RESULT_TYPE      adi_AFE_InvalidHandle                   (ADI_AFE_DEV_HANDLE const       hDevice);
 extern ADI_AFE_RESULT_TYPE      adi_AFE_HandleNotInitialized            (ADI_AFE_DEV_HANDLE const       hDevice);
 extern ADI_AFE_RESULT_TYPE      adi_AFE_SetRcal                         (ADI_AFE_DEV_HANDLE const       hDevice, 
@@ -287,16 +287,16 @@ extern ADI_AFE_RESULT_TYPE      adi_AFE_SetRunSequenceBlockingMode      (ADI_AFE
                                                                          const bool_t                   bFlag);
 extern ADI_AFE_RESULT_TYPE      adi_AFE_GetRunSequenceBlockingMode      (ADI_AFE_DEV_HANDLE const       hDevice,
                                                                          bool_t *const                  pbFlag);
-extern ADI_AFE_RESULT_TYPE      adi_AFE_SeqInit                 (ADI_AFE_DEV_HANDLE const hDevice,
+extern ADI_AFE_RESULT_TYPE      adi_AFE_SeqInit                         (ADI_AFE_DEV_HANDLE const       hDevice,
                                                                          const uint32_t *const          txBuffer,
                                                                          uint16_t *const                rxBuffer,
                                                                          uint32_t                       size);
-extern ADI_AFE_RESULT_TYPE      adi_AFE_SeqStart                (ADI_AFE_DEV_HANDLE const hDevice);
-extern ADI_AFE_RESULT_TYPE      adi_AFE_SeqStop                 (ADI_AFE_DEV_HANDLE const hDevice);
-extern ADI_AFE_RESULT_TYPE      adi_AFE_SeqAbort                (ADI_AFE_DEV_HANDLE const hDevice);
-extern ADI_AFE_RESULT_TYPE      adi_AFE_SeqCheck                (ADI_AFE_DEV_HANDLE const hDevice,
+extern ADI_AFE_RESULT_TYPE      adi_AFE_SeqStart                        (ADI_AFE_DEV_HANDLE const       hDevice);
+extern ADI_AFE_RESULT_TYPE      adi_AFE_SeqStop                         (ADI_AFE_DEV_HANDLE const       hDevice);
+extern ADI_AFE_RESULT_TYPE      adi_AFE_SeqAbort                        (ADI_AFE_DEV_HANDLE const       hDevice);
+extern ADI_AFE_RESULT_TYPE      adi_AFE_SeqCheck                        (ADI_AFE_DEV_HANDLE const       hDevice,
                                                                          const uint32_t *const          txBuffer);
-extern ADI_AFE_RESULT_TYPE      adi_AFE_RunSequence             (ADI_AFE_DEV_HANDLE const hDevice,
+extern ADI_AFE_RESULT_TYPE      adi_AFE_RunSequence                     (ADI_AFE_DEV_HANDLE const       hDevice,
                                                                          const uint32_t *const          txBuffer,
                                                                          uint16_t *const                rxBuffer,
                                                                          uint32_t                       size);

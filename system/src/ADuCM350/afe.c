@@ -19,14 +19,14 @@ static ADI_DMA_TRANSFER_TYPE             gDmaDescriptorForAFERx;
 /* AFE Device instance data structure */
 typedef struct ADI_AFE_DEV_DATA_TYPE {
     /* Device attributes */
-    bool_t                              bInitialized;               /*!< API initialized flag                               */
-    bool_t                               bUseRxDma;         /*!< DMA mode flag              */
+    bool_t                              bInitialized;               /*!< API initialized flag                                */
+    bool_t                              bUseRxDma;                  /*!< DMA mode flag                                       */
 
     /* Sequencer */
-    volatile ADI_AFE_SEQ_STATE_TYPE     seqState;                   /*!< Sequencer state                                    */
-    volatile ADI_AFE_RESULT_TYPE        seqError;                   /*!< Sequencer error                                    */
-    volatile bool_t                     bCmdFifoReady;              /*!< Command FIFO is ready for sequencer start flag.    */
-    volatile bool_t                     bSeqFinished;               /*!< Sequencer execution finished flag.                 */
+    volatile ADI_AFE_SEQ_STATE_TYPE     seqState;                   /*!< Sequencer state                                     */
+    volatile ADI_AFE_RESULT_TYPE        seqError;                   /*!< Sequencer error                                     */
+    volatile bool_t                     bCmdFifoReady;              /*!< Command FIFO is ready for sequencer start flag.     */
+    volatile bool_t                     bSeqFinished;               /*!< Sequencer execution finished flag.                  */
     bool_t                              bSoftwareCRC;               /*!< Flag to indicate the use of dynamic CRC calculation */
     bool_t                              bRunSequenceBlockingMode;   /*!< Flag to set adi_AFE_RunSequence blocking mode       */
 
@@ -222,9 +222,9 @@ ADI_AFE_RESULT_TYPE adi_AFE_SetDataFifoSource(ADI_AFE_DEV_HANDLE const hDevice, 
 
         /* change in a tmp variable and write entire new value all at once */
         tmp = hDevice->pAFE->AFE_FIFO_CFG;
-        tmp &= ~BITM_AFE_AFE_FIFO_CFG_DATA_FIFO_SOURCE_SEL; /* make a hole */
+        tmp &= ~BITM_AFE_AFE_FIFO_CFG_DATA_FIFO_SOURCE_SEL;         /* make a hole */
         tmp |= sel << BITP_AFE_AFE_FIFO_CFG_DATA_FIFO_SOURCE_SEL;   /* fill it */
-        hDevice->pAFE->AFE_FIFO_CFG = tmp;                  /* write it */
+        hDevice->pAFE->AFE_FIFO_CFG = tmp;                          /* write it */
 
     ADI_EXIT_CRITICAL_REGION();
 
@@ -281,9 +281,9 @@ ADI_AFE_RESULT_TYPE adi_AFE_SetWavegenType(ADI_AFE_DEV_HANDLE const hDevice, ADI
 
         /* change in a tmp variable and write entire new value all at once */
         tmp = hDevice->pAFE->AFE_WG_CFG;
-        tmp &= ~BITM_AFE_AFE_WG_CFG_TYPE_SEL;   /* make a hole */
+        tmp &= ~BITM_AFE_AFE_WG_CFG_TYPE_SEL;       /* make a hole */
         tmp |= sel << BITP_AFE_AFE_WG_CFG_TYPE_SEL; /* fill it */
-        hDevice->pAFE->AFE_WG_CFG = tmp;        /* write it */
+        hDevice->pAFE->AFE_WG_CFG = tmp;            /* write it */
 
     ADI_EXIT_CRITICAL_REGION();
 
@@ -385,13 +385,13 @@ ADI_AFE_RESULT_TYPE adi_AFE_WriteCalibrationRegister(ADI_AFE_DEV_HANDLE const hD
 
     ADI_ENTER_CRITICAL_REGION();
 
-    /* Unlock calibration registers */
-    hDevice->pAFE->AFE_CAL_DATA_LOCK = CALDATA_UNLOCK;
-    /* Write the register */
-    *((uint32_t *)Reg) = Val;
+        /* Unlock calibration registers */
+        hDevice->pAFE->AFE_CAL_DATA_LOCK = CALDATA_UNLOCK;
+        /* Write the register */
+        *((uint32_t *)Reg) = Val;
 
-    /* Lock calibration registers */
-    hDevice->pAFE->AFE_CAL_DATA_LOCK = 0x00000000;
+        /* Lock calibration registers */
+        hDevice->pAFE->AFE_CAL_DATA_LOCK = 0x00000000;
 
     ADI_EXIT_CRITICAL_REGION();
 
@@ -438,8 +438,8 @@ ADI_AFE_RESULT_TYPE adi_AFE_ReadCalibrationRegister(ADI_AFE_DEV_HANDLE const hDe
 
     ADI_ENTER_CRITICAL_REGION();
 
-    /* Read the register */
-    *pVal = *((volatile uint32_t *)Reg);
+        /* Read the register */
+        *pVal = *((volatile uint32_t *)Reg);
 
     ADI_EXIT_CRITICAL_REGION();
 
@@ -536,13 +536,13 @@ static __INLINE ADI_AFE_RESULT_TYPE dmaEnable(ADI_AFE_DEV_HANDLE const hDevice) 
 
     ADI_ENTER_CRITICAL_REGION();
 
-    /* Enable Rx DMA only if using it */
-    mask = (hDevice->bUseRxDma)
-      ? BITM_AFE_AFE_FIFO_CFG_DATA_FIFO_DMA_REQ_EN
-      : 0x00000000;
-    /* Enable Tx DMA */
-    mask |= BITM_AFE_AFE_FIFO_CFG_CMD_FIFO_DMA_REQ_EN;
-    hDevice->pAFE->AFE_FIFO_CFG |= mask;
+        /* Enable Rx DMA only if using it */
+        mask = (hDevice->bUseRxDma)
+          ? BITM_AFE_AFE_FIFO_CFG_DATA_FIFO_DMA_REQ_EN
+          : 0x00000000;
+        /* Enable Tx DMA */
+        mask |= BITM_AFE_AFE_FIFO_CFG_CMD_FIFO_DMA_REQ_EN;
+        hDevice->pAFE->AFE_FIFO_CFG |= mask;
 
     ADI_EXIT_CRITICAL_REGION();
 
@@ -577,8 +577,8 @@ static __INLINE ADI_AFE_RESULT_TYPE dmaDisable(ADI_AFE_DEV_HANDLE const hDevice)
 
     ADI_ENTER_CRITICAL_REGION();
 
-    /* Disable both DMA channels */
-    hDevice->pAFE->AFE_FIFO_CFG &= (~BITM_AFE_AFE_FIFO_CFG_DATA_FIFO_DMA_REQ_EN & ~BITM_AFE_AFE_FIFO_CFG_CMD_FIFO_DMA_REQ_EN);
+        /* Disable both DMA channels */
+        hDevice->pAFE->AFE_FIFO_CFG &= (~BITM_AFE_AFE_FIFO_CFG_DATA_FIFO_DMA_REQ_EN & ~BITM_AFE_AFE_FIFO_CFG_CMD_FIFO_DMA_REQ_EN);
 
     ADI_EXIT_CRITICAL_REGION();
 
@@ -659,11 +659,11 @@ ADI_AFE_RESULT_TYPE adi_AFE_ProgramTxDMA(ADI_AFE_DEV_HANDLE const hDevice, const
 #endif
 
     if (buffer) {
-    pTxD->pSrcData  = (void *)buffer;
-    pTxD->DataLength  = length;
-    if (ADI_DMA_SUCCESS != adi_DMA_SubmitTransfer(pTxD)) {
-        result = ADI_AFE_ERR_DMA;
-    }
+        pTxD->pSrcData  = (void *)buffer;
+        pTxD->DataLength  = length;
+        if (ADI_DMA_SUCCESS != adi_DMA_SubmitTransfer(pTxD)) {
+            result = ADI_AFE_ERR_DMA;
+        }
     }
     else {
         if (ADI_DMA_SUCCESS != adi_DMA_ReSubmit(pTxD)) {
@@ -720,11 +720,11 @@ ADI_AFE_RESULT_TYPE adi_AFE_ProgramRxDMA(ADI_AFE_DEV_HANDLE const hDevice, uint1
 #endif
 
     if (buffer) {
-    pRxD->pDstData  = buffer;
-    pRxD->DataLength  = length;
-    if (ADI_DMA_SUCCESS != adi_DMA_SubmitTransfer(pRxD)) {
-        result = ADI_AFE_ERR_DMA;
-    }
+        pRxD->pDstData  = buffer;
+        pRxD->DataLength  = length;
+        if (ADI_DMA_SUCCESS != adi_DMA_SubmitTransfer(pRxD)) {
+            result = ADI_AFE_ERR_DMA;
+        }
         hDevice->dmaRxTransferCount = length;
     }
     else {
@@ -1238,7 +1238,7 @@ ADI_AFE_RESULT_TYPE adi_AFE_SeqInit(ADI_AFE_DEV_HANDLE const hDevice, const uint
         adi_AFE_ClearInterruptSource(hDevice, 
                                      ADI_AFE_INT_GROUP_CMD_FIFO, 
                                      (BITM_AFE_AFE_CMD_FIFO_IEN_CMD_FIFO_FULL_IEN |
-                                   BITM_AFE_AFE_CMD_FIFO_IEN_CMD_FIFO_UDF_IEN |
+                                      BITM_AFE_AFE_CMD_FIFO_IEN_CMD_FIFO_UDF_IEN |
                                       BITM_AFE_AFE_CMD_FIFO_IEN_END_OF_SEQ_IEN));
         
         /* Enable CMD_FIFO interrupts */
@@ -1293,8 +1293,8 @@ ADI_AFE_RESULT_TYPE adi_AFE_SeqStart(ADI_AFE_DEV_HANDLE const hDevice) {
 
     ADI_ENTER_CRITICAL_REGION();
 
-    /* Start sequencer */
-    hDevice->pAFE->AFE_SEQ_CFG |= BITM_AFE_AFE_SEQ_CFG_SEQ_EN;
+        /* Start sequencer */
+        hDevice->pAFE->AFE_SEQ_CFG |= BITM_AFE_AFE_SEQ_CFG_SEQ_EN;
 
     ADI_EXIT_CRITICAL_REGION();
 
@@ -1408,10 +1408,10 @@ ADI_AFE_RESULT_TYPE adi_AFE_SeqAbort(ADI_AFE_DEV_HANDLE const hDevice) {
 
     /* Disable hardware accelerators */
     hDevice->pAFE->AFE_CFG &= ~(BITM_AFE_AFE_CFG_SUPPLY_LPF_EN |
-                           BITM_AFE_AFE_CFG_DFT_EN |
-                           BITM_AFE_AFE_CFG_WAVEGEN_EN |
-                           BITM_AFE_AFE_CFG_TEMP_CONV_EN |
-                           BITM_AFE_AFE_CFG_ADC_CONV_EN);
+                                BITM_AFE_AFE_CFG_DFT_EN |
+                                BITM_AFE_AFE_CFG_WAVEGEN_EN |
+                                BITM_AFE_AFE_CFG_TEMP_CONV_EN |
+                                BITM_AFE_AFE_CFG_ADC_CONV_EN);
 
     return result;
 }
@@ -1478,13 +1478,13 @@ ADI_AFE_RESULT_TYPE adi_AFE_SeqCheck(ADI_AFE_DEV_HANDLE const hDevice, const uin
 /*!
  * @brief       Run a sequence
  *
- * @param[in]   hDevice     Device handle obtained from adi_AFE_Init().
+ * @param[in]   hDevice                                 Device handle obtained from adi_AFE_Init().
  * @param[in]   txBuffer                                Array of sequencer commands to be sent through the Tx DMA channel
  * @param[in]   rxBuffer                                Destination array for the data, to be written through the Rx DMA channel
  * @param[in]   size                                    Size of the expected data, expressed as number of halfwords
  *
  * @return      Status
- *              - #ADI_AFE_SUCCESS                        Call completed successfully.
+ *              - #ADI_AFE_SUCCESS                      Call completed successfully.
  *              - #ADI_AFE_ERR_BAD_DEV_HANDLE           Invalid device handle.
  *              - #ADI_AFE_ERR_NOT_INITIALIZED          Device not initialized.
  *              - #ADI_AFE_ERR_ACLKOFF                  ACLK disabled from the clock gate.
@@ -1579,76 +1579,76 @@ ADI_AFE_RESULT_TYPE adi_AFE_RunSequence(ADI_AFE_DEV_HANDLE const hDevice, const 
     if (hDevice->bRunSequenceBlockingMode)
     {
 
-    /* Progress to next step if sequencer is finished and Rx DMA transfer completed (if Rx DMA is used),    */
-    /* or we have an error event                                                                            */
+        /* Progress to next step if sequencer is finished and Rx DMA transfer completed (if Rx DMA is used),    */
+        /* or we have an error event                                                                            */
 
-    do {
+        do {
 #if (ADI_CFG_ENABLE_RTOS_SUPPORT == 1)
 
-    if (adi_osal_SemPend(hDevice->hSeqSem, ADI_OSAL_TIMEOUT_FOREVER) != ADI_OSAL_SUCCESS) {
-        adi_AFE_SeqAbort(hDevice);
+        if (adi_osal_SemPend(hDevice->hSeqSem, ADI_OSAL_TIMEOUT_FOREVER) != ADI_OSAL_SUCCESS) {
+            adi_AFE_SeqAbort(hDevice);
 
-        return ADI_AFE_ERR_SEMAPHORE_FAILED;
-    }
+            return ADI_AFE_ERR_SEMAPHORE_FAILED;
+        }
 
 #else
-        SystemEnterLowPowerMode(ADI_SYS_MODE_CORE_SLEEP, &hDevice->bInterruptFlag, 0);
+            SystemEnterLowPowerMode(ADI_SYS_MODE_CORE_SLEEP, &hDevice->bInterruptFlag, 0);
 
 #endif /* ADI_CFG_ENABLE_RTOS_SUPPORT */
 
-        /* Check that both data FIFO DMA and the sequence execution are complete.   */
-        /* If either has not finished, then go back to pending/low power mode.      */
-        /* As we're dealing with variables modified within interrupt handlers,      */
-        /* we need critical region macros.                                          */
+            /* Check that both data FIFO DMA and the sequence execution are complete.   */
+            /* If either has not finished, then go back to pending/low power mode.      */
+            /* As we're dealing with variables modified within interrupt handlers,      */
+            /* we need critical region macros.                                          */
 
-        ADI_ENTER_CRITICAL_REGION();
-       
-        bFlag = false;
+            ADI_ENTER_CRITICAL_REGION();
+           
+            bFlag = false;
 
-        result = adi_AFE_GetRxDmaComplete(hDevice, &bFlag);
-        if ((ADI_AFE_SUCCESS == result) && bFlag) {
-            result = adi_AFE_GetSeqFinished(hDevice, &bFlag);
-    	}
+            result = adi_AFE_GetRxDmaComplete(hDevice, &bFlag);
+            if ((ADI_AFE_SUCCESS == result) && bFlag) {
+                result = adi_AFE_GetSeqFinished(hDevice, &bFlag);
+            }
 
 #if (ADI_CFG_ENABLE_RTOS_SUPPORT != 1)
 
-        if ((ADI_AFE_SUCCESS == result) && (!bFlag)) {
-            /* Either Rx DMA is not complete, or Rx DMA is complete, but sequencer  */
-            /* is not finished, need to go back to pending/low power mode.          */
-            hDevice->bInterruptFlag = false;
-    }
+            if ((ADI_AFE_SUCCESS == result) && (!bFlag)) {
+                /* Either Rx DMA is not complete, or Rx DMA is complete, but sequencer  */
+                /* is not finished, need to go back to pending/low power mode.          */
+                hDevice->bInterruptFlag = false;
+        }
 
 #endif /* ADI_CFG_ENABLE_RTOS_SUPPORT */
 
-       ADI_EXIT_CRITICAL_REGION();   
+            ADI_EXIT_CRITICAL_REGION();   
 
-    } while ((ADI_AFE_SUCCESS == result) && (!bFlag) && (!hDevice->seqError));
+        } while ((ADI_AFE_SUCCESS == result) && (!bFlag) && (!hDevice->seqError));
 
-    /* Update state */
-    hDevice->seqState = ADI_AFE_SEQ_STATE_FINISHED;
+        /* Update state */
+        hDevice->seqState = ADI_AFE_SEQ_STATE_FINISHED;
 
-    /* Check for error event in interrupt handler */
-    if (hDevice->seqError) {
-        adi_AFE_SeqAbort(hDevice);
+        /* Check for error event in interrupt handler */
+        if (hDevice->seqError) {
+            adi_AFE_SeqAbort(hDevice);
 
-        return hDevice->seqError;
-     }
+            return hDevice->seqError;
+         }
 
-    /* Stop the sequencer */
-    if (ADI_AFE_SUCCESS != (result = adi_AFE_SeqStop(hDevice))) {
-        adi_AFE_SeqAbort(hDevice);
+        /* Stop the sequencer */
+        if (ADI_AFE_SUCCESS != (result = adi_AFE_SeqStop(hDevice))) {
+            adi_AFE_SeqAbort(hDevice);
 
-        return result;
-    }
+            return result;
+        }
 
-    /* Update state */
-    hDevice->seqState = ADI_AFE_SEQ_STATE_IDLE;
+        /* Update state */
+        hDevice->seqState = ADI_AFE_SEQ_STATE_IDLE;
 
-    /* Check that the CRC returned by the sequencer matches that in [7:0] of    */
-    /* the safety word (txBuffer[0]).                                           */
-    if (ADI_AFE_SUCCESS != (result = adi_AFE_SeqCheck(hDevice, txBuffer))) {
-        return result;
-    }
+        /* Check that the CRC returned by the sequencer matches that in [7:0] of    */
+        /* the safety word (txBuffer[0]).                                           */
+        if (ADI_AFE_SUCCESS != (result = adi_AFE_SeqCheck(hDevice, txBuffer))) {
+            return result;
+        }
     }
 
     return result;
@@ -1945,7 +1945,7 @@ ADI_AFE_RESULT_TYPE adi_AFE_GetRtia(ADI_AFE_DEV_HANDLE const hDevice, uint32_t* 
  * @param[in]   cbWatch                                 \b Ignored.
  *
  * @return      Status
- *              - #ADI_AFE_SUCCESS                        Call completed successfully.
+ *              - #ADI_AFE_SUCCESS                      Call completed successfully.
  *              - #ADI_AFE_ERR_BAD_DEV_HANDLE           Invalid device handle.
  *              - #ADI_AFE_ERR_NOT_INITIALIZED          Device not initialized.
  *              - #ADI_AFE_ERR_ACLKOFF                  ACLK disabled from the clock gate.
@@ -2196,7 +2196,7 @@ ADI_AFE_RESULT_TYPE adi_AFE_RegisterAfeCallback(ADI_AFE_DEV_HANDLE hDevice, ADI_
  *              ADI_ENTER_CRITICAL_REGION()/ADI_EXIT_CRITICAL_REGION() pair to prevent higher-priority interrupts from modifying
  *              said register during the read-modify-write operation.
  *
- *   @note      CALLBACKS: AFE interrupt callbacks are \a disabled by default during the API initialization (#adi_AFE_Init()).
+ * @note        CALLBACKS: AFE interrupt callbacks are \a disabled by default during the API initialization (#adi_AFE_Init()).
  *              The application may use the #adi_AFE_RegisterCallbackOnCommandFIFO() API to register an application-defined
  *              callback function with the interrupt handler that will be called in response to selected command FIFO interrupts.
  *              The callback registration API takes an interrupt mask (of type uint32_t) that designates the set of interrupts
@@ -2420,7 +2420,7 @@ ADI_AFE_RESULT_TYPE adi_AFE_GetDmaRxBufferMaxSize(ADI_AFE_DEV_HANDLE const hDevi
 
 ADI_AFE_RESULT_TYPE adi_AFE_Init(ADI_AFE_DEV_HANDLE* const phDevice) {
     ADI_AFE_RESULT_TYPE     result = ADI_AFE_SUCCESS;
-    ADI_AFE_DEV_HANDLE hDevice;
+    ADI_AFE_DEV_HANDLE      hDevice;
 
     /* Store a bad handle in case of failure */
     *phDevice = (ADI_AFE_DEV_HANDLE) NULL;
@@ -2453,7 +2453,6 @@ ADI_AFE_RESULT_TYPE adi_AFE_Init(ADI_AFE_DEV_HANDLE* const phDevice) {
 
     /* Enable all AFE interrupts from NVIC */
     /* They are all still masked locally   */
-
     ADI_ENABLE_INT(AFE_CAPTURE_IRQn);
     ADI_ENABLE_INT(AFE_GENERATE_IRQn);
     ADI_ENABLE_INT(AFE_CMD_FIFO_IRQn);
@@ -2482,12 +2481,12 @@ ADI_AFE_RESULT_TYPE adi_AFE_Init(ADI_AFE_DEV_HANDLE* const phDevice) {
     hDevice->bRunSequenceBlockingMode = true;
 
     /* Initialize callbacks */
-    hDevice->cbTxDmaFcn = NULL;
-    hDevice->cbRxDmaFcn = NULL;
+    hDevice->cbTxDmaFcn     = NULL;
+    hDevice->cbRxDmaFcn     = NULL;
     hDevice->cbCaptureFcn   = NULL;
     hDevice->cbGenerateFcn  = NULL;
-    hDevice->cbCmdFifoFcn = NULL;
-    hDevice->cbDataFifoFcn = NULL;
+    hDevice->cbCmdFifoFcn   = NULL;
+    hDevice->cbDataFifoFcn  = NULL;
 
 #if (ADI_CFG_ENABLE_RTOS_SUPPORT == 1)
     /* Create the semaphores for blocking mode support. */
@@ -2570,12 +2569,12 @@ ADI_AFE_RESULT_TYPE adi_AFE_UnInit(ADI_AFE_DEV_HANDLE const hDevice) {
     hDevice->seqState = ADI_AFE_SEQ_STATE_IDLE;
 
     /* Reset callbacks */
-    hDevice->cbTxDmaFcn = NULL;
-    hDevice->cbRxDmaFcn = NULL;
+    hDevice->cbTxDmaFcn     = NULL;
+    hDevice->cbRxDmaFcn     = NULL;
     hDevice->cbCaptureFcn   = NULL;
     hDevice->cbGenerateFcn  = NULL;
-    hDevice->cbCmdFifoFcn = NULL;
-    hDevice->cbDataFifoFcn = NULL;
+    hDevice->cbCmdFifoFcn   = NULL;
+    hDevice->cbDataFifoFcn  = NULL;
 
 #if (ADI_CFG_ENABLE_RTOS_SUPPORT == 1)
     /* Destroy the semaphore. */
@@ -2813,7 +2812,9 @@ ADI_INT_HANDLER(AFE_Capture_Int_Handler) {
         /* what interrupt caused this ISR to be entered          */
         if ((clear | disable) & hDevice->cbCaptureWatch) {
             /* Passing to the callback the bits scheduled for clear or disable */
-            hDevice->cbCaptureFcn(hDevice, (clear | disable), NULL);
+            //hDevice->cbCaptureFcn(hDevice, (clear | disable), NULL);
+            //AG
+            hDevice->cbCaptureFcn(hDevice, 0, NULL);
         }
     }
 
@@ -2868,8 +2869,10 @@ ADI_INT_HANDLER(AFE_Generate_Int_Handler) {
         /* and interrupts scheduled to be disabled to find out   */
         /* what interrupt caused this ISR to be entered          */
         if (clear & hDevice->cbGenerateWatch) {
-            /* Passing to the callback the bits scheduled for clear */
-            hDevice->cbGenerateFcn(hDevice, clear, NULL);
+            /* Passing to the callback the bits scheduled for clear or disable */
+            //hDevice->cbGenerateFcn(hDevice, clear, NULL);
+            //AG
+            hDevice->cbGenerateFcn(hDevice, 0, NULL);
         }
     }
 
@@ -2972,7 +2975,9 @@ ADI_INT_HANDLER(AFE_CmdFIFO_Int_Handler) {
         /* what interrupt caused this ISR to be entered          */
         if ((clear | disable) & hDevice->cbCmdFifoWatch) {
             /* Passing to the callback the bits scheduled for clear or disable */
-            hDevice->cbCmdFifoFcn(hDevice, (clear | disable), NULL);
+            //hDevice->cbCmdFifoFcn(hDevice, (clear | disable), NULL);
+            //AG
+            //hDevice->cbCmdFifoFcn(hDevice, clear | disable, NULL);
         }
     }
 
@@ -3040,7 +3045,9 @@ ADI_INT_HANDLER(AFE_DataFIFO_Int_Handler) {
         /* what interrupt caused this ISR to be entered          */
         if ((clear | disable) & hDevice->cbDataFifoWatch) {
             /* Passing to the callback the bits scheduled for clear or disable */
-            hDevice->cbDataFifoFcn(hDevice, (clear | disable), NULL);
+            //hDevice->cbDataFifoFcn(hDevice, (clear | disable), NULL);
+            //AG
+            hDevice->cbDataFifoFcn(hDevice, 0, NULL);
         }
     }
 

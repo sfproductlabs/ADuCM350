@@ -1204,7 +1204,7 @@ ADI_I2C_RESULT_TYPE adi_I2C_MasterReceive(ADI_I2C_DEV_HANDLE const hDevice,
     hDevice->TxRemaining      = 0;
     hDevice->pRxBuffer        = NULL;
     hDevice->RxRemaining      = 0;
-    hDevice->dataAddress      = 0;
+    hDevice->dataAddress      = NULL;
     hDevice->dataAddressWidth = ADI_I2C_NO_DATA_ADDRESSING_PHASE;
 
 #if (ADI_I2C_CFG_ENABLE_DMA_SUPPORT == 1)

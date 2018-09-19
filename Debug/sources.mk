@@ -29,6 +29,8 @@ CPP_DEPS :=
 SUBDIRS := \
 src \
 system/src/ADuCM350 \
+system/src/ADuCM350/lcd \
+system/src/ADuCM350/mipi \
 system/src/cmsis \
 system/src/cortexm \
 system/src/diag \

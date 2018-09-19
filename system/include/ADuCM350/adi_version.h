@@ -12,8 +12,8 @@ License Agreement.
  *****************************************************************************
  * @file:    adi_version.h
  * @brief:   Version macros for ADI ADuCMxxx Device Series
- * @version: $Revision: 33021 $
- * @date:    $Date: 2015-12-15 12:12:46 -0500 (Tue, 15 Dec 2015) $
+ * @version: $Revision: 28525 $
+ * @date:    $Date: 2014-11-12 14:51:26 -0500 (Wed, 12 Nov 2014) $
  *****************************************************************************/
 
 #ifndef __ADI_VERSION_H__
@@ -21,7 +21,7 @@ License Agreement.
 
 /* use a 32-bit versioning scheme that supports numerical compares */
 #define ADI_VERSION_MAJOR     2     // must be <= 255
-#define ADI_VERSION_MINOR     4     // must be <= 255
+#define ADI_VERSION_MINOR     2     // must be <= 255
 #define ADI_VERSION_BUILD     0     // must be <= 255
 #define ADI_VERSION_PATCH     0     // must be <= 255
 

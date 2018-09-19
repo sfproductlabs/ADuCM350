@@ -18,6 +18,8 @@ License Agreement.
 #include "newlib/sys/reent.h"
 #include "startup.h"
 
+//#include "cortexm/ExceptionHandlers.h"
+
 //#ifdef _USING_UCOS_II_
 //#include <os_cpu.h>
 //#endif
@@ -85,7 +87,8 @@ extern unsigned int _estack;
 
 typedef void (* const pHandler)(void);
 
-//
+void __attribute__ ((weak, alias ("Default_Handler")))
+DeviceInterrupt_Handler(void);
 
 typedef union { ADIIntFunc __fun; void * __ptr;  IntFunc __ifunc; } IntVector;
 
@@ -177,7 +180,17 @@ const IntVector __vector_table[] =
     {Random_Int_Handler       } ,  // 58
     {PDI_Int_Handler          } ,  // 59
     {Parity_Int_Handler       } ,  // 60
+	DeviceInterrupt_Handler,       // Device specific
 };
+
+
+void __attribute__ ((section(".after_vectors")))
+Default_Handler(void)
+{
+  while (1)
+    {
+    }
+}
 
 //*****************************************************************************
 //
@@ -235,7 +248,7 @@ WEAK_FUNC (void ResetISR (void)) {
 #endif
 
 #ifdef __GNUC__
-/*
+
     unsigned long *pulSrc, *pulDest;
 
     // Copy initialised data from flash into RAM
@@ -250,7 +263,7 @@ WEAK_FUNC (void ResetISR (void)) {
     {
         *pulDest++ = 0;
     }
-*/
+
     // Call application main directly.
     main();
 

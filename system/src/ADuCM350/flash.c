@@ -12,8 +12,8 @@ License Agreement.
 /*!
    @file:    flash.c
    @brief:   Flash device driver implementation for ADuCxxx
-   @version: $Revision: 30127 $
-   @date:    $Date: 2015-03-09 12:05:31 -0400 (Mon, 09 Mar 2015) $
+   @version: $Revision: 28737 $
+   @date:    $Date: 2014-11-20 16:13:22 -0500 (Thu, 20 Nov 2014) $
 */
 /*****************************************************************************/
 
@@ -461,16 +461,15 @@ ADI_INT_HANDLER(GPFlash_Int_Handler)
  *
  * @sa      waitForInterrupt()
  */
-
-// DI_INT_HANDLER(DMA_CRC_Int_Handler)
-// {
-// #if (ADI_CFG_ENABLE_RTOS_SUPPORT == 1)
-//    adi_osal_SemPost(FEE_DevData[ADI_FEE_DEVID_GP].hSem);
-//    FEE_DevData[ADI_FEE_DEVID_GP].interruptFlag = true;
-// #else
- //   SystemExitLowPowerMode(&FEE_DevData[ADI_FEE_DEVID_GP].interruptFlag);
-// #endif /* (ADI_CFG_ENABLE_RTOS_SUPPORT == 1) */
-// }
+ADI_INT_HANDLER(DMA_CRC_Int_Handler)
+{
+#if (ADI_CFG_ENABLE_RTOS_SUPPORT == 1)
+    adi_osal_SemPost(FEE_DevData[ADI_FEE_DEVID_GP].hSem);
+    FEE_DevData[ADI_FEE_DEVID_GP].interruptFlag = true;
+#else
+    SystemExitLowPowerMode(&FEE_DevData[ADI_FEE_DEVID_GP].interruptFlag);
+#endif /* (ADI_CFG_ENABLE_RTOS_SUPPORT == 1) */
+}
 
 #endif /* (1 == ADI_FEE_CFG_GPF_DMA_SUPPORT) */
 
@@ -541,7 +540,7 @@ ADI_FEE_RESULT_TYPE adi_FEE_Init(
         }
 #endif /* ADI_CFG_ENABLE_RTOS_SUPPORT */
     
-        hDevice->interruptFlag = false;
+    hDevice->interruptFlag = false;
 
     ADI_INSTALL_HANDLER(hDevice->InterruptID, hDevice->pfIntHandler);
     ADI_ENABLE_INT(hDevice->InterruptID); /* enable Flash controller interrupts */
