@@ -12,8 +12,8 @@ License Agreement.
  *****************************************************************************
  * @file:    crc.c
  * @brief:   CRC  Device Implementations for ADuCRFxxx
- * @version: $Revision: 32897 $
- * @date:    $Date: 2015-12-03 01:15:24 -0500 (Thu, 03 Dec 2015) $
+ * @version: $Revision: 28525 $
+ * @date:    $Date: 2014-11-12 14:51:26 -0500 (Wed, 12 Nov 2014) $
  *****************************************************************************/
 
 /*! \addtogroup CRC_Driver CRC Driver
@@ -705,10 +705,6 @@ ADI_CRC_RESULT_TYPE adi_CRC_BufferSubmit(ADI_CRC_DEV_HANDLE const hDevice,uint32
      }
      else
      {
-         /* As DMA for the complete buffer will be scheduled remaining elements
-            for next iteration will be 0 */
-         hDevice->unscheduledCnt = 0x0;
-         
 	 /* Only one iteration */
          hDevice->pBuffer = pBuff;
      }
@@ -924,42 +920,43 @@ ADI_CRC_RESULT_TYPE adi_CRC_RegisterCallback(ADI_CRC_DEV_HANDLE const hDevice, A
  *
  * Override of default (WEAK) CRC interrupt handler.
  */
-
-ADI_INT_HANDLER(DMA_CRC_Int_Handler)
-{
-    uint32_t  nSize;
-    /* Check for the remaining words */
-    if(pCrc_DevData->unscheduledCnt > 0)
-    {
-         /* Calculate the transfer size for next iteration  */
-          nSize =MIN(pCrc_DevData->unscheduledCnt, ADI_DMA_MAX_TRANSFER_SIZE);
-	  /* update the descriptor */
-          gDmaDescriptor.pSrcData    = pCrc_DevData->pBuffer;
-          gDmaDescriptor.DataLength  = nSize;
-          gDmaDescriptor.Mode    = ADI_DMA_MODE_BASIC;
-  	  /* Submit to DMA  manager*/
-          adi_DMA_SubmitTransfer(&gDmaDescriptor);
-  	  /* Update the pointer for next iteration.*/
-          pCrc_DevData->pBuffer += nSize;
-          pCrc_DevData->unscheduledCnt -=  nSize;
-    }
-    else /* No more iteration. Stop the DMA. Reset the pointers */
-    {
-        ADI_ENTER_CRITICAL_REGION();
-        gDmaDescriptor.pSrcData    = NULL;
-        gDmaDescriptor.DataLength  = 0;
-        pCrc_DevData->bCRCBusy           = false;
-        pCrc_DevData->pBuffer            = NULL;
-        ADI_EXIT_CRITICAL_REGION();
-#if (ADI_CFG_ENABLE_CALLBACK_SUPPORT == 1)
-	/* call the registered callback function */
-        if(pCrc_DevData->pfCallback != NULL)
-        {
-            pCrc_DevData->pfCallback(pCrc_DevData->pCBParam, (uint32_t) ADI_CRC_EVENT_RESULT_READY, (void *)pCrc_DevData->pCRC->CRC_RESULT);
-        }
-#endif
-    }
-}
+//AG 
+//duplicate here and flash.c
+// ADI_INT_HANDLER(DMA_CRC_Int_Handler)
+// {
+//     uint32_t  nSize;
+//     /* Check for the remaining words */
+//     if(pCrc_DevData->unscheduledCnt > 0)
+//     {
+//          /* Calculate the transfer size for next iteration  */
+//           nSize =MIN(pCrc_DevData->unscheduledCnt, ADI_DMA_MAX_TRANSFER_SIZE);
+// 	  /* update the descriptor */
+//           gDmaDescriptor.pSrcData    = pCrc_DevData->pBuffer;
+//           gDmaDescriptor.DataLength  = nSize;
+//           gDmaDescriptor.Mode    = ADI_DMA_MODE_BASIC;
+//   	  /* Submit to DMA  manager*/
+//           adi_DMA_SubmitTransfer(&gDmaDescriptor);
+//   	  /* Update the pointer for next iteration.*/
+//           pCrc_DevData->pBuffer += nSize;
+//           pCrc_DevData->unscheduledCnt -=  nSize;
+//     }
+//     else /* No more iteration. Stop the DMA. Reset the pointers */
+//     {
+//         ADI_ENTER_CRITICAL_REGION();
+//         gDmaDescriptor.pSrcData    = NULL;
+//         gDmaDescriptor.DataLength  = 0;
+//         pCrc_DevData->bCRCBusy           = false;
+//         pCrc_DevData->pBuffer            = NULL;
+//         ADI_EXIT_CRITICAL_REGION();
+// #if (ADI_CFG_ENABLE_CALLBACK_SUPPORT == 1)
+// 	/* call the registered callback function */
+//         if(pCrc_DevData->pfCallback != NULL)
+//         {
+//             pCrc_DevData->pfCallback(pCrc_DevData->pCBParam, (uint32_t) ADI_CRC_EVENT_RESULT_READY, (void *)pCrc_DevData->pCRC->CRC_RESULT);
+//         }
+// #endif
+//     }
+// }
 #else
 /*!
  * @brief  CRC computation by CORE.

@@ -70,7 +70,7 @@ void test_Pass()
 {
     char pass[] = "PASS!\n\r";
 
-  //  printf(pass);
+    printf(pass);
 
     /* Once the result is reported, do an abrupt termination */
     quit();
@@ -90,9 +90,9 @@ void test_Fail(char *FailureReason)
     char fail[] = "FAIL: ";
     char term[] = "\n\r";
 
-  //  printf(fail);
-  //  printf(FailureReason);
-  //  printf(term);
+    printf(fail);
+    printf(FailureReason);
+    printf(term);
 
     /* Once the result is reported, do an abrupt termination */
     quit();
@@ -112,9 +112,9 @@ void test_Perf(char *InfoString)
     char info[] = "PERF: ";
     char term[] = "\n\r";
 
-  //  printf(info);
-  //  printf(InfoString);
-  //  printf(term);
+    printf(info);
+    printf(InfoString);
+    printf(term);
 
     /* do not quit... */
 }

@@ -4,6 +4,7 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../src/FlashTest.c \
 ../src/PinMux.c \
 ../src/Timer.c \
 ../src/_write.c \
@@ -12,6 +13,7 @@ C_SRCS += \
 ../src/test_common.c 
 
 OBJS += \
+./src/FlashTest.o \
 ./src/PinMux.o \
 ./src/Timer.o \
 ./src/_write.o \
@@ -20,6 +22,7 @@ OBJS += \
 ./src/test_common.o 
 
 C_DEPS += \
+./src/FlashTest.d \
 ./src/PinMux.d \
 ./src/Timer.d \
 ./src/_write.d \
