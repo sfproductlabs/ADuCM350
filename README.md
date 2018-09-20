@@ -33,6 +33,7 @@ git add -A :/
 git commit -am "my branch is great"
 git push origin mybranch
 ```
+* Look for comments with AG or MVB for things that might be broken or missing. There was a duplicate interrupt in FLASH and CRC that was removed in CRC. Everything else should be working.
 
 ## Contributors
 
