@@ -21,12 +21,6 @@ Portions Copyright (c) 2018 Andrew Grosser, Moritz von Buttlar.
 #include "test_common.h"
 
 
-
-/* Macro to enable the returning of AFE data using the UART */
-/*      1 = return AFE data on UART                         */
-/*      0 = return AFE data on SW (Std Output)              */
-#define USE_UART_FOR_DATA           (1)
-
 /* Helper macro for printing strings to UART or Std. Output */
 #define PRINT(s)                    test_print(s)
 
@@ -67,12 +61,11 @@ int main(void) {
     SetSystemClockDivider(ADI_SYS_CLOCK_UART, 2);
 
     
-    //PRINT("BEGINNING TEST ....\n\n");
-    BlinkyTest();
+    PRINT("BEGINNING TEST ....\n\n");
+    //BlinkyTest();
     //FlashTest();
     //AfeTest();
-    //UartTest();
-
+    UartEcho();
     PASS();
 }
 
