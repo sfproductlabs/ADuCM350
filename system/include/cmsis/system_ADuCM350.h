@@ -46,7 +46,7 @@
 #endif
 
 // added: MVB
-#define ADI_SYSTEM_CLOCK_TRANSITION 0
+#define ADI_SYSTEM_CLOCK_TRANSITION 1
 // added: AG
 //#define ADI_DEBUG 1
 //#define OS_USE_SEMIHOSTING 1

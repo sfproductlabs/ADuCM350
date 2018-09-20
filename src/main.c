@@ -304,10 +304,21 @@ int main(void) {
     /* test system initialization */
     test_Init();
 
+
+    /* Change the system clock source to HFXTAL and change clock frequency to 16MHz     */
+    /* Requirement for AFE (ACLK)                                                       */
+
+    SystemTransitionClocks(ADI_SYS_CLOCK_TRIGGER_MEASUREMENT_ON);
+
+    /* SPLL with 32MHz used , need to divide by 2 */
+    SetSystemClockDivider(ADI_SYS_CLOCK_UART, 2);
+
+    PRINT("BEGINNING TEST ....\n\n");
+
     //BlinkyTest();
     //FlashTest();
-    AfeTest();
-
+    //AfeTest();
+    UartTest();
 
 
 }
@@ -530,58 +541,6 @@ void print_MagnitudePhase(char *text, fixed32_t magnitude, fixed32_t phase) {
     PRINT(msg);
 }
 
-/* Helper function for printing a string to UART or Std. Output */
-void test_print (char *pBuffer) {
-#if (1 == USE_UART_FOR_DATA)
-    int16_t size;
-    /* Print to UART */
-    size = strlen(pBuffer);
-    adi_UART_BufTx(hUartDevice, pBuffer, &size);
-
-#elif (0 == USE_UART_FOR_DATA)
-    /* Print  to console */
-    printf(pBuffer);
-
-#endif /* USE_UART_FOR_DATA */
-}
-
-/* Initialize the UART, set the baud rate and enable */
-ADI_UART_RESULT_TYPE uart_Init (void) {
-    ADI_UART_RESULT_TYPE    result = ADI_UART_SUCCESS;
-
-    /* Open UART in blocking, non-intrrpt mode by supplying no internal buffs */
-    if (ADI_UART_SUCCESS != (result = adi_UART_Init(ADI_UART_DEVID_0, &hUartDevice, NULL)))
-    {
-        return result;
-    }
-
-    /* Set UART baud rate to 115200 */
-    if (ADI_UART_SUCCESS != (result = adi_UART_SetBaudRate(hUartDevice, ADI_UART_BAUD_115200)))
-    {
-        return result;
-    }
-
-    /* Enable UART */
-    if (ADI_UART_SUCCESS != (result = adi_UART_Enable(hUartDevice,true)))
-    {
-        return result;
-    }
-
-    return result;
-}
-
-/* Uninitialize the UART */
-ADI_UART_RESULT_TYPE uart_UnInit (void) {
-    ADI_UART_RESULT_TYPE    result = ADI_UART_SUCCESS;
-
-    /* Uninitialize the UART API */
-    if (ADI_UART_SUCCESS != (result = adi_UART_UnInit(hUartDevice)))
-    {
-        return result;
-    }
-
-    return result;
-}
 
 void rtc_Init (void) {
 

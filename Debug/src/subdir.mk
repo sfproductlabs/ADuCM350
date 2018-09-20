@@ -9,6 +9,7 @@ C_SRCS += \
 ../src/FlashTest.c \
 ../src/PinMux.c \
 ../src/Timer.c \
+../src/UartTest.c \
 ../src/_write.c \
 ../src/crc32.c \
 ../src/main.c \
@@ -20,6 +21,7 @@ OBJS += \
 ./src/FlashTest.o \
 ./src/PinMux.o \
 ./src/Timer.o \
+./src/UartTest.o \
 ./src/_write.o \
 ./src/crc32.o \
 ./src/main.o \
@@ -31,6 +33,7 @@ C_DEPS += \
 ./src/FlashTest.d \
 ./src/PinMux.d \
 ./src/Timer.d \
+./src/UartTest.d \
 ./src/_write.d \
 ./src/crc32.d \
 ./src/main.d \
