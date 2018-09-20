@@ -4,7 +4,9 @@ Copyright (c) 2013-2014 Analog Devices, Inc. All Rights Reserved.
 
 This software is proprietary to Analog Devices, Inc. and its licensors.  By using 
 this software you agree to the terms of the associated Analog Devices Software 
-License Agreement.
+License Agreement (See /LICENSES/ADI.LABLAB.LICENSE). 
+
+Portions Copyright (c) 2018 Andrew Grosser, Moritz von Buttlar.
 
 *********************************************************************************/
 
@@ -920,6 +922,7 @@ ADI_CRC_RESULT_TYPE adi_CRC_RegisterCallback(ADI_CRC_DEV_HANDLE const hDevice, A
  *
  * Override of default (WEAK) CRC interrupt handler.
  */
+//TODO: UNCOMMENT THIS IF REQUIRED
 //AG 
 //duplicate here and flash.c
 // ADI_INT_HANDLER(DMA_CRC_Int_Handler)

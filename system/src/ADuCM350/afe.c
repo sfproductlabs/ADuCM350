@@ -2977,7 +2977,7 @@ ADI_INT_HANDLER(AFE_CmdFIFO_Int_Handler) {
             /* Passing to the callback the bits scheduled for clear or disable */
             //hDevice->cbCmdFifoFcn(hDevice, (clear | disable), NULL);
             //AG
-            //hDevice->cbCmdFifoFcn(hDevice, clear | disable, NULL);
+            hDevice->cbCmdFifoFcn(hDevice, clear | disable, NULL);
         }
     }
 

@@ -275,7 +275,7 @@ int UartTest(void)
         test_Fail("adi_UART_Init() failed");
     }
 
-    Settings.BaudRate = ADI_UART_BAUD_115200;
+    Settings.BaudRate = ADI_UART_BAUD_9600;
     Settings.bBlockingMode = true;
     Settings.bInterruptMode = true;
     Settings.Parity = ADI_UART_PARITY_NONE;
@@ -307,8 +307,8 @@ int UartTest(void)
         txSize = 1;
         // add something to DIVN; thereby increase the baudrate
         //hUartDevice->pUartRegs->COMFBR=hUartDevice->pUartRegs->COMFBR+10;
-        // currentCOMFBR=currentCOMFBR+10;
-        // pADI->COMFBR=currentCOMFBR;
+        //currentCOMFBR=currentCOMFBR+10;
+        //pADI->COMFBR=currentCOMFBR;
         /* Read a character */
 
         uartResult = adi_UART_BufRx(hUartDevice, RxBuffer, &rxSize);

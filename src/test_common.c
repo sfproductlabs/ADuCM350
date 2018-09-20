@@ -4,7 +4,9 @@ Copyright (c) 2011-2014 Analog Devices, Inc. All Rights Reserved.
 
 This software is proprietary to Analog Devices, Inc. and its licensors.  By using
 this software you agree to the terms of the associated Analog Devices Software
-License Agreement.
+License Agreement (See /LICENSES/ADI.LABLAB.LICENSE). 
+
+Portions Copyright (c) 2018 Andrew Grosser, Moritz von Buttlar.
 
 *********************************************************************************/
 
