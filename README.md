@@ -6,7 +6,7 @@ This software has been used and tested on:
 
 ## Instructions
 
-* Install Open MCU Eclipse
+* Install Eclipse
 ```
 Version: Oxygen.3a Release (4.7.3a)
 Build id: 20180405-1200
