@@ -48,3 +48,6 @@ I'd like to thank Analog Devices for their permission to use and redistribute th
 
 Other licenses have been used to develop and source this software. Please see /LICENSES for more information and find specific license information for files in some of the headers. 
 
+## Shameless Plug
+
+Come check out what we're doing with the ADuCM350 and open source biomedical imaging at https://github.com/openeit
