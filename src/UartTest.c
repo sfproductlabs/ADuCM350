@@ -299,6 +299,7 @@ int UartTest(void)
     // reduce baud rate to lower limit
     uint32_t currentCOMFBR;
 
+
     /* UART processing loop */
     while (bStopFlag == false)
     {
@@ -317,6 +318,11 @@ int UartTest(void)
             test_Fail("adi_UART_BufRx() failed");
         }
 
+        char pBuffer[2] = "HIHIHI";
+        int16_t size = 6;
+            /* Print to UART */
+
+            adi_UART_BufTx(hUartDevice, pBuffer, &size);
 
 
         /* copy receive character to transmit */

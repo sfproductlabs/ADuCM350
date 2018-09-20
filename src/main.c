@@ -43,7 +43,7 @@ License Agreement.
 /* Macro to enable the returning of AFE data using the UART */
 /*      1 = return AFE data on UART                         */
 /*      0 = return AFE data on SW (Std Output)              */
-#define USE_UART_FOR_DATA           (0)
+#define USE_UART_FOR_DATA           (1)
 
 /* Excitation frequency in Hz */
 #define FREQ                        (50000)
