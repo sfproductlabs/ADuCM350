@@ -52,4 +52,4 @@ Other licenses have been used to develop and source this software. Please see /L
 
 ## Shameless Plug
 
-Come check out what we're doing with the ADuCM350 and open source biomedical imaging at https://github.com/openeit
+Come check out what we're doing with the ADuCM350 and open source biomedical imaging at https://github.com/openeit, or our product development shop at http://sfproductlabs.com/
