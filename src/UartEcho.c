@@ -42,7 +42,7 @@ License Agreement.
 /* Macro to enable the returning of AFE data using the UART */
 /*      1 = return AFE data on UART                         */
 /*      0 = return AFE data on SW (Std Output)              */
-#define USE_UART_FOR_DATA           (0)
+#define USE_UART_FOR_DATA           (1)
 
 /* Size of Tx and Rx buffers */
 #define BUFFER_SIZE     2
@@ -64,7 +64,7 @@ void test_print(char *pBuffer)
     int16_t size;
     /* Print to UART */
     size = strlen(pBuffer);
-    adi_UART_BufTx(hUartDevice, pBuffer, &size);
+    adi_UART_BufTx(hDevice, pBuffer, &size);
 
 #elif (0 == USE_UART_FOR_DATA)
     /* Print  to console */

@@ -26,12 +26,12 @@ Portions Copyright (c) 2018 Andrew Grosser, Moritz von Buttlar.
 #define PRINT(s)                    test_print(s)
 
 
-extern void initialise_monitor_handles(void);
+//extern void initialise_monitor_handles(void);
 
 
 int main(void) {
 #ifdef DEBUG
-	initialise_monitor_handles();
+//	initialise_monitor_handles();
 #endif
 
     /* Initialize system */
@@ -62,12 +62,12 @@ int main(void) {
     SetSystemClockDivider(ADI_SYS_CLOCK_UART, 2);
 
     
-    PRINT("BEGINNING TEST ....\n\n");
+
     BlinkyTest();
     //FlashTest();
     //AfeTest();
     //UartEcho();
-    PASS();
+
 }
 
 
