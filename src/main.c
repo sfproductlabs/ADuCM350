@@ -7,7 +7,7 @@ this software you agree to the terms of the associated Analog Devices Software
 License Agreement (See /LICENSES/ADI.LABLAB.LICENSE). 
 
 Modified from the Analog Devices original.
-Portions Copyright (c) 2018 Andrew Grosser, Moritz von Buttlar\.
+Portions Copyright (c) 2018 Andrew Grosser, Moritz von Buttlar.
 
 *********************************************************************************/
 
@@ -63,10 +63,10 @@ int main(void) {
 
     
     PRINT("BEGINNING TEST ....\n\n");
-    //BlinkyTest();
+    BlinkyTest();
     //FlashTest();
     //AfeTest();
-    UartEcho();
+    //UartEcho();
     PASS();
 }
 
