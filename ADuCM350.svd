@@ -368,6 +368,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>GPTCLRI</name>
 					<description>Clear interrupt register</description>
 					<addressOffset>0x0C</addressOffset>
+					<access>write-only</access>
 					<fields>
 						<field>
 							<name>CAP</name>
@@ -843,6 +844,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>GPTCLRI</name>
 					<description>Clear interrupt register</description>
 					<addressOffset>0x0C</addressOffset>
+					<access>write-only</access>					
 					<fields>
 						<field>
 							<name>CAP</name>
@@ -1298,6 +1300,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>GPTCLRI</name>
 					<description>Clear interrupt register</description>
 					<addressOffset>0x0C</addressOffset>
+					<access>write-only</access>					
 					<fields>
 						<field>
 							<name>CAP</name>
@@ -2749,6 +2752,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>T2CLRI</name>
 					<description>WUT Clear interrupt register</description>
 					<addressOffset>0x30</addressOffset>
+					<access>write-only</access>
 					<fields>
 						<field>
 							<name>ROLL</name>
@@ -2908,6 +2912,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>T3CLRI</name>
 					<description>WDT Clear interrupt register</description>
 					<addressOffset>0x0C</addressOffset>
+					<access>write-only</access>
 				</register>
 				<register>
 					<name>T3VALA</name>
@@ -3940,7 +3945,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>I2CSHCON</name>
 					<description>I2C Shared control</description>
 					<addressOffset>0x50</addressOffset>
-					
+					<access>write-only</access>
 					<fields>
 						<field>
 							<name>RESET</name>
@@ -4139,7 +4144,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>SPITX</name>
 					<description>SPI0 Transmit</description>
 					<addressOffset>0x08</addressOffset>
-					
+					<access>write-only</access>
 					<fields>
 						<field>
 							<name>DMA</name>
@@ -4533,7 +4538,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>SPITX</name>
 					<description>SPI1 Transmit</description>
 					<addressOffset>0x08</addressOffset>
-					
+					<access>write-only</access>					
 					<fields>
 						<field>
 							<name>DMA</name>
@@ -7340,7 +7345,7 @@ In the event that Third Party Software has only been provided to you in object c
 
 	<interrupt>
 	<name>PDI</name>
-	<description>Paraller Display Interface interrupt</description>
+	<description>Parallel Display Interface interrupt</description>
 	<value>59</value>
 	</interrupt>
 		<registers>
@@ -7987,33 +7992,18 @@ In the event that Third Party Software has only been provided to you in object c
 				<addressOffset>0x0010</addressOffset>
 				<size>16</size>
 			</register>
-<!--
+
 			<register>
-				<name>USB0_EPI_TXCSR_H0</name>
-				<description>USB0 EPn Transmit Configuration and Status (Host) Register</description>
+				<name>USB0_EPI_TXCSR</name>
+				<description>USB0 EPn Transmit Configuration and Status Register</description>
 				<addressOffset>0x0012</addressOffset>
 				<size>16</size>				
 			</register>
--->
-<!--
+
 			<register>
-				<name>USB0_EP0I_CSR0_P</name>
-				<description>USB0 EP0 Configuration and Status (Peripheral) Register</description>
-				<addressOffset>0x0012</addressOffset>
-				<size>16</size>				
-			</register>
--->
-<!--
-			<register>
-				<name>USB0_EP0I_CSR0_H</name>
-				<description>USB0 EP0 Configuration and Status (Host) Register</description>
-				<addressOffset>0x0012</addressOffset>
-				<size>16</size>				
-			</register>
--->
-			<register>
-				<name>USB0_EPI_TXCSR_P0</name>
-				<description>USB0 EPn Transmit Configuration and Status (Peripheral) Register</description>
+				<name>USB0_EP0I_CSR0</name>
+				<alternateRegister>USB0_EPI_TXCSR</alternateRegister>				
+				<description>USB0 EP0 Configuration and Status Register</description>
 				<addressOffset>0x0012</addressOffset>
 				<size>16</size>				
 			</register>
