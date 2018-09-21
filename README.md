@@ -3,7 +3,7 @@
 This is the open source alternative using GCC to compile firmware for the ADuCM350. Use this if you don't want to spend thousands of dollars on an IAR compiler.
 
 This software has been used and tested on:
-* Linux (Debian Buster)
+* Linux (Debian Buster, Fedora 28)
 * Segger EDU
 
 ## Instructions
@@ -48,3 +48,6 @@ I'd like to thank Analog Devices for their permission to use and redistribute th
 
 Other licenses have been used to develop and source this software. Please see /LICENSES for more information and find specific license information for files in some of the headers. 
 
+## Shameless Plug
+
+Come check out what we're doing with the ADuCM350 and open source biomedical imaging at https://github.com/openeit
