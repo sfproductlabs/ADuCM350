@@ -6,7 +6,8 @@ This software is proprietary to Analog Devices, Inc. and its licensors.  By usin
 this software you agree to the terms of the associated Analog Devices Software 
 License Agreement (See /LICENSES/ADI.LABLAB.LICENSE). 
 
-Portions Copyright (c) 2018 Andrew Grosser, Moritz von Buttlar.
+Modified from the Analog Devices original.
+Portions Copyright (c) 2018 Andrew Grosser, Moritz von Buttlar\.
 
 *********************************************************************************/
 /*!
