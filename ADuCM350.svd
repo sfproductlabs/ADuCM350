@@ -99,7 +99,7 @@ In the event that Third Party Software has only been provided to you in object c
 	
 	
 		<peripheral>
-			<name>ADI_GPT0</name>
+			<name>GPT0</name>
 			<description>General Purpose Timer 0</description>
 			<groupName>GP Timers</groupName>
 			<baseAddress>0x40000000</baseAddress>
@@ -113,24 +113,24 @@ In the event that Third Party Software has only been provided to you in object c
 				<name>TIMER0</name>
 				<value>11</value>
 			</interrupt>
+			<size>16</size>
+			<access>read-write</access>
 			<registers>	
 				<register>
-					<name>LOAD</name>
+					<name>GPTLD</name>
 					<description>16-bit load value</description>
-					<addressOffset>0x00</addressOffset>
-					<size>16</size>						
+					<addressOffset>0x00</addressOffset>				
 				</register>
 				<register>
-					<name>CURCNT</name>
+					<name>GPTVAL</name>
 					<description>16-bit timer value. read only.</description>
 					<addressOffset>0x04</addressOffset>
-					<size>16</size>					
+					<access>read-only</access>					
 				</register>
 				<register>
-					<name>CTL</name>
+					<name>GPTCON</name>
 					<description>Control Register</description>
 					<addressOffset>0x08</addressOffset>
-					<size>16</size>
 					<fields>
 						<field>
 							<name>EVENTEN</name>
@@ -365,10 +365,9 @@ In the event that Third Party Software has only been provided to you in object c
 					</fields>
 				</register>
 				<register>
-					<name>CLRINT</name>
+					<name>GPTCLRI</name>
 					<description>Clear interrupt register</description>
 					<addressOffset>0x0C</addressOffset>
-					<size>16</size>
 					<fields>
 						<field>
 							<name>CAP</name>
@@ -404,28 +403,27 @@ In the event that Third Party Software has only been provided to you in object c
 					</fields>
 				</register>
 				<register>
-					<name>CAPTURE</name>
+					<name>GPTCAP</name>
 					<description>Capture Register</description>
 					<addressOffset>0x10</addressOffset>
-					<size>16</size>			
-				</register>
+					<access>read-only</access>	
+					</register>
 				<register>
-					<name>ALOAD</name>
+					<name>GPTALD</name>
 					<description>16-bit load value, asynchronous</description>
 					<addressOffset>0x14</addressOffset>
-					<size>16</size>
 				</register>
 				<register>
-					<name>ACURCNT</name>
+					<name>GPTAVAL</name>
 					<description>16-bit timer value, asynchronous</description>
 					<addressOffset>0x18</addressOffset>
-					<size>16</size>
+					<access>read-only</access>				
 				</register>
 				<register>
-					<name>STATUS</name>
+					<name>GPTSTA</name>
 					<description>Status</description>
 					<addressOffset>0x1C</addressOffset>
-					<size>16</size>				
+					<access>read-only</access>						
 					<fields>
 						<field>
 							<name>PDOK</name>
@@ -502,10 +500,9 @@ In the event that Third Party Software has only been provided to you in object c
 					</fields>
 				</register>
 				<register>
-					<name>PWMCTL</name>
+					<name>GPTPCON</name>
 					<description>PWM Control Register</description>
 					<addressOffset>0x20</addressOffset>
-					<size>16</size>  
 					<fields>
 						<field>
 							<name>IDLE_STATE</name>
@@ -546,21 +543,34 @@ In the event that Third Party Software has only been provided to you in object c
 					</fields>
 				</register>
 				<register>
-					<name>PWMMATCH</name>
+					<name>GPTPMAT</name>
 					<description>PWM Match Value</description>
 					<addressOffset>0x24</addressOffset>
-					<size>16</size>
 				</register>
 			</registers>
 		</peripheral>
 	<!--
-		<peripheral derived from ADI_GPT0>
-			<name>Test_GPT</name>
-			<baseAddress>0x80000000</baseAddress>
+		<peripheral derivedFrom=GPT0>
+			<name>GPT1</name>
+			<baseAddress>0x40000400</baseAddress>
+			<interrupt>
+				<description>Timer 1 Interrupt</description>
+				<name>TIMER1</name>
+				<value>12</value>
+			</interrupt>	
 		</peripheral>
+		<peripheral derivedFrom=GPT0>
+			<name>GPT2</name>
+			<baseAddress>0x40000800</baseAddress>
+			<interrupt>
+				<description>Timer 1 Interrupt</description>
+				<name>TIMER1</name>
+				<value>12</value>
+			</interrupt>	
+		</peripheral>		
 -->		
 		<peripheral>
-			<name>ADI_GPT1</name>
+			<name>GPT1</name>
 			<description>General Purpose Timer1</description>
 			<groupName>Timer1</groupName>
 			<baseAddress>0x40000400</baseAddress>
@@ -574,24 +584,24 @@ In the event that Third Party Software has only been provided to you in object c
 				<name>TIMER1</name>
 				<value>12</value>
 			</interrupt>
-			<registers>	
+			<size>16</size>							
+			<access>read-write</access>				
+			<registers>		
 				<register>
-					<name>LOAD</name>
+					<name>GPTLD</name>
 					<description>16-bit load value</description>
 					<addressOffset>0x00</addressOffset>
-					<size>16</size>						
 				</register>
 				<register>
-					<name>CURCNT</name>
+					<name>GPTVAL</name>
 					<description>16-bit timer value. read only.</description>
 					<addressOffset>0x04</addressOffset>
-					<size>16</size>					
+					<access>read-only</access>
 				</register>
 				<register>
-					<name>CTL</name>
+					<name>GPTCON</name>
 					<description>Control Register</description>
 					<addressOffset>0x08</addressOffset>
-					<size>16</size>
 					<fields>
 						<field>
 							<name>EVENTEN</name>
@@ -649,12 +659,12 @@ In the event that Third Party Software has only been provided to you in object c
 								</enumeratedValue>
 								<enumeratedValue>
 									<name>I2S</name>
-									<description>I2S</description>
+									<description>I2S Event</description>
 									<value>6</value>
 								</enumeratedValue>
 								<enumeratedValue>
 									<name>USB</name>
-									<description>USB</description>
+									<description>USB Event</description>
 									<value>7</value>
 								</enumeratedValue>
 								<enumeratedValue>
@@ -770,7 +780,7 @@ In the event that Third Party Software has only been provided to you in object c
 							<bitWidth>1</bitWidth>
 							<enumeratedValues>
 								<enumeratedValue>
-									<description>Timer runs free</description>																	<description>Enable</description>	<description>Enable</description>	
+									<description>Timer runs free</description>
 									<name>FREERUN</name>
 									<value>0</value>
 								</enumeratedValue>
@@ -830,10 +840,9 @@ In the event that Third Party Software has only been provided to you in object c
 					</fields>
 				</register>
 				<register>
-					<name>CLRINT</name>
+					<name>GPTCLRI</name>
 					<description>Clear interrupt register</description>
 					<addressOffset>0x0C</addressOffset>
-					<size>16</size>
 					<fields>
 						<field>
 							<name>CAP</name>
@@ -869,28 +878,27 @@ In the event that Third Party Software has only been provided to you in object c
 					</fields>
 				</register>
 				<register>
-					<name>CAPTURE</name>
+					<name>GPTCAP</name>
 					<description>Capture Register</description>
 					<addressOffset>0x10</addressOffset>
-					<size>16</size>			
-				</register>
+					<access>read-only</access>	
+					</register>
 				<register>
-					<name>ALOAD</name>
+					<name>GPTALD</name>
 					<description>16-bit load value, asynchronous</description>
 					<addressOffset>0x14</addressOffset>
-					<size>16</size>
 				</register>
 				<register>
-					<name>ACURCNT</name>
+					<name>GPTAVAL</name>
 					<description>16-bit timer value, asynchronous</description>
 					<addressOffset>0x18</addressOffset>
-					<size>16</size>
+					<access>read-only</access>					
 				</register>
 				<register>
-					<name>STATUS</name>
+					<name>GPTSTA</name>
 					<description>Status</description>
 					<addressOffset>0x1C</addressOffset>
-					<size>16</size>				
+					<access>read-only</access>						
 					<fields>
 						<field>
 							<name>PDOK</name>
@@ -967,10 +975,9 @@ In the event that Third Party Software has only been provided to you in object c
 					</fields>
 				</register>
 				<register>
-					<name>PWMCTL</name>
+					<name>GPTPCON</name>
 					<description>PWM Control Register</description>
 					<addressOffset>0x20</addressOffset>
-					<size>16</size>  
 					<fields>
 						<field>
 							<name>IDLE_STATE</name>
@@ -1011,15 +1018,14 @@ In the event that Third Party Software has only been provided to you in object c
 					</fields>
 				</register>
 				<register>
-					<name>PWMMATCH</name>
+					<name>GPTPMAT</name>
 					<description>PWM Match Value</description>
 					<addressOffset>0x24</addressOffset>
-					<size>16</size>
 				</register>
 			</registers>			
 		</peripheral>
 		<peripheral>
-			<name>ADI_GPT2</name>
+			<name>GPT2</name>
 			<description>General Purpose Timer2 </description>
 			<groupName>T2</groupName>
 			<baseAddress>0x40000800</baseAddress>
@@ -1033,24 +1039,24 @@ In the event that Third Party Software has only been provided to you in object c
 			<description>TIMER 2 interrupt</description>
 			<value>40</value>
 		</interrupt>	
-			<registers>	
+		<size>16</size>						
+		<access>read-write</access>				
+			<registers>
 				<register>
-					<name>LOAD</name>
+					<name>GPTLD</name>
 					<description>16-bit load value</description>
 					<addressOffset>0x00</addressOffset>
-					<size>16</size>						
 				</register>
 				<register>
-					<name>CURCNT</name>
+					<name>GPTVAL</name>
 					<description>16-bit timer value. read only.</description>
 					<addressOffset>0x04</addressOffset>
-					<size>16</size>					
-				</register>
+					<access>read-only</access>	
+					</register>
 				<register>
-					<name>CTL</name>
+					<name>GPTCON</name>
 					<description>Control Register</description>
 					<addressOffset>0x08</addressOffset>
-					<size>16</size>
 					<fields>
 						<field>
 							<name>EVENTEN</name>
@@ -1289,10 +1295,9 @@ In the event that Third Party Software has only been provided to you in object c
 					</fields>
 				</register>
 				<register>
-					<name>CLRINT</name>
+					<name>GPTCLRI</name>
 					<description>Clear interrupt register</description>
 					<addressOffset>0x0C</addressOffset>
-					<size>16</size>
 					<fields>
 						<field>
 							<name>CAP</name>
@@ -1328,28 +1333,27 @@ In the event that Third Party Software has only been provided to you in object c
 					</fields>
 				</register>
 				<register>
-					<name>CAPTURE</name>
+					<name>GPTCAP</name>
 					<description>Capture Register</description>
 					<addressOffset>0x10</addressOffset>
-					<size>16</size>			
+					<access>read-only</access>				
 				</register>
 				<register>
-					<name>ALOAD</name>
+					<name>GPTALD</name>
 					<description>16-bit load value, asynchronous</description>
 					<addressOffset>0x14</addressOffset>
-					<size>16</size>
 				</register>
 				<register>
-					<name>ACURCNT</name>
+					<name>GPTAVAL</name>
 					<description>16-bit timer value, asynchronous</description>
 					<addressOffset>0x18</addressOffset>
-					<size>16</size>
+					<access>read-only</access>	
 				</register>
 				<register>
-					<name>STATUS</name>
+					<name>GPTSTA</name>
 					<description>Status</description>
 					<addressOffset>0x1C</addressOffset>
-					<size>16</size>				
+					<access>read-only</access>						
 					<fields>
 						<field>
 							<name>PDOK</name>
@@ -1426,10 +1430,9 @@ In the event that Third Party Software has only been provided to you in object c
 					</fields>
 				</register>
 				<register>
-					<name>PWMCTL</name>
+					<name>GPTPCON</name>
 					<description>PWM Control Register</description>
 					<addressOffset>0x20</addressOffset>
-					<size>16</size>  
 					<fields>
 						<field>
 							<name>IDLE_STATE</name>
@@ -1470,16 +1473,15 @@ In the event that Third Party Software has only been provided to you in object c
 					</fields>
 				</register>
 				<register>
-					<name>PWMMATCH</name>
+					<name>GPTPMAT</name>
 					<description>PWM Match Value</description>
 					<addressOffset>0x24</addressOffset>
-					<size>16</size>
 				</register>
 			</registers>
 		</peripheral>
 		<peripheral>
-			<name>ADI_ID</name>
-			<description>ID </description>
+			<name>ID</name>
+			<description>Identification Registers</description>
 			<groupName>PWRCTL</groupName>
 			<baseAddress>0x40002020</baseAddress>
 			<addressBlock>
@@ -1487,23 +1489,23 @@ In the event that Third Party Software has only been provided to you in object c
 				<size>0x8</size>
 				<usage>registers</usage>
 			</addressBlock>
+			<size>16</size>							
+			<access>read-write</access>			
 			<registers>
 				<register>
 					<name>ADIID</name>
 					<description>Analog Devices ID Register</description>
 					<addressOffset>0</addressOffset>
-					<size>16</size>				
 				</register>
 				<register>
 					<name>CHIPID</name>
 					<description>Chip ID Register</description>
 					<addressOffset>4</addressOffset>
-					<size>16</size>				
 				</register>				
 			</registers>
 		</peripheral>			
 		<peripheral>
-		<name>ADI_PWR</name>
+		<name>PWR</name>
 		<description>Power Management Unit</description>
 		<groupName>PWRCTL</groupName>
 		<baseAddress>0x40002400</baseAddress>
@@ -1512,12 +1514,13 @@ In the event that Third Party Software has only been provided to you in object c
 			<size>0x14</size>
 			<usage>registers</usage>
 		</addressBlock>
+			<size>16</size>							
+			<access>read-write</access>			
 		<registers>
 			<register>
 			<name>PWRMOD</name>
 			<description>PWR Power modes</description>
 			<addressOffset>0x00</addressOffset>
-			<size>16</size>
 			<fields>
 				<field>
 			        <name>RAM0_RET</name>
@@ -1589,7 +1592,6 @@ In the event that Third Party Software has only been provided to you in object c
 			<name>PWRKEY</name>
 			<description>PWR Key protection for PWRMOD</description>
 			<addressOffset>0x04</addressOffset>
-			<size>16</size>
 			<fields>
 				<field>
 					<name>KEY</name>
@@ -1618,7 +1620,6 @@ In the event that Third Party Software has only been provided to you in object c
 			<name>PSMCON</name>
 			<description>PWR PSM Configuration</description>
 			<addressOffset>0x08</addressOffset>
-			<size>16</size>
 			<fields>
 				<field>
 					<name>VCCMPSMSTAT</name>
@@ -1734,7 +1735,6 @@ In the event that Third Party Software has only been provided to you in object c
 			<name>OSCKEY</name>
 			<description>PWR Key protection for OSCCTRL</description>
 			<addressOffset>0x0C</addressOffset>
-			<size>16</size>
 			<fields>
 				<field>
 					<name>VALUE</name>
@@ -1759,12 +1759,11 @@ In the event that Third Party Software has only been provided to you in object c
 			<name>OSCCTRL</name>
 			<description>PWR Oscillator control</description>
 			<addressOffset>0x10</addressOffset>
-			<size>16</size>
 		</register>		
 		</registers>
 	</peripheral>
 	<peripheral>
-		<name>ADI_EI</name>
+		<name>EI</name>
 		<description>External Interrupts</description>
 		<groupName>PWRCTL</groupName>
 		<baseAddress>0x40002420</baseAddress>
@@ -1818,12 +1817,13 @@ In the event that Third Party Software has only been provided to you in object c
 				<name>EINT8</name>
 				<value>9</value>
 			</interrupt>
+			<size>16</size>
+			<access>read-write</access>				
 			<registers>		
 		<register>
 			<name>EI0CFG</name>
 			<description>PWR External Interrupt configuration 0</description>
 			<addressOffset>0x0</addressOffset>
-			<size>16</size>
 			<fields>
 				<field>
 					<name>IRQ3EN</name>
@@ -1946,7 +1946,6 @@ In the event that Third Party Software has only been provided to you in object c
 			<name>EI1CFG</name>
 			<description>PWR External Interrupt configuration 1</description>
 			<addressOffset>0x4</addressOffset>
-			<size>16</size>
             <fields>
                 <field>
                     <name>IRQ7EN</name>
@@ -2051,7 +2050,6 @@ In the event that Third Party Software has only been provided to you in object c
             <name>EI2CFG</name>
 			<description>PWR External Interrupt configuration 2</description>
 			<addressOffset>0x8</addressOffset>
-			<size>16</size>
             <fields>
                 <field>
                     <name>USBVBUSEN</name>
@@ -2156,7 +2154,6 @@ In the event that Third Party Software has only been provided to you in object c
 			<name>EICLR</name>
 			<description>PWR External Interrupt clear</description>
 			<addressOffset>0x10</addressOffset>
-			<size>16</size>
             <fields>
                 <field>
                     <name>USBVBUS</name>
@@ -2321,7 +2318,6 @@ In the event that Third Party Software has only been provided to you in object c
 			<name>NMICLR</name>
 			<description>PWR Non-maskable interrupt clear</description>
 			<addressOffset>0x14</addressOffset>
-			<size>16</size>
             <fields>
                 <field>
                     <name>CLEAR</name>
@@ -2343,7 +2339,7 @@ In the event that Third Party Software has only been provided to you in object c
 			<name>USBWKSTAT</name>
 			<description>PWR USB Wakeup Status</description>
 			<addressOffset>0x18</addressOffset>
-			<size>16</size>
+			<access>read-only</access>
             <fields>
                 <field>
                     <name>USBVBUS</name>
@@ -2370,7 +2366,6 @@ In the event that Third Party Software has only been provided to you in object c
 			<name>RSTSTA</name>
 			<description>PWR Reset status</description>
 			<addressOffset>0x20</addressOffset>
-			<size>16</size>
             <fields>
                 <field>
                     <name>SWRST</name>
@@ -2401,7 +2396,7 @@ In the event that Third Party Software has only been provided to you in object c
 		</registers>
 	</peripheral>
 	<peripheral>
-		<name>ADI_PWRVCC</name>
+		<name>PWRVCC</name>
 		<description>Power</description>
 		<groupName>PWRCTL</groupName>
 		<baseAddress>0x40002480</baseAddress>
@@ -2410,13 +2405,14 @@ In the event that Third Party Software has only been provided to you in object c
 			<size>0x10</size>
 			<usage>registers</usage>
 		</addressBlock>
+		<size>16</size>						
+		<access>read-write</access>			
 		<registers>		
 
 		<register>
 			<name>VCCMCON</name>
 			<description>PWR VCCM Control and Status</description>
 			<addressOffset>0x8</addressOffset>
-			<size>16</size>
             <fields>
                 <field>
                     <name>VCCMTHR_HYST</name>
@@ -2449,7 +2445,6 @@ In the event that Third Party Software has only been provided to you in object c
 			<name>VBACKCON</name>
 			<description>PWR VBACK control and status</description>
 			<addressOffset>0xC</addressOffset>
-			<size>16</size>
             <fields>
                 <field>
                     <name>VBACKTRIP</name>
@@ -2480,11 +2475,11 @@ In the event that Third Party Software has only been provided to you in object c
 	</registers>
 </peripheral>
 		<peripheral>
-			<name>ADI_WUT</name>
+			<name>WUT</name>
 			<description>Wake-up timer</description>
 			<groupName>WUT</groupName>
 			<baseAddress>0x40002500</baseAddress>
-			<size>16</size>
+			
 
 			<addressBlock>
 				<offset>0</offset>
@@ -2497,27 +2492,29 @@ In the event that Third Party Software has only been provided to you in object c
 				<description>Wake Up Timer interrupt</description>
 				<value>0</value>
 			</interrupt>
+
+			<size>16</size>							
+			<access>read-write</access>	
 			
 			<registers>
 				<register>
 					<name>T2VAL0</name>
 					<description>WUT Current count value - LS halfword.</description>
 					<addressOffset>0x00</addressOffset>
-					<size>16</size>
+					<access>read-only</access>	
 				</register>
 
 				<register>
 					<name>T2VAL1</name>
 					<description>WUT Current count value - MS halfword</description>
 					<addressOffset>0x04</addressOffset>
-					<size>16</size>
+					<access>read-only</access>	
 				</register>
 
 				<register>
 					<name>T2CON</name>
 					<description>WUT Control</description>
 					<addressOffset>0x08</addressOffset>
-					<size>16</size>
 					<fields>
 						<field>
 							<name>STOP</name>
@@ -2607,7 +2604,6 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>T2INC</name>
 					<description>WUT 12-bit interval for wakeup field A</description>
 					<addressOffset>0x0C</addressOffset>
-					<size>16</size>
 					<fields>
 						<field>
 							<name>INTERVAL</name>
@@ -2622,28 +2618,24 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>T2WUFB0</name>
 					<description>WUT Wakeup field B - LS halfword</description>
 					<addressOffset>0x10</addressOffset>
-					<size>16</size>
 				</register>
 
 				<register>
 					<name>T2WUFB1</name>
 					<description>WUT Wakeup field B - MS halfword</description>
 					<addressOffset>0x14</addressOffset>
-					<size>16</size>
 				</register>
 
 				<register>
 					<name>T2WUFC0</name>
 					<description>WUT Wakeup field C - LS halfword</description>
 					<addressOffset>0x18</addressOffset>
-					<size>16</size>
 				</register>
 
 				<register>
 					<name>T2WUFC1</name>
 					<description>WUT Wakeup field C - MS halfword</description>
 					<addressOffset>0x1C</addressOffset>
-					<size>16</size>
 				</register>
 
 				<register>
@@ -2656,14 +2648,12 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>T2WUFD1</name>
 					<description>WUT Wakeup field D - MS halfword</description>
 					<addressOffset>0x24</addressOffset>
-					<size>16</size>
 				</register>
 
 				<register>
 					<name>T2IEN</name>
 					<description>WUT Interrupt enable</description>
 					<addressOffset>0x28</addressOffset>
-					<size>16</size>
 					<fields>
 						<field>
 							<name>ROLL</name>
@@ -2702,7 +2692,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>T2STA</name>
 					<description>WUT Status</description>
 					<addressOffset>0x2C</addressOffset>
-					<size>16</size>
+					<access>read-only</access>	
 					<fields>
 						<field>
 							<name>PDOK</name>
@@ -2759,7 +2749,6 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>T2CLRI</name>
 					<description>WUT Clear interrupt register</description>
 					<addressOffset>0x30</addressOffset>
-					<size>16</size>
 					<fields>
 						<field>
 							<name>ROLL</name>
@@ -2798,37 +2787,35 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>WUTVAL_LOW</name>
 					<description>WUT Unsynchronized lower 16 bits of WU Timer counter value.</description>
 					<addressOffset>0x34</addressOffset>
-					<size>16</size>
 				</register>		
 
 				<register>
 					<name>WUTVAL_HIGH</name>
 					<description>WUT Unsynchronized upper 16 bits of WU Timer counter value.</description>
 					<addressOffset>0x38</addressOffset>
-					<size>16</size>
 				</register>
 
 				<register>
 					<name>T2WUFA0</name>
 					<description>WUT Wakeup field A - LS halfword</description>
 					<addressOffset>0x3C</addressOffset>
-					<size>16</size>
+					<access>read-only</access>						
 				</register>
 
 				<register>
 					<name>T2WUFA1</name>
 					<description>WUT Wakeup field A - MS halfword</description>
 					<addressOffset>0x40</addressOffset>
-					<size>16</size>
+					<access>read-only</access>						
 				</register>
 			</registers>
 		</peripheral>
 		<peripheral>
-			<name>ADI_WDT</name>
+			<name>WDT</name>
 			<description>WatchDog Timer</description>
 			<groupName>WDT</groupName>
 			<baseAddress>0x40002580</baseAddress>
-			<size>16</size>
+			
 
 			<addressBlock>
 				<offset>0</offset>
@@ -2841,28 +2828,26 @@ In the event that Third Party Software has only been provided to you in object c
 				<description>WDT Interrupt</description>
 				<value>10</value>
 			</interrupt>
-
+			<size>16</size>							
+			<access>read-write</access>	
 			<registers>
 
 				<register>
 					<name>T3LD</name>
 					<description>WDT Load value</description>
 					<addressOffset>0x00</addressOffset>
-					<size>16</size>
 				</register>
 
 				<register>
 					<name>T3VAL</name>
 					<description>WDT Current count value</description>
 					<addressOffset>0x04</addressOffset>
-					<size>16</size>
 				</register>
 
 			<register>
 				<name>T3CON</name>
 				<description>WDT Control</description>
 				<addressOffset>0x08</addressOffset>
-				<size>16</size>
 					<fields>
 						<field>
 							<name>MOD</name>
@@ -2923,14 +2908,16 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>T3CLRI</name>
 					<description>WDT Clear interrupt register</description>
 					<addressOffset>0x0C</addressOffset>
-					<size>16</size>
 				</register>
-
+				<register>
+					<name>T3VALA</name>
+					<description>WDT Asynchronous Count</description>
+					<addressOffset>0x14</addressOffset>
+				</register>
 				<register>
 					<name>T3STA</name>
 					<description>WDT Status</description>
 					<addressOffset>0x18</addressOffset>
-					<size>16</size>
 					<fields>
 						<field>
 							<name>LOCK</name>
@@ -2968,7 +2955,7 @@ In the event that Third Party Software has only been provided to you in object c
 		</peripheral>
 		
 		<peripheral>
-		<name>ADI_RTC</name>
+		<name>RTC</name>
 		<description>RealTimeClock</description>
 	<groupName>RTC</groupName>
 	<baseAddress>0x40002600</baseAddress>
@@ -2985,13 +2972,14 @@ In the event that Third Party Software has only been provided to you in object c
 		<description>Real Time Clock interrupt</description>
 		<value>43</value>
 	</interrupt>
+	<size>16</size>						
+	<access>read-write</access>		
     <registers>
 
 	<register>
 		<name>RTCCR</name>
 		<description>RTC RTC Control</description>
 		<addressOffset>0x00</addressOffset>
-		<size>16</size>
             <fields>
                 <field>
                     <name>WPENDINTEN</name>
@@ -3066,7 +3054,6 @@ In the event that Third Party Software has only been provided to you in object c
 			<name>RTCSR0</name>
 			<description>RTC RTC Status 0</description>
 			<addressOffset>0x04</addressOffset>
-			<size>16</size>
             <fields>
                 <field>
                     <name>WSYNCTRM</name>
@@ -3159,7 +3146,6 @@ In the event that Third Party Software has only been provided to you in object c
 			<name>RTCSR1</name>
 			<description>RTC RTC Status 1</description>
 			<addressOffset>0x08</addressOffset>
-			<size>16</size>
             <fields>
                 <field>
                     <name>WPENDTRM</name>
@@ -3216,35 +3202,30 @@ In the event that Third Party Software has only been provided to you in object c
 			<name>RTCCNT0</name>
 			<description>RTC RTC Count 0</description>
 			<addressOffset>0x0C</addressOffset>
-			<size>16</size>
 		</register>
 
 		<register>
 			<name>RTCCNT1</name>
 			<description>RTC RTC Count 1</description>
 			<addressOffset>0x10</addressOffset>
-			<size>16</size>
 		</register>
 
 		<register>
 			<name>RTCALM0</name>
 			<description>RTC RTC Alarm 0</description>
 			<addressOffset>0x14</addressOffset>
-			<size>16</size>
 		</register>
 
 		<register>
 			<name>RTCALM1</name>
 			<description>RTC RTC Alarm 1</description>
 			<addressOffset>0x18</addressOffset>
-			<size>16</size>
 		</register>
 
 		<register>
 			<name>RTCTRM</name>
 			<description>RTC RTC Trim</description>
 			<addressOffset>0x1C</addressOffset>
-			<size>16</size>
 			<fields>
                 <field>
                     <name>TRMIVL</name>
@@ -3271,12 +3252,11 @@ In the event that Third Party Software has only been provided to you in object c
 			<name>RTCGWY</name>
 			<description>RTC RTC Gateway</description>
 			<addressOffset>0x20</addressOffset>
-			<size>16</size>
 		</register>
 		</registers>
 	</peripheral>
 		<peripheral>
-			<name>ADI_I2C</name>
+			<name>I2C</name>
 			
 			<description>I2C Master/Slave</description>
 			<groupName>I2C</groupName>
@@ -3298,14 +3278,16 @@ In the event that Third Party Software has only been provided to you in object c
 				<name>I2CM</name>
 				<description>I2C 0 master interrupt</description>
 				<value>18</value>
-			</interrupt>			
+			</interrupt>
+			<size>16</size>
+			<access>read-write</access>
 			<registers>
 
 				<register>
 					<name>I2CMCON</name>
 					<description>I2C Master control</description>
 					<addressOffset>0x00</addressOffset>
-					<size>16</size>
+					
 					<fields>
 						<field>
 							<name>PRESTOP</name>
@@ -3398,7 +3380,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>I2CMSTA</name>
 					<description>I2C Master status</description>
 					<addressOffset>0x04</addressOffset>
-					<size>16</size>
+					
 					<fields>
 						<field>
 							<name>SCL</name>
@@ -3491,7 +3473,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>I2CMRX</name>
 					<description>I2C Master receive data</description>
 					<addressOffset>0x08</addressOffset>
-					<size>16</size>
+					
 					<fields>
 						<field>
 							<name>I2CMRX</name>
@@ -3506,7 +3488,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>I2CMTX</name>
 					<description>I2C Master transmit data</description>
 					<addressOffset>0x0C</addressOffset>
-					<size>16</size>
+					
 					<fields>
 						<field>
 							<name>I2CMTX</name>
@@ -3521,7 +3503,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>I2CMRXCNT</name>
 					<description>I2C Master receive data count</description>
 					<addressOffset>0x10</addressOffset>
-					<size>16</size>
+					
 					<fields>
 						<field>
 							<name>EXTEND</name>
@@ -3542,7 +3524,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>I2CMCRXCNT</name>
 					<description>I2C Master current receive data count</description>
 					<addressOffset>0x14</addressOffset>
-					<size>16</size>
+					
 					<fields>
 						<field>
 							<name>COUNT</name>
@@ -3557,7 +3539,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>I2CADR1</name>
 					<description>I2C 1st master address byte</description>
 					<addressOffset>0x18</addressOffset>
-					<size>16</size>
+					
 					<fields>
 						<field>
 							<name>ADR1</name>
@@ -3572,7 +3554,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>I2CADR2</name>
 					<description>I2C 2nd master address byte</description>
 					<addressOffset>0x1C</addressOffset>
-					<size>16</size>
+					
 					<fields>
 						<field>
 							<name>ADR2</name>
@@ -3586,7 +3568,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>I2CBYT</name>
 					<description>I2C Start byte</description>
 					<addressOffset>0x20</addressOffset>
-					<size>16</size>
+					
 					<fields>
 						<field>
 							<name>SBYTE</name>
@@ -3601,7 +3583,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>I2CDIV</name>
 					<description>I2C Serial clock period divisor</description>
 					<addressOffset>0x24</addressOffset>
-					<size>16</size>
+					
 					<fields>
 						<field>
 							<name>HIGH</name>
@@ -3622,7 +3604,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>I2CSCON</name>
 					<description>I2C Slave control</description>
 					<addressOffset>0x28</addressOffset>
-					<size>16</size>
+					
 					<fields>
 						<field>
 							<name>STXDMA</name>
@@ -3721,7 +3703,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>I2CSSTA</name>
 					<description>I2C Slave I2C Status/Error/IRQ</description>
 					<addressOffset>0x2C</addressOffset>
-					<size>16</size>
+					
 					<fields>
 						<field>
 							<name>START</name>
@@ -3808,7 +3790,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>I2CSRX</name>
 					<description>I2C Slave receive</description>
 					<addressOffset>0x30</addressOffset>
-					<size>16</size>
+					
 					<fields>
 						<field>
 							<name>I2CSRX</name>
@@ -3823,7 +3805,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>I2CSTX</name>
 					<description>I2C Slave transmit</description>
 					<addressOffset>0x34</addressOffset>
-					<size>16</size>
+					
 					<fields>
 						<field>
 							<name>I2CSTX</name>
@@ -3838,7 +3820,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>I2CALT</name>
 					<description>I2C Hardware general call ID</description>
 					<addressOffset>0x38</addressOffset>
-					<size>16</size>
+					
 					<fields>
 						<field>
 							<name>ALT</name>
@@ -3853,7 +3835,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>I2CID0</name>
 					<description>I2C 1st slave address device ID</description>
 					<addressOffset>0x3C</addressOffset>
-					<size>16</size>
+					
 					<fields>
 						<field>
 							<name>ID0</name>
@@ -3868,7 +3850,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>I2CID1</name>
 					<description>I2C 2nd slave address device ID</description>
 					<addressOffset>0x40</addressOffset>
-					<size>16</size>
+					
 					<fields>
 						<field>
 							<name>ID1</name>
@@ -3883,7 +3865,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>I2CID2</name>
 					<description>I2C 3rd slave address device ID</description>
 					<addressOffset>0x44</addressOffset>
-					<size>16</size>
+					
 					<fields>
 						<field>
 							<name>ID2</name>
@@ -3898,7 +3880,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>I2CID3</name>
 					<description>I2C 4th slave address device ID</description>
 					<addressOffset>0x48</addressOffset>
-					<size>16</size>
+					
 					<fields>
 						<field>
 							<name>ID3</name>
@@ -3913,7 +3895,7 @@ In the event that Third Party Software has only been provided to you in object c
 			<name>I2CFSTA</name>
 			<description>I2C Master and slave FIFO status</description>
 			<addressOffset>0x4C</addressOffset>
-			<size>16</size>
+			
             <fields>
                 <field>
                     <name>MFLUSH</name>
@@ -3958,7 +3940,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>I2CSHCON</name>
 					<description>I2C Shared control</description>
 					<addressOffset>0x50</addressOffset>
-					<size>16</size>
+					
 					<fields>
 						<field>
 							<name>RESET</name>
@@ -3973,7 +3955,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>I2CTCTL</name>
 					<description>I2C Timing Control Register</description>
 					<addressOffset>0x54</addressOffset>
-					<size>16</size>
+					
 					<fields>
 						<field>
 							<name>FILTEROFF</name>
@@ -3993,7 +3975,7 @@ In the event that Third Party Software has only been provided to you in object c
 		</peripheral>
 
 		<peripheral>
-			<name>ADI_SPI0</name>
+			<name>SPI0</name>
 			
 			<description>SPI0 Maste/Slave</description>
 			<groupName>SPI0</groupName>
@@ -4011,7 +3993,8 @@ In the event that Third Party Software has only been provided to you in object c
 				<description>SPI 0 interrupt</description>
 				<value>15</value>
 			</interrupt>
-
+			<size>16</size>
+			<access>read-write</access>
 			<registers>	
 				<register>
 					<name>SPISTA</name>
@@ -4135,7 +4118,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>SPIRX</name>
 					<description>SPI0 Receive</description>
 					<addressOffset>0x04</addressOffset>
-					<size>16</size>
+					
 					<fields>
 						<field>
 							<name>DMA</name>
@@ -4156,7 +4139,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>SPITX</name>
 					<description>SPI0 Transmit</description>
 					<addressOffset>0x08</addressOffset>
-					<size>16</size>
+					
 					<fields>
 						<field>
 							<name>DMA</name>
@@ -4177,7 +4160,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>SPIDIV</name>
 					<description>SPI0 Baud rate selection</description>
 					<addressOffset>0x0C</addressOffset>
-					<size>16</size>
+					
 					<fields>
 						<field>
 							<name>CSIRQ</name>
@@ -4210,7 +4193,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>SPICON</name>
 					<description>SPI0 SPI configuration</description>
 					<addressOffset>0x10</addressOffset>
-					<size>16</size>
+					
 					<fields>
 						<field>
 							<name>MOD</name>
@@ -4309,7 +4292,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>SPIDMA</name>
 					<description>SPI0 SPI DMA enable</description>
 					<addressOffset>0x14</addressOffset>
-					<size>16</size>
+					
 					<fields>
 						<field>
 							<name>IENRXDMA</name>
@@ -4372,7 +4355,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>SPICNT</name>
 					<description>SPI0 Transfer byte count</description>
 					<addressOffset>0x18</addressOffset>
-					<size>16</size>
+					
 					<fields>
 						<field>
 							<name>COUNT</name>
@@ -4386,7 +4369,7 @@ In the event that Third Party Software has only been provided to you in object c
 		</peripheral>
 		
 		<peripheral>
-			<name>ADI_SPI1</name>
+			<name>SPI1</name>
 			
 			<description>SPI1 Master/Slave</description>
 			<groupName>SPI1</groupName>
@@ -4404,6 +4387,8 @@ In the event that Third Party Software has only been provided to you in object c
 				<description>interrupt</description>
 				<value>42</value>
 			</interrupt>
+			<size>16</size>
+			<access>read-write</access>			
 			<registers>	
 				<register>
 					<name>SPISTA</name>
@@ -4527,7 +4512,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>SPIRX</name>
 					<description>SPI1 Receive</description>
 					<addressOffset>0x04</addressOffset>
-					<size>16</size>
+					
 					<fields>
 						<field>
 							<name>DMA</name>
@@ -4548,7 +4533,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>SPITX</name>
 					<description>SPI1 Transmit</description>
 					<addressOffset>0x08</addressOffset>
-					<size>16</size>
+					
 					<fields>
 						<field>
 							<name>DMA</name>
@@ -4569,7 +4554,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>SPIDIV</name>
 					<description>SPI1 Baud rate selection</description>
 					<addressOffset>0x0C</addressOffset>
-					<size>16</size>
+					
 					<fields>
 						<field>
 							<name>CSIRQ</name>
@@ -4602,7 +4587,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>SPICON</name>
 					<description>SPI1 SPI configuration</description>
 					<addressOffset>0x10</addressOffset>
-					<size>16</size>
+					
 					<fields>
 						<field>
 							<name>MOD</name>
@@ -4701,7 +4686,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>SPIDMA</name>
 					<description>SPI1 SPI DMA enable</description>
 					<addressOffset>0x14</addressOffset>
-					<size>16</size>
+					
 					<fields>
 						<field>
 							<name>IENRXDMA</name>
@@ -4764,7 +4749,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>SPICNT</name>
 					<description>SPI1 Transfer byte count</description>
 					<addressOffset>0x18</addressOffset>
-					<size>16</size>
+					
 					<fields>
 						<field>
 							<name>COUNT</name>
@@ -4779,7 +4764,7 @@ In the event that Third Party Software has only been provided to you in object c
 	</peripheral>
 		
 		<peripheral>
-			<name>ADI_UART</name>
+			<name>UART</name>
 			
 			<description>Uart</description>
 			<groupName>UART</groupName>
@@ -4797,6 +4782,8 @@ In the event that Third Party Software has only been provided to you in object c
 				<description>interrupt</description>
 				<value>14</value>
 			</interrupt>
+			<size>16</size>
+			<access>read-write</access>			
 			<registers>
 
 			<register>
@@ -4831,7 +4818,7 @@ In the event that Third Party Software has only been provided to you in object c
 				<name>COMIEN</name>
 				<description>UART Interrupt Enable</description>
 				<addressOffset>0x04</addressOffset>
-				<size>16</size>
+				
 				<fields>
 					<field>
 						<name>EDMAR</name>
@@ -4876,7 +4863,7 @@ In the event that Third Party Software has only been provided to you in object c
 				<name>COMIIR</name>
 				<description>UART Interrupt ID</description>
 				<addressOffset>0x08</addressOffset>
-				<size>16</size>
+				
 				<fields>
 					<field>
 						<name>STA</name>
@@ -4897,7 +4884,7 @@ In the event that Third Party Software has only been provided to you in object c
 				<name>COMLCR</name>
 				<description>UART Line Control</description>
 				<addressOffset>0x0C</addressOffset>
-				<size>16</size>
+				
 				<fields>
 					<field>
 						<name>BRK</name>
@@ -4942,7 +4929,7 @@ In the event that Third Party Software has only been provided to you in object c
 				<name>COMMCR</name>
 				<description>UART Modem Control</description>
 				<addressOffset>0x10</addressOffset>
-				<size>16</size>
+				
 				<fields>
 					<field>
 						<name>LOOPBACK</name>
@@ -4981,7 +4968,7 @@ In the event that Third Party Software has only been provided to you in object c
 				<name>COMLSR</name>
 				<description>UART Line Status</description>
 				<addressOffset>0x14</addressOffset>
-				<size>16</size>
+				
 				<fields>
 					<field>
 						<name>TEMT</name>
@@ -5032,7 +5019,7 @@ In the event that Third Party Software has only been provided to you in object c
 				<name>COMMSR</name>
 				<description>UART Modem Status</description>
 				<addressOffset>0x18</addressOffset>
-				<size>16</size>
+				
 				<fields>
 					<field>
 						<name>DCD</name>
@@ -5089,7 +5076,7 @@ In the event that Third Party Software has only been provided to you in object c
 				<name>COMSCR</name>
 				<description>UART Scratch buffer</description>
 				<addressOffset>0x1C</addressOffset>
-				<size>16</size>
+				
 				<fields>
 					<field>
 						<name>SCR</name>
@@ -5103,7 +5090,7 @@ In the event that Third Party Software has only been provided to you in object c
 				<name>COMFBR</name>
 				<description>UART Fractional Baud Rate</description>
 				<addressOffset>0x24</addressOffset>
-				<size>16</size>
+				
                 <fields>
                     <field>
                         <name>FBEN</name>
@@ -5130,13 +5117,13 @@ In the event that Third Party Software has only been provided to you in object c
 				<name>COMDIV</name>
 				<description>UART Baudrate divider</description>
 				<addressOffset>0x28</addressOffset>
-				<size>16</size>
+				
 			</register>
 		</registers>
 	</peripheral>
 
 	<peripheral>
-		<name>ADI_I2S</name>
+		<name>I2S</name>
 		
 		<description>I2S Master/Slave</description>
 		<groupName>I2S</groupName>
@@ -5154,13 +5141,15 @@ In the event that Third Party Software has only been provided to you in object c
 			<description>I2S interrupt</description>
 			<value>39</value>
 		</interrupt>
+		<size>16</size>
+		<access>read-write</access>		
 		<registers>
 
 			<register>
 				<name>OUT1L</name>
 				<description>I2S Channel 1 LSBs</description>
 				<addressOffset>0x00</addressOffset>
-				<size>16</size>
+				
 				<fields>
 						<field>
 							<description>I2S Ch1 lsb</description>
@@ -5175,7 +5164,7 @@ In the event that Third Party Software has only been provided to you in object c
 				<name>OUT1H</name>
 				<description>I2S Channel 1 MSBs</description>
 				<addressOffset>0x04</addressOffset>
-				<size>16</size>
+				
 				<fields>
 						<field>
 							<description>I2S Ch1 msb</description>
@@ -5190,7 +5179,7 @@ In the event that Third Party Software has only been provided to you in object c
 				<name>OUT2L</name>
 				<description>I2S Channel 2 LSBs</description>
 				<addressOffset>0x08</addressOffset>
-				<size>16</size>
+				
 				<fields>
 						<field>
 							<description>I2S Ch2 lsb</description>
@@ -5204,7 +5193,7 @@ In the event that Third Party Software has only been provided to you in object c
 				<name>OUT2H</name>
 				<description>I2S Channel 2 MSBs</description>
 				<addressOffset>0x0C</addressOffset>
-				<size>16</size>
+				
 				<fields>
 						<field>
 							<description>I2S Ch2 msb</description>
@@ -5219,42 +5208,41 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>MODE1</name>
 					<description>I2S I2S format modes 1</description>
 					<addressOffset>0x10</addressOffset>
-					<size>16</size>
+					
 				</register>
 
 				<register>
 					<name>MODE2</name>
 					<description>I2S I2S format modes 2</description>
 					<addressOffset>0x14</addressOffset>
-					<size>16</size>
+					
 				</register>
 
 				<register>
 					<name>CFG1</name>
 					<description>I2S I2S configuration 1</description>
 					<addressOffset>0x18</addressOffset>
-					<size>16</size>
+					
 				</register>
 
 				<register>
 					<name>CFG2</name>
 					<description>I2S I2S configuration 2</description>
 					<addressOffset>0x1C</addressOffset>
-					<size>16</size>
+					
 				</register>
 
 				<register>
 					<name>STAT</name>
 					<description>I2S I2S status</description>
 					<addressOffset>0x20</addressOffset>
-					<size>16</size>
+					
 				</register>
 			</registers>
 	</peripheral>
 	
 		<peripheral>
-			<name>ADI_BEEP</name>
-			
+			<name>BEEP</name>			
 			<description>Beeper</description>
 			<groupName>BEEP</groupName>
 			<baseAddress>0x40005C00</baseAddress>
@@ -5271,40 +5259,42 @@ In the event that Third Party Software has only been provided to you in object c
 				<description>Beep interrupt</description>
 				<value>45</value>
 			</interrupt>
+			<size>16</size>
+			<access>read-write</access>			
 			<registers>
 
 				<register>
-					<name>BEEP_CFG</name>
+					<name>CFG</name>
 					<description>BEEP Beeper configuration</description>
 					<addressOffset>0x00</addressOffset>
-					<size>16</size>
+					
 				</register>
 
 				<register>
 					<name>STAT</name>
 					<description>BEEP Beeper status</description>
 					<addressOffset>0x04</addressOffset>
-					<size>16</size>
+					
 				</register>
 
 				<register>
 					<name>TONE_A</name>
 					<description>BEEP Tone A Data</description>
 					<addressOffset>0x08</addressOffset>
-					<size>16</size>
+					
 				</register>
 
 				<register>
 					<name>TONE_B</name>
 					<description>BEEP Tone B Data</description>
 					<addressOffset>0x0C</addressOffset>
-					<size>16</size>
+					
 				</register>
 			</registers>
 	</peripheral>
 	
 		<peripheral>
-			<name>ADI_RNG</name>
+			<name>RNG</name>
 			
 			<description>Random Bit Generator</description>
 			<groupName>RBG</groupName>
@@ -5322,13 +5312,15 @@ In the event that Third Party Software has only been provided to you in object c
 				<description>Random Bit Generator interrupt</description>
 				<value>58</value>
 			</interrupt>
+			<size>16</size>
+			<access>read-write</access>			
 			<registers>
 
 				<register>
 					<name>RNGCTL</name>
 					<description>RNG RNG Control Register</description>
 					<addressOffset>0x00</addressOffset>
-					<size>16</size>
+					
 					<fields>
                     <field>
                         <name>TMRMODE</name>
@@ -5355,7 +5347,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>RNGLEN</name>
 					<description>RNG RNG Sample Length Register</description>
 					<addressOffset>0x04</addressOffset>
-					<size>16</size>
+					
 					<fields>
                     <field>
                         <name>LENPRE</name>
@@ -5376,7 +5368,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>RNGSTAT</name>
 					<description>RNG RNG Status Register</description>
 					<addressOffset>0x08</addressOffset>
-					<size>16</size>
+					
 					<fields>
                     <field>
                         <name>RNGRDY</name>
@@ -5391,14 +5383,14 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>RNGDATA</name>
 					<description>RNG RNG Data Register</description>
 					<addressOffset>0x0C</addressOffset>
-					<size>16</size>
+					
 				</register>
 
 				<register>
 					<name>RNGCNTL</name>
 					<description>RNG Oscillator Count Low</description>
 					<addressOffset>0x10</addressOffset>
-					<size>16</size>
+					
 					<access>read-only</access>					
 				</register>
 
@@ -5406,7 +5398,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>RNGCNTH</name>
 					<description>RNG Oscillator Count High</description>
 					<addressOffset>0x14</addressOffset>
-					<size>16</size>
+					
 					<access>read-only</access>					
 					<fields>
                     <field>
@@ -5421,9 +5413,9 @@ In the event that Third Party Software has only been provided to you in object c
 		</peripheral>
 	
 		<peripheral>
-			<name>ADI_LCD</name>
+			<name>LCD</name>
 			<description>LCD Controller</description>
-			<groupName>LCD</groupName>
+			<groupName>LCD Controller</groupName>
 			<baseAddress>0x40008000</baseAddress>
 			<size>32</size>
 
@@ -5438,13 +5430,15 @@ In the event that Third Party Software has only been provided to you in object c
 				<description>LCD Controller interrupt</description>
 				<value>46</value>
 			</interrupt>
+			<size>16</size>
+			<access>read-write</access>
 			<registers>
 
 				<register>
 					<name>LCDCON</name>
 					<description>LCD LCD Configuration Register</description>
 					<addressOffset>0x00</addressOffset>
-					<size>16</size>
+					
                 <fields>
                     <field>
                         <name>BLINKEN</name>
@@ -5507,7 +5501,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>LCDSTAT</name>
 					<description>LCD LCD Status Register</description>
 					<addressOffset>0x04</addressOffset>
-					<size>16</size>
+					
 					<fields>
                     <field>
                         <name>LCD</name>
@@ -5546,7 +5540,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>LCDBLINK</name>
 					<description>LCD LCD Blink Control Register</description>
 					<addressOffset>0x08</addressOffset>
-					<size>16</size>
+					
 					<fields>
                     <field>
                         <name>AUTOSWITCH</name>
@@ -5573,7 +5567,7 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>LCDCONTRAST</name>
 					<description>LCD LCD Contrast Control Register</description>
 					<addressOffset>0x0C</addressOffset>
-					<size>16</size>
+					
 					<fields>
                     <field>
                         <name>CP_PD</name>
@@ -5612,119 +5606,119 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>LCDDATA0_S0</name>
 					<description>LCD Screen 0 LCD Data Register n</description>
 					<addressOffset>0x10</addressOffset>
-					<size>16</size>
+					
 				</register>
 
 				<register>
 					<name>LCDDATA1_S0</name>
 					<description>LCD Screen 0 LCD Data Register n</description>
 					<addressOffset>0x14</addressOffset>
-					<size>16</size>
+					
 				</register>
 
 				<register>
 					<name>LCDDATA2_S0</name>
 					<description>LCD Screen 0 LCD Data Register n</description>
 					<addressOffset>0x18</addressOffset>
-					<size>16</size>
+					
 				</register>
 
 				<register>
 					<name>LCDDATA3_S0</name>
 					<description>LCD Screen 0 LCD Data Register n</description>
 					<addressOffset>0x1C</addressOffset>
-					<size>16</size>
+					
 				</register>
 
 				<register>
 					<name>LCDDATA4_S0</name>
 					<description>LCD Screen 0 LCD Data Register n</description>
 					<addressOffset>0x20</addressOffset>
-					<size>16</size>
+					
 				</register>
 
 				<register>
 					<name>LCDDATA5_S0</name>
 					<description>LCD Screen 0 LCD Data Register n</description>
 					<addressOffset>0x24</addressOffset>
-					<size>16</size>
+					
 				</register>
 
 				<register>
 					<name>LCDDATA6_S0</name>
 					<description>LCD Screen 0 LCD Data Register n</description>
 					<addressOffset>0x28</addressOffset>
-					<size>16</size>
+					
 				</register>
 
 				<register>
 					<name>LCDDATA7_S0</name>
 					<description>LCD Screen 0 LCD Data Register n</description>
 					<addressOffset>0x2C</addressOffset>
-					<size>16</size>
+					
 				</register>
 
 				<register>
 					<name>LCDDATA0_S1</name>
 					<description>LCD Screen 1 LCD Data Register n</description>
 					<addressOffset>0x30</addressOffset>
-					<size>16</size>
+					
 				</register>
 
 				<register>
 					<name>LCDDATA1_S1</name>
 					<description>LCD Screen 1 LCD Data Register n</description>
 					<addressOffset>0x34</addressOffset>
-					<size>16</size>
+					
 				</register>
 
 				<register>
 					<name>LCDDATA2_S1</name>
 					<description>LCD Screen 1 LCD Data Register n</description>
 					<addressOffset>0x38</addressOffset>
-					<size>16</size>
+					
 				</register>
 
 				<register>
 					<name>LCDDATA3_S1</name>
 					<description>LCD Screen 1 LCD Data Register n</description>
 					<addressOffset>0x3C</addressOffset>
-					<size>16</size>
+					
 				</register>
 
 				<register>
 					<name>LCDDATA4_S1</name>
 					<description>LCD Screen 1 LCD Data Register n</description>
 					<addressOffset>0x40</addressOffset>
-					<size>16</size>
+					
 				</register>
 
 				<register>
 					<name>LCDDATA5_S1</name>
 					<description>LCD Screen 1 LCD Data Register n</description>
 					<addressOffset>0x44</addressOffset>
-					<size>16</size>
+					
 				</register>
 
 				<register>
 					<name>LCDDATA6_S1</name>
 					<description>LCD Screen 1 LCD Data Register n</description>
 					<addressOffset>0x48</addressOffset>
-					<size>16</size>
+					
 				</register>
 
 				<register>
 					<name>LCDDATA7_S1</name>
 					<description>LCD Screen 1 LCD Data Register n</description>
 					<addressOffset>0x4C</addressOffset>
-					<size>16</size>
+					
 				</register>
 			</registers>
 		</peripheral>
 		
 	<peripheral>
-		<name>ADI_DMA</name>
-		<description>DMA</description>
+		<name>DMA</name>
+		<description>DMA Controller</description>
 		<groupName>DMAC</groupName>
 		<baseAddress>0x40010000</baseAddress>
 		<size>32</size>
@@ -5819,13 +5813,16 @@ In the event that Third Party Software has only been provided to you in object c
 			<name>DMA_I2S</name>
 			<description>DMA Ch 15 interrupt</description>
 			<value>35</value>
-		</interrupt>		
+		</interrupt>
+			<size>32</size>
+			<access>read-write</access>		
 		<registers>
 
 	<register>
 		<name>DMASTA</name>
 		<description>DMA DMA Status</description>
 		<addressOffset>0x00</addressOffset>
+		<access>read-only</access>	
 		<fields>
                     <field>
                         <name>CHNLSM1</name>
@@ -5896,21 +5893,20 @@ In the event that Third Party Software has only been provided to you in object c
 		<name>DMAPDBPTR</name>
 		<description>DMA DMA channel primary control data base pointer</description>
 		<addressOffset>0x08</addressOffset>
-		<size>32</size>
 	</register>
 
 	<register>
 		<name>DMAADBPTR</name>
 		<description>DMA DMA channel alternate control data base pointer</description>
 		<addressOffset>0x0C</addressOffset>
-		<size>32</size>
+		<access>read-only</access>			
 	</register>
 
 	<register>
 		<name>DMASWREQ</name>
 		<description>DMA DMA channel software request</description>
 		<addressOffset>0x14</addressOffset>
-		<size>16</size>
+		
 		<fields>
                     <field>
                         <name>CHSWREQ</name>
@@ -5925,7 +5921,7 @@ In the event that Third Party Software has only been provided to you in object c
 		<name>DMARMSKSET</name>
 		<description>DMA DMA channel request mask set</description>
 		<addressOffset>0x20</addressOffset>
-		<size>16</size>
+		
 		<fields>
                     <field>
                         <name>CHREQMSET</name>
@@ -5940,7 +5936,7 @@ In the event that Third Party Software has only been provided to you in object c
 		<name>DMARMSKCLR</name>
 		<description>DMA DMA channel request mask clear</description>
 		<addressOffset>0x24</addressOffset>
-		<size>16</size>
+		
 		<fields>
                     <field>
                         <name>CHREQMCLR</name>
@@ -5955,7 +5951,7 @@ In the event that Third Party Software has only been provided to you in object c
 		<name>DMAENSET</name>
 		<description>DMA DMA channel enable set</description>
 		<addressOffset>0x28</addressOffset>
-		<size>16</size>
+		
 		<fields>
                     <field>
                         <name>CHENSET</name>
@@ -5970,7 +5966,7 @@ In the event that Third Party Software has only been provided to you in object c
 		<name>DMAENCLR</name>
 		<description>DMA DMA channel enable clear</description>
 		<addressOffset>0x2C</addressOffset>
-		<size>16</size>
+		
 		<fields>
                     <field>
                         <name>CHENCLR</name>
@@ -5985,7 +5981,7 @@ In the event that Third Party Software has only been provided to you in object c
 		<name>DMAALTSET</name>
 		<description>DMA DMA channel primary-alternate set</description>
 		<addressOffset>0x30</addressOffset>
-		<size>16</size>
+		
 		<fields>
                     <field>
                         <name>CHPRIALTSET</name>
@@ -6000,7 +5996,7 @@ In the event that Third Party Software has only been provided to you in object c
 		<name>DMAALTCLR</name>
 		<description>DMA DMA channel primary-alternate clear</description>
 		<addressOffset>0x34</addressOffset>
-		<size>16</size>
+		
 		<fields>
                     <field>
                         <name>CHPRIALTCLR</name>
@@ -6015,7 +6011,7 @@ In the event that Third Party Software has only been provided to you in object c
 		<name>DMAPRISET</name>
 		<description>DMA DMA channel priority set</description>
 		<addressOffset>0x38</addressOffset>
-		<size>16</size>
+		
 		<fields>
                     <field>
                         <name>CHPRISET</name>
@@ -6030,7 +6026,7 @@ In the event that Third Party Software has only been provided to you in object c
 		<name>DMAPRICLR</name>
 		<description>DMA DMA channel priority clear</description>
 		<addressOffset>0x3C</addressOffset>
-		<size>16</size>
+		
 		<fields>
                     <field>
                         <name>CHPRICLR</name>
@@ -6045,7 +6041,7 @@ In the event that Third Party Software has only been provided to you in object c
 		<name>DMAERRCHNLCLR</name>
 		<description>DMA DMA Per Channel Error Clear</description>
 		<addressOffset>0x48</addressOffset>
-		<size>16</size>
+		
 		<fields>
                     <field>
                         <name>CHNL</name>
@@ -6060,7 +6056,7 @@ In the event that Third Party Software has only been provided to you in object c
 		<name>DMAERRCLR</name>
 		<description>DMA DMA bus error clear</description>
 		<addressOffset>0x4C</addressOffset>
-		<size>16</size>
+		
 		<fields>
                     <field>
                         <name>ERRCLR</name>
@@ -6075,7 +6071,7 @@ In the event that Third Party Software has only been provided to you in object c
 		<name>DMAINVALIDDESCCLR</name>
 		<description>DMA DMA Per Channel Invalid Descriptor Clear</description>
 		<addressOffset>0x50</addressOffset>
-		<size>16</size>
+		
 		<fields>
                     <field>
                         <name>CHNL</name>
@@ -6090,7 +6086,7 @@ In the event that Third Party Software has only been provided to you in object c
 		<name>DMABSSET</name>
 		<description>DMA DMA channel bytes swap enable set</description>
 		<addressOffset>0x0800</addressOffset>
-		<size>16</size>
+		
 		<fields>
                     <field>
                         <name>CHBSWAPSET</name>
@@ -6105,7 +6101,7 @@ In the event that Third Party Software has only been provided to you in object c
 		<name>DMABSCLR</name>
 		<description>DMA DMA channel bytes swap enable clear</description>
 		<addressOffset>0x0804</addressOffset>
-		<size>16</size>
+		
 		<fields>
                     <field>
                         <name>CHBSWAPCLR</name>
@@ -6120,7 +6116,7 @@ In the event that Third Party Software has only been provided to you in object c
 		<name>DMASRCADSSET</name>
 		<description>DMA DMA channel source address decrement enable set</description>
 		<addressOffset>0x0810</addressOffset>
-		<size>16</size>
+		
 		<fields>
                     <field>
                         <name>CHSRCADRDECSET</name>
@@ -6135,7 +6131,7 @@ In the event that Third Party Software has only been provided to you in object c
 		<name>DMASRCADCLR</name>
 		<description>DMA DMA channel source address decrement enable clear</description>
 		<addressOffset>0x0814</addressOffset>
-		<size>16</size>
+		
 		<fields>
                     <field>
                         <name>CHADRDECCLR</name>
@@ -6150,7 +6146,7 @@ In the event that Third Party Software has only been provided to you in object c
 		<name>DMADSTADSET</name>
 		<description>DMA DMA channel destination address decrement enable set</description>
 		<addressOffset>0x0818</addressOffset>
-		<size>16</size>
+		
 		<fields>
                     <field>
                         <name>CHDSTADRDECSET</name>
@@ -6165,7 +6161,6 @@ In the event that Third Party Software has only been provided to you in object c
 		<name>DMADSTADCLR</name>
 		<description>DMA DMA channel destination address decrement enable clear</description>
 		<addressOffset>0x081C</addressOffset>
-		<size>16</size>
 		<fields>
                     <field>
                         <name>CHADRDECCLR</name>
@@ -6180,13 +6175,14 @@ In the event that Third Party Software has only been provided to you in object c
 					<name>DMAREVID</name>
 					<description>DMA DMA Controller Revision ID</description>
 					<addressOffset>0x0FE0</addressOffset>
+					<access>read-only</access>	
 					<size>8</size>
 				</register>
 			</registers>
 		</peripheral>
 		
 	<peripheral>
-	<name>ADI_FEE0</name>
+	<name>FEE0</name>
 	
 	<description>Instruction Flash Controller</description>
 	<groupName>IFC</groupName>
@@ -6208,62 +6204,57 @@ In the event that Third Party Software has only been provided to you in object c
 	<description>Flash EEPROM interrupt</description>
 	<value>55</value>
 	</interrupt>
+		<size>16</size>
+		<access>read-write</access>	
 		<registers>
 
 	<register>
 		<name>FEESTA</name>
 		<description>FEE0 Status</description>
 		<addressOffset>0x00</addressOffset>
-		<size>16</size>
+		<access>read-only</access>			
 	</register>
 
 	<register>
 		<name>FEECON0</name>
 		<description>FEE0 Command Control</description>
 		<addressOffset>0x04</addressOffset>
-		<size>16</size>
 	</register>
 
 	<register>
 		<name>FEECMD</name>
 		<description>FEE0 Command</description>
 		<addressOffset>0x08</addressOffset>
-		<size>16</size>
 	</register>
 
 	<register>
 		<name>FEEADR0L</name>
 		<description>FEE0 Lower page address</description>
 		<addressOffset>0x10</addressOffset>
-		<size>16</size>
 	</register>
 
 	<register>
 		<name>FEEADR0H</name>
 		<description>FEE0 Upper page address</description>
 		<addressOffset>0x14</addressOffset>
-		<size>16</size>
 	</register>
 
 	<register>
 		<name>FEEADR1L</name>
 		<description>FEE0 Lower page address</description>
 		<addressOffset>0x18</addressOffset>
-		<size>16</size>
 	</register>
 
 	<register>
 		<name>FEEADR1H</name>
 		<description>FEE0 Upper page address</description>
 		<addressOffset>0x1C</addressOffset>
-		<size>16</size>
 	</register>
 
 	<register>
 		<name>FEEKEY</name>
 		<description>FEE0 Key</description>
 		<addressOffset>0x20</addressOffset>
-		<size>16</size>
 		<fields>
 				<field>
 					<name>KEY</name>
@@ -6293,90 +6284,78 @@ In the event that Third Party Software has only been provided to you in object c
 		<name>FEESIGL</name>
 		<description>FEE0 Lower halfword of signature</description>
 		<addressOffset>0x30</addressOffset>
-		<size>16</size>
 	</register>
 
 	<register>
 		<name>FEESIGH</name>
 		<description>FEE0 Upper halfword of signature</description>
 		<addressOffset>0x34</addressOffset>
-		<size>16</size>
 	</register>
 
 	<register>
 		<name>FEEADRAL</name>
 		<description>FEE0 Lower halfword of write abort address</description>
 		<addressOffset>0x48</addressOffset>
-		<size>16</size>
 	</register>
 
 	<register>
 		<name>FEEADRAH</name>
 		<description>FEE0 Upper halfword of write abort address</description>
 		<addressOffset>0x4C</addressOffset>
-		<size>16</size>
 	</register>
 
 	<register>
 		<name>FEEPARCTL</name>
 		<description>FEE0 Parity Control Register</description>
 		<addressOffset>0x50</addressOffset>
-		<size>16</size>
 	</register>
 
 	<register>
 		<name>FEEPARSTA</name>
 		<description>FEE0 Parity Status Register</description>
 		<addressOffset>0x54</addressOffset>
-		<size>16</size>
 	</register>
 
 	<register>
 		<name>FEEPARADRL</name>
 		<description>FEE0 Parity Error Address Low</description>
 		<addressOffset>0x58</addressOffset>
-		<size>16</size>
 	</register>
 
 	<register>
 		<name>FEEPARADRH</name>
 		<description>FEE0 Parity Error Address High</description>
 		<addressOffset>0x5C</addressOffset>
-		<size>16</size>
 	</register>
 
 	<register>
 		<name>FEEAEN0</name>
 		<description>FEE0 System IRQ abort enable for interrupts 15 to 0</description>
 		<addressOffset>0x78</addressOffset>
-		<size>16</size>
 	</register>
 
 	<register>
 		<name>FEEAEN1</name>
 		<description>FEE0 System IRQ abort enable for interrupts 31 to 16</description>
 		<addressOffset>0x7C</addressOffset>
-		<size>16</size>
 	</register>
 
 	<register>
 		<name>FEEAEN2</name>
 		<description>FEE0 System IRQ abort enable for interrupts 47 to 32</description>
 		<addressOffset>0x80</addressOffset>
-		<size>16</size>
 	</register>
 
 	<register>
 		<name>FEEAEN3</name>
 		<description>FEE0 System IRQ abort enable for interrupts 60 to 48</description>
 		<addressOffset>0x84</addressOffset>
-		<size>16</size>
 	</register>
 	</registers>
 	</peripheral>
 	
 	<peripheral>
-	<name>ADI_GPF</name>
+	<name>GPF</name>
 	
 	<description>General Purpose Flash Controller</description>
 	<groupName>GPFC</groupName>
@@ -6388,111 +6367,98 @@ In the event that Third Party Software has only been provided to you in object c
 	<size>0x88</size>
 	<usage>registers</usage>
 	</addressBlock>
-
+	<size>16</size>
+	<access>read-write</access>	
 	<registers>
 
 	<register>
 		<name>GPFEESTA</name>
 		<description>GPF Status</description>
 		<addressOffset>0x00</addressOffset>
-		<size>16</size>
 	</register>
 
 	<register>
 		<name>GPFEECON0</name>
 		<description>GPF Command Control</description>
 		<addressOffset>0x04</addressOffset>
-		<size>16</size>
 	</register>
 
 	<register>
 		<name>GPFEECMD</name>
 		<description>GPF Command</description>
 		<addressOffset>0x08</addressOffset>
-		<size>16</size>
 	</register>
 
 	<register>
 		<name>GPFEEADR0L</name>
 		<description>GPF Lower page address</description>
 		<addressOffset>0x10</addressOffset>
-		<size>16</size>
 	</register>
 
 	<register>
 		<name>GPFEEADR1L</name>
 		<description>GPF Lower page address</description>
 		<addressOffset>0x18</addressOffset>
-		<size>16</size>
 	</register>
 
 	<register>
 		<name>GPFEEKEY</name>
 		<description>GPF Key</description>
 		<addressOffset>0x20</addressOffset>
-		<size>16</size>
 	</register>
 
 	<register>
 		<name>GPFEESIGL</name>
 		<description>GPF Lower halfword of signature</description>
 		<addressOffset>0x30</addressOffset>
-		<size>16</size>
 	</register>
 
 	<register>
 		<name>GPFEESIGH</name>
 		<description>GPF Upper halfword of signature</description>
 		<addressOffset>0x34</addressOffset>
-		<size>16</size>
 	</register>
 
 	<register>
 		<name>GPFEEADRAL</name>
 		<description>GPF Lower halfword of write abort address</description>
 		<addressOffset>0x48</addressOffset>
-		<size>16</size>
 	</register>
 
 	<register>
 		<name>GPFEEADRAH</name>
 		<description>GPF Upper halfword of write abort address</description>
 		<addressOffset>0x4C</addressOffset>
-		<size>16</size>
 	</register>
 
 	<register>
 		<name>GPFEEAEN0</name>
 		<description>GPF System IRQ abort enable for interrupts 15 to 0</description>
 		<addressOffset>0x78</addressOffset>
-		<size>16</size>
 	</register>
 
 	<register>
 		<name>GPFEEAEN1</name>
 		<description>GPF System IRQ abort enable for interrupts 31 to 16</description>
 		<addressOffset>0x7C</addressOffset>
-		<size>16</size>
 	</register>
 
 	<register>
 		<name>GPFEEAEN2</name>
 		<description>GPF System IRQ abort enable for interrupts 47 to 32</description>
 		<addressOffset>0x80</addressOffset>
-		<size>16</size>
 	</register>
 
 	<register>
 		<name>GPFEEAEN3</name>
 		<description>GPF System IRQ abort enable for interrupts 60 to 48</description>
 		<addressOffset>0x84</addressOffset>
-		<size>16</size>
 	</register>
 	</registers>
 	</peripheral>
 	
 	<peripheral>
-	<name>ADI_GPIO0</name>
+	<name>GPIO0</name>
 	
 	<description>GPIO</description>
 	<groupName>GPIO</groupName>
@@ -6514,119 +6480,121 @@ In the event that Third Party Software has only been provided to you in object c
 	<name>GPIOB</name>
 	<description>interrupt</description>
 	<value>48</value>
-	</interrupt>	
+	</interrupt>
+		<size>32</size>
+		<access>read-write</access>
 		<registers>
 
 	<register>
 		<name>GPCON</name>
 		<description>GPIO0 GPIO Port 0 Configuration</description>
 		<addressOffset>0x00</addressOffset>
-		<size>16</size>
+		<size>32</size>		
 	</register>
 
 	<register>
 		<name>GPOEN</name>
 		<description>GPIO0 GPIO Port 0 output enable</description>
 		<addressOffset>0x04</addressOffset>
-		<size>16</size>
+		<size>16</size>			
 	</register>
 
 	<register>
 		<name>GPPE</name>
 		<description>GPIO0 GPIO Port 0 output pullup/pulldown enable</description>
 		<addressOffset>0x08</addressOffset>
-		<size>16</size>
+		<size>16</size>	
 	</register>
 
 	<register>
 		<name>GPIEN</name>
 		<description>GPIO0 GPIO Port 0 Input Path Enable</description>
 		<addressOffset>0x0C</addressOffset>
-		<size>16</size>
+		<size>16</size>	
 	</register>
 
 	<register>
 		<name>GPIN</name>
 		<description>GPIO0 GPIO Port 0 registered data input</description>
 		<addressOffset>0x10</addressOffset>
-		<size>16</size>
+		<size>16</size>	
 	</register>
 
 	<register>
 		<name>GPOUT</name>
 		<description>GPIO0 GPIO Port 0 data output</description>
 		<addressOffset>0x14</addressOffset>
-		<size>16</size>
+		<size>16</size>			
 	</register>
 
 	<register>
 		<name>GPSET</name>
 		<description>GPIO0 GPIO Port 0 data out set</description>
 		<addressOffset>0x18</addressOffset>
-		<size>16</size>
+		<size>16</size>			
 	</register>
 
 	<register>
 		<name>GPCLR</name>
 		<description>GPIO0 GPIO Port 0 data out clear</description>
 		<addressOffset>0x1C</addressOffset>
-		<size>16</size>
+		<size>16</size>			
 	</register>
 
 	<register>
 		<name>GPTGL</name>
 		<description>GPIO0 GPIO Port 0 pin toggle</description>
 		<addressOffset>0x20</addressOffset>
-		<size>16</size>
+		<size>16</size>			
 	</register>
 
 	<register>
 		<name>GPPOL</name>
 		<description>GPIO0 GPIO Port 0 interrupt polarity</description>
 		<addressOffset>0x24</addressOffset>
-		<size>16</size>
+		<size>16</size>			
 	</register>
 
 	<register>
 		<name>GPIENA</name>
 		<description>GPIO0 GPIO Port 0 interrupt A enable</description>
 		<addressOffset>0x28</addressOffset>
-		<size>16</size>
+		<size>16</size>	
 	</register>
 
 	<register>
 		<name>GPIENB</name>
 		<description>GPIO0 GPIO Port 0 interrupt B enable</description>
 		<addressOffset>0x2C</addressOffset>
-		<size>16</size>
+		<size>16</size>			
 	</register>
 
 	<register>
 		<name>GPINT</name>
 		<description>GPIO0 GPIO Port 0 interrupt Status</description>
 		<addressOffset>0x30</addressOffset>
-		<size>16</size>
+		<size>16</size>			
 	</register>
 	</registers>
 	</peripheral>
-	<peripheral derivedFrom=ADI_GPIO0>
-	<name>ADI_GPIO1</name>
+	<peripheral derivedFrom=GPIO0>
+	<name>GPIO1</name>
 	<baseAddress>0x40020040</baseAddress>
 	</peripheral>
-	<peripheral derivedFrom=ADI_GPIO0>
-	<name>ADI_GPIO2</name>
+	<peripheral derivedFrom=GPIO0>
+	<name>GPIO2</name>
 	<baseAddress>0x40020080</baseAddress>
 	</peripheral>	
-	<peripheral derivedFrom=ADI_GPIO0>
-	<name>ADI_GPIO3</name>
+	<peripheral derivedFrom=GPIO0>
+	<name>GPIO3</name>
 	<baseAddress>0x400200C0</baseAddress>
 	</peripheral>
-	<peripheral derivedFrom=ADI_GPIO0>
-	<name>ADI_GPIO4</name>
+	<peripheral derivedFrom=GPIO0>
+	<name>GPIO4</name>
 	<baseAddress>0x40020100</baseAddress>
 	</peripheral>
 	<peripheral>
-	<name>ADI_SPIH</name>
+	<name>SPIH0</name>
 	<description>SPIH Master/Slave</description>
 	<groupName>SPIH</groupName>
 	<baseAddress>0x40024000</baseAddress>
@@ -6643,9 +6611,11 @@ In the event that Third Party Software has only been provided to you in object c
 	<description>interrupt</description>
 	<value>16</value>
 	</interrupt>
+			<size>16</size>
+			<access>read-write</access>	
 				<registers>	
 				<register>
-					<name>SPISTA</name>
+					<name>SPIH0STA</name>
 					<description>SPIH Status</description>
 					<addressOffset>0x00</addressOffset>
 					<fields>
@@ -6763,10 +6733,10 @@ In the event that Third Party Software has only been provided to you in object c
 				</register>
 
 				<register>
-					<name>SPIRX</name>
+					<name>SPIH0RX</name>
 					<description>SPIH Receive</description>
 					<addressOffset>0x04</addressOffset>
-					<size>16</size>
+					
 					<fields>
 						<field>
 							<name>DMA</name>
@@ -6784,10 +6754,10 @@ In the event that Third Party Software has only been provided to you in object c
 				</register>
 
 				<register>
-					<name>SPITX</name>
+					<name>SPIH0TX</name>
 					<description>SPIH Transmit</description>
 					<addressOffset>0x08</addressOffset>
-					<size>16</size>
+					
 					<fields>
 						<field>
 							<name>DMA</name>
@@ -6805,10 +6775,10 @@ In the event that Third Party Software has only been provided to you in object c
 				</register>
 
 				<register>
-					<name>SPIDIV</name>
+					<name>SPIH0DIV</name>
 					<description>SPIH Baud rate selection</description>
 					<addressOffset>0x0C</addressOffset>
-					<size>16</size>
+					
 					<fields>
 						<field>
 							<name>CSIRQ</name>
@@ -6838,10 +6808,10 @@ In the event that Third Party Software has only been provided to you in object c
 				</register>
 
 				<register>
-					<name>SPICON</name>
+					<name>SPIH0CON</name>
 					<description>SPIH SPI configuration</description>
 					<addressOffset>0x10</addressOffset>
-					<size>16</size>
+					
 					<fields>
 						<field>
 							<name>MOD</name>
@@ -6997,10 +6967,10 @@ In the event that Third Party Software has only been provided to you in object c
 				</register>
 
 				<register>
-					<name>SPIDMA</name>
+					<name>SPIH0DMA</name>
 					<description>SPIH SPI DMA enable</description>
 					<addressOffset>0x14</addressOffset>
-					<size>16</size>
+					
 					<fields>
 						<field>
 							<name>IENRXDMA</name>
@@ -7060,10 +7030,10 @@ In the event that Third Party Software has only been provided to you in object c
 				</register>
 
 				<register>
-					<name>SPICNT</name>
+					<name>SPIH0CNT</name>
 					<description>SPIH Transfer byte count</description>
 					<addressOffset>0x18</addressOffset>
-					<size>16</size>
+					
 					<fields>
 						<field>
 							<name>COUNT</name>
@@ -7077,10 +7047,10 @@ In the event that Third Party Software has only been provided to you in object c
 	</peripheral>
 	
 	<peripheral>
-	<name>ADI_SYSCLK</name>
+	<name>SYSCLK</name>
 	
 	<description>System Clocking</description>
-	<groupName>SYSCLK</groupName>
+	<groupName>System Clocking</groupName>
 	<baseAddress>0x40028000</baseAddress>
 	<size>32</size>
 
@@ -7096,7 +7066,7 @@ In the event that Third Party Software has only been provided to you in object c
 		<name>CLKCON0</name>
 		<description>Clock Control Register 0</description>
 		<addressOffset>0x00</addressOffset>
-		<size>16</size>
+		
 		<fields>
 			<field>
 				<name>HFXTALIE</name>
@@ -7188,7 +7158,7 @@ In the event that Third Party Software has only been provided to you in object c
 							</enumeratedValue>
 							<enumeratedValue>
 								<description>Cap Touch Clock</description>
-								<name>CT_CLK</name>
+								<name>CLK</name>
 								<value>2</value>
 							</enumeratedValue>
 							<enumeratedValue>
@@ -7279,44 +7249,44 @@ In the event that Third Party Software has only been provided to you in object c
 		<name>CLKCON1</name>
 		<description>Clock Control Register 0</description>
 		<addressOffset>0x04</addressOffset>
-		<size>16</size>
+		
 	</register>
 
 	<register>
 		<name>CLKCON2</name>
 		<description>Clock Control Register 2</description>
 		<addressOffset>0x08</addressOffset>
-		<size>16</size>
+		
 	</register>
 	<register>
 		<name>CLKCON3</name>
 		<description>Clock Control Register 3</description>
 		<addressOffset>0x0c</addressOffset>
-		<size>16</size>
+		
 	</register>	
 	<register>
 		<name>CLKCON4</name>
 		<description>Clock Control Register 4</description>
 		<addressOffset>0x10</addressOffset>
-		<size>16</size>
+		
 	</register>		
 	<register>
 		<name>CLKCON5</name>
 		<description>Clock Control Register 5</description>
 		<addressOffset>0x14</addressOffset>
-		<size>16</size>
+		
 	</register>	
 	<register>
 		<name>CLKSTAT0</name>
 		<description>Clock Status Register 0</description>
 		<addressOffset>0x18</addressOffset>
-		<size>16</size>
+		
 	</register>	
 	</registers>
 	</peripheral>
 
 	<peripheral>
-	<name>ADI_CRC</name>
+	<name>CRC</name>
 	
 	<description>CRC Engine</description>
 	<groupName>CRCENG</groupName>
@@ -7335,27 +7305,27 @@ In the event that Third Party Software has only been provided to you in object c
 		<name>CTL</name>
 		<description>CRC CRC Control Register</description>
 		<addressOffset>0x00</addressOffset>
-		<size>16</size>
+		
 	</register>
 
 	<register>
 		<name>IPDATA</name>
 		<description>CRC Input Data Register</description>
 		<addressOffset>0x04</addressOffset>
-		<size>16</size>
+		
 	</register>
 
 	<register>
 		<name>RESULT</name>
 		<description>CRC CRC Result Register</description>
 		<addressOffset>0x08</addressOffset>
-		<size>16</size>
+		
 	</register>
 	</registers>
 	</peripheral>
 	
 	<peripheral>
-	<name>ADI_PDI</name>
+	<name>PDI</name>
 	
 	<description>Parallel Display Interface</description>
 	<groupName>PDIC</groupName>
@@ -7379,28 +7349,28 @@ In the event that Third Party Software has only been provided to you in object c
 		<name>CFG</name>
 		<description>PDI PDI Configuration Register</description>
 		<addressOffset>0x00</addressOffset>
-		<size>16</size>
+		
 	</register>
 
 	<register>
 		<name>INT_SET</name>
 		<description>PDI PDI Interrupt Set Register</description>
 		<addressOffset>0x04</addressOffset>
-		<size>16</size>
+		
 	</register>
 
 	<register>
 		<name>INT_CLR</name>
 		<description>PDI PDI Interrupt Clear Register</description>
 		<addressOffset>0x08</addressOffset>
-		<size>16</size>
+		
 	</register>
 
 	<register>
 		<name>STAT</name>
 		<description>PDI PDI Status Register</description>
 		<addressOffset>0x0C</addressOffset>
-		<size>16</size>
+		
 	</register>
 
 	<register>
@@ -7408,34 +7378,34 @@ In the event that Third Party Software has only been provided to you in object c
 		<name>CMD</name>
 		<description>PDI PDI Command Register</description>
 		<addressOffset>0x10</addressOffset>
-		<size>16</size>
+		
 	</register>
 
 	<register>
 		<name>FRDATA_N</name>
 		<description>PDI PDI Frame Data Count Register</description>
 		<addressOffset>0x14</addressOffset>
-		<size>16</size>
+		
 	</register>
 
 	<register>
 		<name>FIFO</name>
 		<description>PDI PDI Parameter FIFO</description>
 		<addressOffset>0x18</addressOffset>
-		<size>16</size>
+		
 	</register>
 
 	<register>
 		<name>IF_TIMING</name>
 		<description>PDI PDI Interface Timing Register</description>
 		<addressOffset>0x1C</addressOffset>
-		<size>16</size>
+		
 	</register>
 	</registers>
 	</peripheral>
 	
 	<peripheral>
-	<name>ADI_AFE</name>
+	<name>AFE</name>
 	
 	<description>Analog Front End</description>
 	<groupName>Analog Front End</groupName>
@@ -7449,22 +7419,22 @@ In the event that Third Party Software has only been provided to you in object c
 	</addressBlock>
 
 	<interrupt>
-	<name>AFE_CAPTURE</name>
+	<name>CAPTURE</name>
 	<description>Analog Front End Capture interrupt</description>
 	<value>50</value>
 	</interrupt>
 	<interrupt>
-	<name>AFE_GENERATE</name>
+	<name>GENERATE</name>
 	<description>Analog Front End Generation interrupt</description>
 	<value>51</value>
 	</interrupt>
 	<interrupt>
-	<name>AFE_CMD_FIFO</name>
+	<name>CMD_FIFO</name>
 	<description>Analog Front End FIFO CMD interrupt</description>
 	<value>52</value>
 	</interrupt>
 	<interrupt>
-		<name>AFE_DATA_FIFO</name>
+		<name>DATA_FIFO</name>
 		<description>Analog Front End FIFO DATA interrupt</description>
 		<value>53</value>
 	</interrupt>	
@@ -7864,10 +7834,10 @@ In the event that Third Party Software has only been provided to you in object c
 	</registers>
 	</peripheral>
 	<peripheral>
-		<name>ADI_CT</name>
+		<name>CT</name>
 		
 		<description>Cap Touch Controller</description>
-		<groupName>CT</groupName>
+		<groupName>Capacitive Touch</groupName>
 		<baseAddress>0x40084000</baseAddress>
 		<size>32</size>
 
@@ -7906,10 +7876,10 @@ In the event that Third Party Software has only been provided to you in object c
 	</peripheral>
 		
 	<peripheral>
-		<name>ADI_USB</name>
+		<name>USB</name>
 		
 		<description>USB Controller</description>
-		<groupName>USB</groupName>
+		<groupName>USB0</groupName>
 		<baseAddress>0x400A0000</baseAddress>
 		<size>32</size>
 
@@ -7935,686 +7905,686 @@ In the event that Third Party Software has only been provided to you in object c
 		</interrupt>
 		<registers>
 			<register>
-				<name>FADDR</name>
+				<name>USB0_FADDR</name>
 				<description>USB0 Function Address Register</description>
 				<addressOffset>0x00</addressOffset>
 				<size>8</size>
 			</register>
 
 			<register>
-				<name>POWER</name>
+				<name>USB0_POWER</name>
 				<description>USB0 Power and Device Control Register</description>
 				<addressOffset>0x01</addressOffset>
 				<size>8</size>
 			</register>
 
 			<register>
-				<name>INTRTX</name>
+				<name>USB0_INTRTX</name>
 				<description>USB0 Transmit Interrupt Register</description>
 				<addressOffset>0x02</addressOffset>
 				<size>8</size>
 			</register>
 
 			<register>
-				<name>INTRRX</name>
+				<name>USB0_INTRRX</name>
 				<description>USB0 Receive Interrupt Register</description>
 				<addressOffset>0x04</addressOffset>
 				<size>16</size>
 			</register>
 
 			<register>
-				<name>INTRTXE</name>
+				<name>USB0_INTRTXE</name>
 				<description>USB0 Transmit Interrupt Enable Register</description>
 				<addressOffset>0x0006</addressOffset>
-				<size>16</size>
+				<size>16</size>				
 			</register>
 
 			<register>
-				<name>INTRRXE</name>
+				<name>USB0_INTRRXE</name>
 				<description>USB0 Receive Interrupt Enable Register</description>
 				<addressOffset>0x0008</addressOffset>
-				<size>16</size>
+				<size>16</size>				
 			</register>
 
 			<register>
-				<name>IRQ</name>
+				<name>USB0_IRQ</name>
 				<description>USB0 Common Interrupts Register</description>
 				<addressOffset>0x000A</addressOffset>
 				<size>8</size>
 			</register>
 
 			<register>
-				<name>IEN</name>
+				<name>USB0_IEN</name>
 				<description>USB0 Common Interrupts Enable Register</description>
 				<addressOffset>0x000B</addressOffset>
 				<size>8</size>
 			</register>
 
 			<register>
-				<name>FRAME</name>
+				<name>USB0_FRAME</name>
 				<description>USB0 Frame Number Register</description>
 				<addressOffset>0x000C</addressOffset>
 				<size>16</size>
 			</register>
 
 			<register>
-				<name>INDEX</name>
+				<name>USB0_INDEX</name>
 				<description>USB0 Index Register</description>
 				<addressOffset>0x000E</addressOffset>
 				<size>8</size>
 			</register>
 
 			<register>
-				<name>TESTMODE</name>
+				<name>USB0_TESTMODE</name>
 				<description>USB0 Testmode Register</description>
 				<addressOffset>0x000F</addressOffset>
 				<size>8</size>
 			</register>
 
 			<register>
-				<name>EPI_TXMAXP0</name>
+				<name>USB0_EPI_TXMAXP0</name>
 				<description>USB0 EPn Transmit Maximum Packet Length Register</description>
 				<addressOffset>0x0010</addressOffset>
 				<size>16</size>
 			</register>
 <!--
 			<register>
-				<name>EPI_TXCSR_H0</name>
+				<name>USB0_EPI_TXCSR_H0</name>
 				<description>USB0 EPn Transmit Configuration and Status (Host) Register</description>
 				<addressOffset>0x0012</addressOffset>
-				<size>16</size>
+				<size>16</size>				
 			</register>
 -->
 <!--
 			<register>
-				<name>EP0I_CSR0_P</name>
+				<name>USB0_EP0I_CSR0_P</name>
 				<description>USB0 EP0 Configuration and Status (Peripheral) Register</description>
 				<addressOffset>0x0012</addressOffset>
-				<size>16</size>
+				<size>16</size>				
 			</register>
 -->
 <!--
 			<register>
-				<name>EP0I_CSR0_H</name>
+				<name>USB0_EP0I_CSR0_H</name>
 				<description>USB0 EP0 Configuration and Status (Host) Register</description>
 				<addressOffset>0x0012</addressOffset>
-				<size>16</size>
+				<size>16</size>				
 			</register>
 -->
 			<register>
-				<name>EPI_TXCSR_P0</name>
+				<name>USB0_EPI_TXCSR_P0</name>
 				<description>USB0 EPn Transmit Configuration and Status (Peripheral) Register</description>
 				<addressOffset>0x0012</addressOffset>
-				<size>16</size>
+				<size>16</size>				
 			</register>
 
 			<register>
-				<name>EPI_RXMAXP0</name>
+				<name>USB0_EPI_RXMAXP0</name>
 				<description>USB0 EPn Receive Maximum Packet Length Register</description>
 				<addressOffset>0x0014</addressOffset>
-				<size>16</size>
+				<size>16</size>				
 			</register>
 <!--
 			<register>
-				<name>EPI_RXCSR_H0</name>
+				<name>USB0_EPI_RXCSR_H0</name>
 				<description>USB0 EPn Receive Configuration and Status (Host) Register</description>
 				<addressOffset>0x0016</addressOffset>
-				<size>16</size>
+				<size>16</size>				
 			</register>
 -->
 <!--
 			<register>
-				<name>EPI_RXCSR_P0</name>
+				<name>USB0_EPI_RXCSR_P0</name>
 				<description>USB0 EPn Receive Configuration and Status (Peripheral) Register</description>
 				<addressOffset>0x0016</addressOffset>
-				<size>16</size>
+				<size>16</size>				
 			</register>
 -->
 			<register>
-				<name>EP0I_CNT0</name>
+				<name>USB0_EP0I_CNT0</name>
 				<description>USB0 EP0 Number of Received Bytes Register</description>
 				<addressOffset>0x0018</addressOffset>
-				<size>16</size>
+				<size>16</size>				
 			</register>
 <!--
 			<register>
-				<name>EPI_RXCNT0</name>
+				<name>USB0_EPI_RXCNT0</name>
 				<description>USB0 EPn Number of Bytes Received Register</description>
 				<addressOffset>0x0018</addressOffset>
-				<size>16</size>
+				<size>16</size>				
 			</register>
 -->
 			<register>
-				<name>EP0I_CFGDATA0</name>
+				<name>USB0_EP0I_CFGDATA0</name>
 				<description>USB0 EP0 Configuration Information Register</description>
 				<addressOffset>0x001F</addressOffset>
 				<size>8</size>
 			</register>
 <!--
 			<register>
-				<name>EPI_FIFOSIZE0</name>
+				<name>USB0_EPI_FIFOSIZE0</name>
 				<description>USB0 FIFO size</description>
 				<addressOffset>0x001F</addressOffset>
 				<size>8</size>
 			</register>
 -->
 			<register>
-				<name>FIFO0</name>
+				<name>USB0_FIFO0</name>
 				<description>USB0 FIFO Word (32-Bit) Register</description>
 				<addressOffset>0x0020</addressOffset>
-				<size>16</size>
+				<size>16</size>				
 			</register>
 
 			<register>
-				<name>FIFO1</name>
+				<name>USB0_FIFO1</name>
 				<description>USB0 FIFO Word (32-Bit) Register</description>
 				<addressOffset>0x0024</addressOffset>
-				<size>16</size>
+				<size>16</size>			
 			</register>
 
 			<register>
-				<name>FIFO2</name>
+				<name>USB0_FIFO2</name>
 				<description>USB0 FIFO Word (32-Bit) Register</description>
 				<addressOffset>0x0028</addressOffset>
 			</register>
 
 			<register>
-				<name>FIFO3</name>
+				<name>USB0_FIFO3</name>
 				<description>USB0 FIFO Word (32-Bit) Register</description>
 				<addressOffset>0x002C</addressOffset>
-				<size>16</size>
+				<size>16</size>				
 			</register>
 <!--
 			<register>
-				<name>FIFOH0</name>
+				<name>USB0_FIFOH0</name>
 				<description>USB0 FIFO Half-Word (16-Bit) Register</description>
 				<addressOffset>0x0020</addressOffset>
-				<size>16</size>
+				<size>16</size>				
 			</register>
 
 			<register>
-				<name>FIFOH1</name>
+				<name>USB0_FIFOH1</name>
 				<description>USB0 FIFO Half-Word (16-Bit) Register</description>
 				<addressOffset>0x0024</addressOffset>
-				<size>16</size>
+				<size>16</size>				
 			</register>
 
 			<register>
-				<name>FIFOH2</name>
+				<name>USB0_FIFOH2</name>
 				<description>USB0 FIFO Half-Word (16-Bit) Register</description>
 				<addressOffset>0x0028</addressOffset>
-				<size>16</size>
+				<size>16</size>				
 			</register>
 
 			<register>
-				<name>FIFOH3</name>
+				<name>USB0_FIFOH3</name>
 				<description>USB0 FIFO Half-Word (16-Bit) Register</description>
 				<addressOffset>0x002C</addressOffset>
-				<size>16</size>
+				<size>16</size>				
 			</register>
 -->
 <!--
 			<register>
-				<name>FIFOB0</name>
+				<name>USB0_FIFOB0</name>
 				<description>USB0 FIFO Byte (8-Bit) Register</description>
 				<addressOffset>0x0020</addressOffset>
-				<size>16</size>
+				<size>16</size>				
 			</register>
 
 			<register>
-				<name>FIFOB1</name>
+				<name>USB0_FIFOB1</name>
 				<description>USB0 FIFO Byte (8-Bit) Register</description>
 				<addressOffset>0x0024</addressOffset>
-				<size>16</size>
+				<size>16</size>				
 			</register>
 
 			<register>
-				<name>FIFOB2</name>
+				<name>USB0_FIFOB2</name>
 				<description>USB0 FIFO Byte (8-Bit) Register</description>
 				<addressOffset>0x0028</addressOffset>
-				<size>16</size>
+				<size>16</size>				
 			</register>
 
 			<register>
-				<name>FIFOB3</name>
+				<name>USB0_FIFOB3</name>
 				<description>USB0 FIFO Byte (8-Bit) Register</description>
 				<addressOffset>0x002C</addressOffset>
-				<size>16</size>
+				<size>16</size>				
 			</register>
 -->
 			<register>
-				<name>DEV_CTL</name>
+				<name>USB0_DEV_CTL</name>
 				<description>USB0 Device Control Register</description>
 				<addressOffset>0x0060</addressOffset>
 				<size>8</size>
 			</register>
 
 			<register>
-				<name>MISC</name>
+				<name>USB0_MISC</name>
 				<description>USB0 Miscellaneous Register</description>
 				<addressOffset>0x0061</addressOffset>
 				<size>8</size>
 			</register>
 
 			<register>
-				<name>EPINFO</name>
+				<name>USB0_EPINFO</name>
 				<description>USB0 Endpoint Information Register</description>
 				<addressOffset>0x0078</addressOffset>
 				<size>8</size>
 			</register>
 
 			<register>
-					<name>RAMINFO</name>
+					<name>USB0_RAMINFO</name>
 					<description>USB0 RAM Information Register</description>
 					<addressOffset>0x0079</addressOffset>
 					<size>8</size>
 				</register>
 
 				<register>
-					<name>LINKINFO</name>
+					<name>USB0_LINKINFO</name>
 					<description>USB0 Link Information Register</description>
 					<addressOffset>0x007A</addressOffset>
+					<size>16</size>					
+				</register>
+
+				<register>
+					<name>USB0_FS_EOF1</name>
+					<description>USB0 Full-Speed EOF 1 Register</description>
+					<addressOffset>0x007D</addressOffset>
+					<size>8</size>
 					<size>16</size>
 				</register>
 
 				<register>
-					<name>FS_EOF1</name>
-					<description>USB0 Full-Speed EOF 1 Register</description>
-					<addressOffset>0x007D</addressOffset>
-					<size>8</size>
-
-				</register>
-
-				<register>
-					<name>SOFT_RST</name>
+					<name>USB0_SOFT_RST</name>
 					<description>USB0 Software Reset Register</description>
 					<addressOffset>0x007F</addressOffset>
 					<size>8</size>
 				</register>
 
 				<register>
-					<name>EP0_TXMAXP</name>
+					<name>USB0_EP0_TXMAXP</name>
 					<description>USB0 EPn Transmit Maximum Packet Length Register</description>
 					<addressOffset>0x0100</addressOffset>
-					<size>16</size>
+					<size>16</size>					
 				</register>
 
 				<register>
-					<name>EP1_TXMAXP</name>
+					<name>USB0_EP1_TXMAXP</name>
 					<description>USB0 EPn Transmit Maximum Packet Length Register</description>
 					<addressOffset>0x0110</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 
 				<register>
-					<name>EP2_TXMAXP</name>
+					<name>USB0_EP2_TXMAXP</name>
 					<description>USB0 EPn Transmit Maximum Packet Length Register</description>
 					<addressOffset>0x0120</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 
 				<register>
-					<name>EP3_TXMAXP</name>
+					<name>USB0_EP3_TXMAXP</name>
 					<description>USB0 EPn Transmit Maximum Packet Length Register</description>
 					<addressOffset>0x0130</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 
 				<register>
-					<name>EP0_TXCSR_P</name>
+					<name>USB0_EP0_TXCSR_P</name>
 					<description>USB0 EPn Transmit Configuration and Status (Peripheral) Register</description>
 					<addressOffset>0x0102</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 
 				<register>
-					<name>EP1_TXCSR_P</name>
+					<name>USB0_EP1_TXCSR_P</name>
 					<description>USB0 EPn Transmit Configuration and Status (Peripheral) Register</description>
 					<addressOffset>0x0112</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 
 				<register>
-					<name>EP2_TXCSR_P</name>
+					<name>USB0_EP2_TXCSR_P</name>
 					<description>USB0 EPn Transmit Configuration and Status (Peripheral) Register</description>
 					<addressOffset>0x0122</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 
 				<register>
-					<name>EP3_TXCSR_P</name>
+					<name>USB0_EP3_TXCSR_P</name>
 					<description>USB0 EPn Transmit Configuration and Status (Peripheral) Register</description>
 					<addressOffset>0x0132</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 <!--
 				<register>
-					<name>EP0_CSR0_P</name>
+					<name>USB0_EP0_CSR0_P</name>
 					<description>USB0 EP0 Configuration and Status (Peripheral) Register</description>
 					<addressOffset>0x0102</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 -->
 <!--
 				<register>
-					<name>EP0_CSR0_H</name>
+					<name>USB0_EP0_CSR0_H</name>
 					<description>USB0 EP0 Configuration and Status (Host) Register</description>
 					<addressOffset>0x0102</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 -->
 <!--
 				<register>
-					<name>EP0_TXCSR_H</name>
+					<name>USB0_EP0_TXCSR_H</name>
 					<description>USB0 EPn Transmit Configuration and Status (Host) Register</description>
 					<addressOffset>0x0102</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 -->
 <!--
 				<register>
-					<name>EP1_TXCSR_H</name>
+					<name>USB0_EP1_TXCSR_H</name>
 					<description>USB0 EPn Transmit Configuration and Status (Host) Register</description>
 					<addressOffset>0x0112</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 -->
 <!--
 				<register>
-					<name>EP2_TXCSR_H</name>
+					<name>USB0_EP2_TXCSR_H</name>
 					<description>USB0 EPn Transmit Configuration and Status (Host) Register</description>
 					<addressOffset>0x0122</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 -->
 <!--
 				<register>
-					<name>EP3_TXCSR_H</name>
+					<name>USB0_EP3_TXCSR_H</name>
 					<description>USB0 EPn Transmit Configuration and Status (Host) Register</description>
 					<addressOffset>0x0132</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 -->
 
 				<register>
-					<name>EP0_RXMAXP</name>
+					<name>USB0_EP0_RXMAXP</name>
 					<description>USB0 EPn Receive Maximum Packet Length Register</description>
 					<addressOffset>0x0104</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 
 				<register>
-					<name>EP1_RXMAXP</name>
+					<name>USB0_EP1_RXMAXP</name>
 					<description>USB0 EPn Receive Maximum Packet Length Register</description>
 					<addressOffset>0x0114</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 
 				<register>
-					<name>EP2_RXMAXP</name>
+					<name>USB0_EP2_RXMAXP</name>
 					<description>USB0 EPn Receive Maximum Packet Length Register</description>
 					<addressOffset>0x0124</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 
 				<register>
-					<name>EP3_RXMAXP</name>
+					<name>USB0_EP3_RXMAXP</name>
 					<description>USB0 EPn Receive Maximum Packet Length Register</description>
 					<addressOffset>0x0134</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 
 				<register>
-					<name>EP0_RXCSR_P</name>
+					<name>USB0_EP0_RXCSR_P</name>
 					<description>USB0 EPn Receive Configuration and Status (Peripheral) Register</description>
 					<addressOffset>0x0106</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 
 				<register>
-					<name>EP1_RXCSR_P</name>
+					<name>USB0_EP1_RXCSR_P</name>
 					<description>USB0 EPn Receive Configuration and Status (Peripheral) Register</description>
 					<addressOffset>0x0116</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 
 				<register>
-					<name>EP2_RXCSR_P</name>
+					<name>USB0_EP2_RXCSR_P</name>
 					<description>USB0 EPn Receive Configuration and Status (Peripheral) Register</description>
 					<addressOffset>0x0126</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 
 				<register>
-					<name>EP3_RXCSR_P</name>
+					<name>USB0_EP3_RXCSR_P</name>
 					<description>USB0 EPn Receive Configuration and Status (Peripheral) Register</description>
 					<addressOffset>0x0136</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 <!--
 				<register>
-					<name>EP0_RXCSR_H</name>
+					<name>USB0_EP0_RXCSR_H</name>
 					<description>USB0 EPn Receive Configuration and Status (Host) Register</description>
 					<addressOffset>0x0106</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 -->
 <!--
 				<register>
-					<name>EP1_RXCSR_H</name>
+					<name>USB0_EP1_RXCSR_H</name>
 					<description>USB0 EPn Receive Configuration and Status (Host) Register</description>
 					<addressOffset>0x0116</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 -->
 <!--
 				<register>
-					<name>EP2_RXCSR_H</name>
+					<name>USB0_EP2_RXCSR_H</name>
 					<description>USB0 EPn Receive Configuration and Status (Host) Register</description>
 					<addressOffset>0x0126</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 -->
 <!--
 				<register>
-					<name>EP3_RXCSR_H</name>
+					<name>USB0_EP3_RXCSR_H</name>
 					<description>USB0 EPn Receive Configuration and Status (Host) Register</description>
 					<addressOffset>0x0136</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 -->
 				<register>
-					<name>EP0_CNT0</name>
+					<name>USB0_EP0_CNT0</name>
 					<description>USB0 EP0 Number of Received Bytes Register</description>
 					<addressOffset>0x0108</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 <!--
 				<register>
-					<name>EP0_RXCNT</name>
+					<name>USB0_EP0_RXCNT</name>
 					<description>USB0 EPn Number of Bytes Received Register</description>
 					<addressOffset>0x0108</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 -->
 				<register>
-					<name>EP1_RXCNT</name>
+					<name>USB0_EP1_RXCNT</name>
 					<description>USB0 EPn Number of Bytes Received Register</description>
 					<addressOffset>0x0118</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 
 				<register>
-					<name>EP2_RXCNT</name>
+					<name>USB0_EP2_RXCNT</name>
 					<description>USB0 EPn Number of Bytes Received Register</description>
 					<addressOffset>0x0128</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 
 				<register>
-					<name>EP3_RXCNT</name>
+					<name>USB0_EP3_RXCNT</name>
 					<description>USB0 EPn Number of Bytes Received Register</description>
 					<addressOffset>0x0138</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 <!--
 				<register>
-					<name>EP0_FIFOSIZE</name>
+					<name>USB0_EP0_FIFOSIZE</name>
 					<description>USB0 FIFO size</description>
 					<addressOffset>0x010F</addressOffset>
-					<size>16</size>
+					<size>16</size>			
 				</register>
 
 				<register>
-					<name>EP1_FIFOSIZE</name>
+					<name>USB0_EP1_FIFOSIZE</name>
 					<description>USB0 FIFO size</description>
 					<addressOffset>0x011F</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 
 				<register>
-					<name>EP2_FIFOSIZE</name>
+					<name>USB0_EP2_FIFOSIZE</name>
 					<description>USB0 FIFO size</description>
 					<addressOffset>0x012F</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 
 				<register>
-					<name>EP3_FIFOSIZE</name>
+					<name>USB0_EP3_FIFOSIZE</name>
 					<description>USB0 FIFO size</description>
 					<addressOffset>0x013F</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 -->
 <!--
 				<register>
-					<name>EP0_CFGDATA0</name>
+					<name>USB0_EP0_CFGDATA0</name>
 					<description>USB0 EP0 Configuration Information Register</description>
 					<addressOffset>0x010F</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 -->
 				<register>
-					<name>DMA_IRQ</name>
+					<name>USB0_DMA_IRQ</name>
 					<description>USB0 DMA Interrupt Register</description>
 					<addressOffset>0x0200</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 
 				<register>
-					<name>DMA0_CTL</name>
+					<name>USB0_DMA0_CTL</name>
 					<description>USB0 DMA Channel n Control Register</description>
 					<addressOffset>0x0204</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 
 				<register>
-					<name>DMA1_CTL</name>
+					<name>USB0_DMA1_CTL</name>
 					<description>USB0 DMA Channel n Control Register</description>
 					<addressOffset>0x0214</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 
 				<register>
-					<name>DMA0_ADDR</name>
+					<name>USB0_DMA0_ADDR</name>
 					<description>USB0 DMA Channel n Address Register</description>
 					<addressOffset>0x0208</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 
 				<register>
-					<name>DMA1_ADDR</name>
+					<name>USB0_DMA1_ADDR</name>
 					<description>USB0 DMA Channel n Address Register</description>
 					<addressOffset>0x0218</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 
 				<register>
-					<name>DMA0_CNT</name>
+					<name>USB0_DMA0_CNT</name>
 					<description>USB0 DMA Channel n Count Register</description>
 					<addressOffset>0x020C</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 
 				<register>
-					<name>DMA1_CNT</name>
+					<name>USB0_DMA1_CNT</name>
 					<description>USB0 DMA Channel n Count Register</description>
 					<addressOffset>0x021C</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 
 				<register>
-					<name>RXDPKTBUFDIS</name>
+					<name>USB0_RXDPKTBUFDIS</name>
 					<description>USB0 RX Double Packet Buffer Disable for Endpoints 1 to 3</description>
 					<addressOffset>0x0340</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 
 				<register>
-					<name>TXDPKTBUFDIS</name>
+					<name>USB0_TXDPKTBUFDIS</name>
 					<description>USB0 TX Double Packet Buffer Disable for Endpoints 1 to 3</description>
 					<addressOffset>0x0342</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 
 				<register>
-					<name>CT_UCH</name>
+					<name>USB0_CT_UCH</name>
 					<description>USB0 Chirp Timeout Register</description>
 					<addressOffset>0x0344</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 
 				<register>
-					<name>LPM_ATTR</name>
+					<name>USB0_LPM_ATTR</name>
 					<description>USB0 LPM Attribute Register</description>
 					<addressOffset>0x0360</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 
 				<register>
-					<name>LPM_CTL</name>
+					<name>USB0_LPM_CTL</name>
 					<description>USB0 LPM Control Register</description>
 					<addressOffset>0x0362</addressOffset>
 					<size>8</size>
 				</register>
 
 				<register>
-					<name>LPM_IEN</name>
+					<name>USB0_LPM_IEN</name>
 					<description>USB0 LPM Interrupt Enable Register</description>
 					<addressOffset>0x0363</addressOffset>
 					<size>8</size>
 				</register>
 
 				<register>
-					<name>LPM_IRQ</name>
+					<name>USB0_LPM_IRQ</name>
 					<description>USB0 LPM Interrupt Status Register</description>
 					<addressOffset>0x0364</addressOffset>
 					<size>8</size>
 				</register>
 
 				<register>
-					<name>PHY_CTL</name>
+					<name>USB0_PHY_CTL</name>
 					<description>USB0 FS PHY Control</description>
 					<addressOffset>0x039C</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 
 				<register>
-					<name>PHY_STAT</name>
+					<name>USB0_PHY_STAT</name>
 					<description>USB0 FS PHY Status</description>
 					<addressOffset>0x039E</addressOffset>
-					<size>16</size>
+					<size>16</size>				
 				</register>
 
 				<register>
-					<name>RAM_ADDR</name>
+					<name>USB0_RAM_ADDR</name>
 					<description>USB0 RAM Address Register</description>
 					<addressOffset>0x03B0</addressOffset>
 					<size>32</size>
 				</register>
 
 				<register>
-					<name>RAM_DATA</name>
+					<name>USB0_RAM_DATA</name>
 					<description>USB0 RAM Data Register</description>
 					<addressOffset>0x03B4</addressOffset>
 					<size>32</size>
