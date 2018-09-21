@@ -21,7 +21,7 @@ Portions Copyright (c) 2018 Andrew Grosser, Moritz von Buttlar.
 #ifndef __ADI_UART_CONFIG__
 #define __ADI_UART_CONFIG__
 
-#define ADI_UART_CFG_INTERRUPT_MODE_SUPPORT     1 /*!< Enable interrupt mode*/
+#define ADI_UART_CFG_INTERRUPT_MODE_SUPPORT     0 /*!< Enable interrupt mode*/
 #define ADI_UART_CFG_POLLED_MODE_SUPPORT        1 /*!< Enable polled mode*/
 #define ADI_UART_CFG_BLOCKING_MODE_SUPPORT      1 /*!< Enable blocking mode*/
 #define ADI_UART_CFG_NONBLOCKING_MODE_SUPPORT   1 /*!< Enable non-blocking mode*/

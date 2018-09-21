@@ -48,6 +48,7 @@
 // added: MVB
 #define ADI_SYSTEM_CLOCK_TRANSITION 1
 // added: AG
+//#define ARM_MATH_CM3 1
 //#define ADI_DEBUG 1
 //#define OS_USE_SEMIHOSTING 1
 //#define OS_USE_TRACE_SEMIHOSTING_DEBUG 0

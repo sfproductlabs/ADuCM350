@@ -4,39 +4,27 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-../src/AfeTest.c \
-../src/BlinkyTest.c \
-../src/FlashTest.c \
+../src/Impedance4WireTest.c \
 ../src/PinMux.c \
 ../src/Timer.c \
-../src/UartEcho.c \
 ../src/_write.c \
 ../src/crc32.c \
-../src/main.c \
 ../src/test_common.c 
 
 OBJS += \
-./src/AfeTest.o \
-./src/BlinkyTest.o \
-./src/FlashTest.o \
+./src/Impedance4WireTest.o \
 ./src/PinMux.o \
 ./src/Timer.o \
-./src/UartEcho.o \
 ./src/_write.o \
 ./src/crc32.o \
-./src/main.o \
 ./src/test_common.o 
 
 C_DEPS += \
-./src/AfeTest.d \
-./src/BlinkyTest.d \
-./src/FlashTest.d \
+./src/Impedance4WireTest.d \
 ./src/PinMux.d \
 ./src/Timer.d \
-./src/UartEcho.d \
 ./src/_write.d \
 ./src/crc32.d \
-./src/main.d \
 ./src/test_common.d 
 
 

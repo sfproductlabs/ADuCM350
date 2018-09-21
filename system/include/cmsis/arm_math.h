@@ -425,7 +425,7 @@ extern "C"
 #elif defined __GNUC__
   #define __SIMD32_TYPE int32_t
   #define CMSIS_UNUSED __attribute__((unused))
-
+  #define __INLINE inline
 #elif defined __ICCARM__
   #define __SIMD32_TYPE int32_t __packed
   #define CMSIS_UNUSED
