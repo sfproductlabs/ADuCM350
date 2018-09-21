@@ -26,25 +26,27 @@ https://github.com/dioptre/eclipse
 
 ## Contributions
 
-* Create your own branch and push to here
+* Create your own branch and push to here, then to do a pull request (https://help.github.com/articles/about-pull-requests/)
 ```
 git checkout -b mybranch
 git add -A :/
 git commit -am "my branch is great"
 git push origin mybranch
+#then merge mybranch into our github repo using a pull request (above)
 ```
 * Look for comments with AG or MVB for things that might be broken or missing. There was a duplicate interrupt in FLASH and CRC that was removed in CRC (find **ADI_INT_HANDLER(DMA_CRC_Int_Handler)**). Everything else should be working.
 
 ## Contributors
 
 * Moritz von Buttlar
-* Andrew Grosser
+* Paul Clarke
+* Andrew Grosser (me)
 
 ## License
 
 Where not specifically stated, this repository and all source code is licensed under the Apache License v2 (https://www.apache.org/licenses/LICENSE-2.0.html). Any contributions submitted to this project fall under the Apache License.
 
-I'd like to thank Analog Devices for their permission to use and redistribute the original software (See /LICENSES/ADI.LABLAB.LICENSE) taken from their ADUCM350 SDK (http://www.analog.com/en/products/aducm350.html).
+I'd like to thank Analog Devices for their permission to use and redistribute the original software (See /LICENSES/ADI.LABLAB.LICENSE) taken from their ADUCM350 SDK (http://www.analog.com/en/products/aducm350.html). Please assume we've modified the original versions.
 
 Other licenses have been used to develop and source this software. Please see /LICENSES for more information and find specific license information for files in some of the headers. 
 
