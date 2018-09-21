@@ -25,13 +25,13 @@ Portions Copyright (c) 2018 Andrew Grosser, Moritz von Buttlar.
 /* Helper macro for printing strings to UART or Std. Output */
 #define PRINT(s)                    test_print(s)
 
-
-//extern void initialise_monitor_handles(void);
-
+#if defined (DEBUG) && defined (__GNUC__) && !defined (NDEBUG)
+	extern void initialise_monitor_handles(void);
+#endif
 
 int main(void) {
-#ifdef DEBUG
-//	initialise_monitor_handles();
+#if defined (DEBUG) && defined (__GNUC__) && !defined (NDEBUG)
+	initialise_monitor_handles();
 #endif
 
     /* Initialize system */
