@@ -4,6 +4,7 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../src/Blink.c \
 ../src/Impedance4WireTest.c \
 ../src/PinMux.c \
 ../src/Timer.c \
@@ -12,6 +13,7 @@ C_SRCS += \
 ../src/test_common.c 
 
 OBJS += \
+./src/Blink.o \
 ./src/Impedance4WireTest.o \
 ./src/PinMux.o \
 ./src/Timer.o \
@@ -20,6 +22,7 @@ OBJS += \
 ./src/test_common.o 
 
 C_DEPS += \
+./src/Blink.d \
 ./src/Impedance4WireTest.d \
 ./src/PinMux.d \
 ./src/Timer.d \

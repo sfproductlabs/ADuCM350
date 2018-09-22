@@ -8,6 +8,12 @@
 * enums and definitions
 *********************************************************************************/
 
+//AG
+/* Macro to enable the returning of AFE data using the UART */
+/*      1 = return AFE data on UART                         */
+/*      0 = return AFE data on SW (Std Output)              */
+#define USE_UART_FOR_DATA           (1)
+
 /* preprocessor tweaks to convert "__LINE__" from int to a char string... */
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)

@@ -137,6 +137,7 @@ uint32_t seq_afe_acmeasBioZ_4wire[] = {
 #endif
 
 int main(void) {
+
 #if defined (DEBUG) && defined (__GNUC__) && !defined (NDEBUG)
 	initialise_monitor_handles();
 #endif
@@ -152,7 +153,7 @@ int main(void) {
     uint32_t offset_code;
     uint32_t gain_code;
     uint32_t rtiaAndGain;
-
+x:
     /* Initialize system */
     SystemInit();
 
@@ -322,6 +323,10 @@ int main(void) {
     /* Uninitilize the UART */
     uart_UnInit();
 
+    BlinkSetup();
+    Blink();
+    delay(10000);
+    goto x;
     PASS();
 }
 

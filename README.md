@@ -23,6 +23,9 @@ Build id: 20180405-1200
 If you use debian you might be able to just run my eclipse with this repo:
 https://github.com/dioptre/eclipse
 
+### Deploying for Production
+
+* Build using the the "Release" configuration and use "upload.sh" to upload it to your device.
 
 ## Contributions
 
