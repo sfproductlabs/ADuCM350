@@ -132,8 +132,14 @@ uint32_t seq_afe_acmeasBioZ_4wire[] = {
     0x82000002, /* AFE_SEQ_CFG: SEQ_EN = 0                                                */
 };
 
-int main(void)
-{
+#if defined (DEBUG) && defined (__GNUC__) && !defined (NDEBUG)
+	extern void initialise_monitor_handles(void);
+#endif
+
+int main(void) {
+#if defined (DEBUG) && defined (__GNUC__) && !defined (NDEBUG)
+	initialise_monitor_handles();
+#endif
     ADI_AFE_DEV_HANDLE hDevice;
     int16_t dft_results[DFT_RESULTS_COUNT];
     q15_t dft_results_q15[DFT_RESULTS_COUNT];
