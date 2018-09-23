@@ -471,6 +471,29 @@ void convert_dft_results(int16_t *dft_results, q15_t *dft_results_q15, q31_t *df
     arm_q15_to_q31(dft_results_q15, dft_results_q31, DFT_RESULTS_COUNT);
 }
 
+
+int div64by32eq64(uint64_t* dividend, uint32_t divisor)
+{
+	uint32_t dividendHi = (uint32_t)(*dividend >> 32);
+	uint32_t dividendLo = (uint32_t)*dividend;
+	uint32_t quotientHi;
+	uint32_t quotientLo;
+
+  if (divisor == 0)
+    return 0;
+
+  // This can be done as one 32-bit DIV, e.g. "div ecx"
+  quotientHi = dividendHi / (uint32_t)divisor;
+  dividendHi = dividendHi % (uint32_t)divisor;
+
+  // This can be done as another 32-bit DIV, e.g. "div ecx"
+  quotientLo = (uint32_t)((((uint64_t)dividendHi << 32) + dividendLo) / divisor);
+
+  *dividend = ((uint64_t)quotientHi << 32) + quotientLo;
+
+  return 1;
+}
+
 /* Calculates magnitude.                                */
 /* performs the calculation:                            */
 /*      magnitude = magnitude_1 / magnitude_2 * res     */
@@ -480,7 +503,7 @@ q63_t calculate_magnitude(q31_t magnitude_1, q31_t magnitude_2, uint32_t res)
     q63_t magnitude;
     magnitude = (q63_t)0;
 
-    if ((q63_t)0 != magnitude_2)
+    if ((q31_t)0 != magnitude_2)
     {
     	//Replace Part 1:
     	//magnitude = (q63_t)magnitude_1 * (q63_t)res; //0xb70744cc = 16a09 * 816c
@@ -501,7 +524,7 @@ q63_t calculate_magnitude(q31_t magnitude_1, q31_t magnitude_2, uint32_t res)
         //magnitude = (q63_t)magnitude / (q63_t)0x5a827; //FAIL
 
 ////TEST Routine:
-//        char str[300];
+        char str[300];
 //        uint32_t* m32ptr = (uint32_t*)&magnitude;
 //        sprintf(str, "m1: %x m2: %x res: %x\n", magnitude_1, magnitude_2, res);
 //        PRINT(str);
@@ -523,12 +546,23 @@ q63_t calculate_magnitude(q31_t magnitude_1, q31_t magnitude_2, uint32_t res)
         /* Shift up for additional precision and rounding */
 //THIS BREAKS!!!
     	magnitude = (q63_t)magnitude_1 * (q63_t)res; //0xb70744cc = 16a09 * 816c
-        magnitude = (magnitude << 5) / (q63_t)magnitude_2; //WTF DIVIDE
+    	magnitude = (magnitude << 5);
+    	sprintf(str, "MAG %x", magnitude);
+    	PRINT(str);
+    	uint64_t mag = (uint64_t)((uint64_t)magnitude & (uint64_t)0xFFFFFFFF);
+    	sprintf(str, "M2 %x", magnitude_2);
+    	PRINT(str);
 
-    	magnitude = (q63_t)(((magnitude_1 * res) << 5 ) / magnitude_2); //WORKS WTF
+        magnitude = mag / (magnitude_2 & (uint64_t)0xFFFF); //WTF DIVIDE
+    	//div64by32eq64(&mag, (uint32_t)magnitude_2);
+    	BlinkSetup();
+    	Blink();
+  //  	mag = div(mag / magnitude_2);
+  //  	do_div(mag)
+  //  	magnitude = (q63_t)(((magnitude_1 * res) << 5 ) / magnitude_2); //WORKS WTF
 
         /* Rounding */
-        magnitude = (magnitude + 1) >> 1;
+        magnitude = (mag + 1) >> 1;
     }
 
 
@@ -541,7 +575,7 @@ q63_t calculate_magnitude(q31_t magnitude_1, q31_t magnitude_2, uint32_t res)
     }
     else
     {
-        return magnitude & 0xFFFFFFFF;
+        return (q63_t)magnitude & 0xFFFFFFFF;
     }
 
 }
