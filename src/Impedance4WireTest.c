@@ -500,7 +500,7 @@ q63_t calculate_magnitude(q31_t magnitude_1, q31_t magnitude_2, uint32_t res)
     	//magnitude = (((q63_t)0xFFFFFFFFFF * (q63_t)0xCDFF) << 5) / (q63_t)0xACDFEEE; //OK
         //magnitude = (q63_t)magnitude / (q63_t)0x5a827; //FAIL
 
-////TEST Routine:up
+////TEST Routine:
 //        char str[300];
 //        uint32_t* m32ptr = (uint32_t*)&magnitude;
 //        sprintf(str, "m1: %x m2: %x res: %x\n", magnitude_1, magnitude_2, res);
