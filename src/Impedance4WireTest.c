@@ -516,20 +516,20 @@ q63_t calculate_magnitude(q31_t magnitude_1, q31_t magnitude_2, uint32_t res)
         //magnitude = -521627264 / 370727; //OK
         //magnitude = 0xFFFFFFFFFAAAAAAA / 0x816c; //OK
         //magnitude = (q63_t)magnitude / (q63_t)0x5a827; //FAIL
-        char str[300];
-        uint32_t* m32ptr = (uint32_t*)&magnitude;
-        sprintf(str, "m1: %x m2: %x res: %x\n", magnitude_1, magnitude_2, res);
-        PRINT(str);
-        sprintf(str, "%x%x\n", *m32ptr, *(m32ptr+1));
-        PRINT(str);
-		char* ptr = (char*)&magnitude;
-		for (int i =0; i<9; i++, ptr++)
-			str[i] = *ptr;
-		PRINT("...");
-		PRINT(str);
-		PRINT("...");
-		sprintf(str, "%x%x", magnitude);
-		PRINT(str);
+//        char str[300];
+//        uint32_t* m32ptr = (uint32_t*)&magnitude;
+//        sprintf(str, "m1: %x m2: %x res: %x\n", magnitude_1, magnitude_2, res);
+//        PRINT(str);
+//        sprintf(str, "%x%x\n", *m32ptr, *(m32ptr+1));
+//        PRINT(str);
+//		char* ptr = (char*)&magnitude;
+//		for (int i =0; i<9; i++, ptr++)
+//			str[i] = *ptr;
+//		PRINT("...");
+//		PRINT(str);
+//		PRINT("...");
+//		sprintf(str, "%x%x", magnitude);
+//		PRINT(str);
         BlinkSetup();
 		Blink();
 
