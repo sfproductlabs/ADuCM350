@@ -5,4 +5,5 @@ GROUP(
 	libm.a
 	libgcc.a
 	libgcov.a
+	librdimon.a
 ) 

@@ -522,7 +522,8 @@ q63_t calculate_magnitude(q31_t magnitude_1, q31_t magnitude_2, uint32_t res)
 
         /* Shift up for additional precision and rounding */
 //THIS BREAKS!!!
-//WTF        magnitude = (magnitude << 5) / (q63_t)magnitude_2;
+    	magnitude = (q63_t)magnitude_1 * (q63_t)res; //0xb70744cc = 16a09 * 816c
+        magnitude = (magnitude << 5) / (q63_t)magnitude_2; //WTF DIVIDE
 
     	magnitude = (q63_t)(((magnitude_1 * res) << 5 ) / magnitude_2); //WORKS WTF
 
