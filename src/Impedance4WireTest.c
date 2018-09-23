@@ -279,24 +279,6 @@ int main(void) {
     volatile q63_t x = 0xFFFFFFFF;
     magnitude_result[0] = calculate_magnitude(magnitude[1], magnitude[0], rtiaAndGain);
 
-////    delay(10000);
-//
-//    char str[300];
-////    x = 0x7FFFFFFF;
-//    char* ptr = (char*)&x;
-//    for (int i =0; i<9; i++, ptr++)
-//    	str[i] = *ptr;
-////    sprintf(str, "%ll", x);
-//    //sprintf(str, "%ll", y);
-//    PRINT("A");
-//    PRINT(str);
-//    PRINT("B");
-////    char buffer [33];
-////    itoa (x[0],buffer,8);
-//BlinkSetup();
-//Blink();
-//
-return 0;
     /* Phase calculations */
     if (magnitude_result[0])
     {
@@ -500,11 +482,10 @@ q63_t calculate_magnitude(q31_t magnitude_1, q31_t magnitude_2, uint32_t res)
 
     if ((q63_t)0 != magnitude_2)
     {
-        magnitude = (q63_t)magnitude_1 * (q63_t)res; //0xb70744cc = 16a09 * 816c
+    	//Replace Part 1:
+    	//magnitude = (q63_t)magnitude_1 * (q63_t)res; //0xb70744cc = 16a09 * 816c
 
-        magnitude = magnitude << 5; //0xe0e8998016, should be 0x16E0E89980
-
-
+        //magnitude = magnitude << 5; //0xe0e8998016, should be 0x16E0E89980
         //magnitude = 4 / 2; //OK
         //magnitude = magnitude_1 / magnitude_2; //OK
         //magnitude = magnitude / m2; //FAILS
@@ -516,6 +497,8 @@ q63_t calculate_magnitude(q31_t magnitude_1, q31_t magnitude_2, uint32_t res)
         //magnitude = -521627264 / 370727; //OK
         //magnitude = 0xFFFFFFFFFAAAAAAA / 0x816c; //OK
         //magnitude = (q63_t)magnitude / (q63_t)0x5a827; //FAIL
+
+////TEST Routine:
 //        char str[300];
 //        uint32_t* m32ptr = (uint32_t*)&magnitude;
 //        sprintf(str, "m1: %x m2: %x res: %x\n", magnitude_1, magnitude_2, res);
@@ -530,14 +513,15 @@ q63_t calculate_magnitude(q31_t magnitude_1, q31_t magnitude_2, uint32_t res)
 //		PRINT("...");
 //		sprintf(str, "%x%x", magnitude);
 //		PRINT(str);
-        BlinkSetup();
-		Blink();
+//        BlinkSetup();
+//		Blink();
 
-		return magnitude;
 
 
         /* Shift up for additional precision and rounding */
-        magnitude = (magnitude << 5) / (q63_t)magnitude_2;
+//WTF        magnitude = (magnitude << 5) / (q63_t)magnitude_2;
+
+    	magnitude = (q63_t)(((magnitude_1 * res) << 5 ) / magnitude_2); //WORKS WTF
 
         /* Rounding */
         magnitude = (magnitude + 1) >> 1;
@@ -611,13 +595,14 @@ void print_MagnitudePhase(char *text, int32_t magnitude, int32_t phase)
     sprintf(msg, "    %s = (", text);
     /* Magnitude */
 //    sprintf_fixed32(tmp, magnitude);
-    sprintf(tmp, "%ld", magnitude);
+    sprintf(tmp, "%lx", magnitude);
     strcat(msg, tmp);
     strcat(msg, ", ");
     /* Phase */
 //    sprintf_fixed32(tmp, phase);
-//    strcat(msg, tmp);
-//    strcat(msg, ")\r\n");
+    sprintf(tmp, "%lx", phase);
+    strcat(msg, tmp);
+    strcat(msg, ")\r\n");
 
     PRINT(msg);
 }
