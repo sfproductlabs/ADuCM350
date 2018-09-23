@@ -484,7 +484,6 @@ q63_t calculate_magnitude(q31_t magnitude_1, q31_t magnitude_2, uint32_t res)
     {
     	//Replace Part 1:
     	//magnitude = (q63_t)magnitude_1 * (q63_t)res; //0xb70744cc = 16a09 * 816c
-
         //magnitude = magnitude << 5; //0xe0e8998016, should be 0x16E0E89980
         //magnitude = 4 / 2; //OK
         //magnitude = magnitude_1 / magnitude_2; //OK
@@ -495,10 +494,13 @@ q63_t calculate_magnitude(q31_t magnitude_1, q31_t magnitude_2, uint32_t res)
         //magnitude = magnitude / 227; //FAILS
         //magnitude = -521627264 / 227; //OK
         //magnitude = -521627264 / 370727; //OK
-        //magnitude = 0xFFFFFFFFFAAAAAAA / 0x816c; //OK
+        //magnitude = (((q63_t)magnitude_1 * (q63_t)res) << 5) / 44; //FAILS
+    	//magnitude = (((q63_t)magnitude_1 * (q63_t)res)) / 44; //FAILS
+    	//magnitude = 0xFFFFFFFFFF * 0xCDFF / 0xACDFEEE; //OK
+    	//magnitude = (((q63_t)0xFFFFFFFFFF * (q63_t)0xCDFF) << 5) / (q63_t)0xACDFEEE; //OK
         //magnitude = (q63_t)magnitude / (q63_t)0x5a827; //FAIL
 
-////TEST Routine:
+////TEST Routine:up
 //        char str[300];
 //        uint32_t* m32ptr = (uint32_t*)&magnitude;
 //        sprintf(str, "m1: %x m2: %x res: %x\n", magnitude_1, magnitude_2, res);
