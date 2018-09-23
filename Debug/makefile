@@ -63,7 +63,7 @@ all: firm.elf secondary-outputs
 firm.elf: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GNU ARM Cross C++ Linker'
-	arm-none-eabi-g++ -mcpu=cortex-m3 -mthumb -Og -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -ffreestanding -fno-move-loop-invariants -Wall -Wextra  -g3 -T "/home/a/Downloads/firm/ldscripts/mem.ld" -T "/home/a/Downloads/firm/ldscripts/libs.ld" -T "/home/a/Downloads/firm/ldscripts/sections.ld" -nostartfiles -nodefaultlibs -nostdlib -Xlinker --gc-sections -L"/home/a/Downloads/firm/lib" -Wl,-Map,"firm.map" --specs=nano.specs -o "firm.elf" $(OBJS) $(USER_OBJS) $(LIBS)
+	arm-none-eabi-g++ -mcpu=cortex-m3 -mthumb -Og -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -ffreestanding -fno-move-loop-invariants -Wall -Wextra  -g3 -T "/home/a/Downloads/firm/ldscripts/mem.ld" -T "/home/a/Downloads/firm/ldscripts/libs.ld" -T "/home/a/Downloads/firm/ldscripts/sections.ld" -nostartfiles -nodefaultlibs -nostdlib -Xlinker --gc-sections -L"/home/a/Downloads/firm/lib" -L"../ldscripts" -Wl,-Map,"firm.map" --specs=nano.specs -o "firm.elf" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 

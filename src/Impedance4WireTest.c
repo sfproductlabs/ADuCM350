@@ -74,24 +74,16 @@ Portions Copyright (c) 2018 Andrew Grosser.
 /* Custom fixed-point type used for final results,              */
 /* to keep track of the decimal point position.                 */
 /* Signed number with 28 integer bits and 4 fractional bits.    */
-typedef union {
-    int32_t full;
-    struct
-    {
-        uint8_t fpart : 4;
-        int32_t ipart : 28;
-    } parts;
-} fixed32_t;
 
 ADI_UART_HANDLE hUartDevice = NULL;
 
 /* Function prototypes */
 q15_t arctan(q15_t imag, q15_t real);
-fixed32_t calculate_magnitude(q31_t magnitude_1, q31_t magnitude_2, uint32_t res);
-fixed32_t calculate_phase(q15_t phase_rcal, q15_t phase_z);
+q63_t calculate_magnitude(q31_t magnitude_1, q31_t magnitude_2, uint32_t res);
+int32_t calculate_phase(q15_t phase_rcal, q15_t phase_z);
 void convert_dft_results(int16_t *dft_results, q15_t *dft_results_q15, q31_t *dft_results_q31);
-void sprintf_fixed32(char *out, fixed32_t in);
-void print_MagnitudePhase(char *text, fixed32_t magnitude, fixed32_t phase);
+void sprintf_fixed32(char *out, int32_t in);
+void print_MagnitudePhase(char *text, int32_t magnitude, int32_t phase);
 void test_print(char *pBuffer);
 ADI_UART_RESULT_TYPE uart_Init(void);
 ADI_UART_RESULT_TYPE uart_UnInit(void);
@@ -137,7 +129,6 @@ uint32_t seq_afe_acmeasBioZ_4wire[] = {
 #endif
 
 int main(void) {
-
 #if defined (DEBUG) && defined (__GNUC__) && !defined (NDEBUG)
 	initialise_monitor_handles();
 #endif
@@ -147,13 +138,13 @@ int main(void) {
     q31_t dft_results_q31[DFT_RESULTS_COUNT];
     q31_t magnitude[DFT_RESULTS_COUNT / 2];
     q15_t phase[DFT_RESULTS_COUNT / 2];
-    fixed32_t magnitude_result[DFT_RESULTS_COUNT / 2 - 1];
-    fixed32_t phase_result[DFT_RESULTS_COUNT / 2 - 1];
+    int32_t magnitude_result[DFT_RESULTS_COUNT / 2 - 1];
+    int32_t phase_result[DFT_RESULTS_COUNT / 2 - 1];
     char msg[MSG_MAXLEN];
     uint32_t offset_code;
     uint32_t gain_code;
     uint32_t rtiaAndGain;
-x:
+
     /* Initialize system */
     SystemInit();
 
@@ -184,6 +175,8 @@ x:
     {
         FAIL("uart_Init");
     }
+
+
 
     /* Initialize the AFE API */
     if (ADI_AFE_SUCCESS != adi_AFE_Init(&hDevice))
@@ -247,6 +240,7 @@ x:
         FAIL("adi_AFE_WriteCalibrationRegister, offset");
     }
 
+
     /* Update FCW in the sequence */
     seq_afe_acmeasBioZ_4wire[3] = SEQ_MMR_WRITE(REG_AFE_AFE_WG_FCW, FCW);
     /* Update sine amplitude in the sequence */
@@ -262,8 +256,11 @@ x:
         FAIL("Impedance Measurement");
     }
 
+
+
     /* Print DFT complex results to console */
     PRINT("DFT results (real, imaginary):\r\n");
+
     sprintf(msg, "    CURRENT     = (%6d, %6d)\r\n", dft_results[0], dft_results[1]);
     PRINT(msg);
     sprintf(msg, "    VOLTAGE     = (%6d, %6d)\r\n", dft_results[2], dft_results[3]);
@@ -278,10 +275,30 @@ x:
 
     /* Calculate final magnitude value, calibrated with RTIA the gain of the instrumenation amplifier */
     rtiaAndGain = (uint32_t)((RTIA * 1.5) / INST_AMP_GAIN);
+    //magnitude_result[0] = calculate_magnitude(magnitude[1], magnitude[0], rtiaAndGain);
+    volatile q63_t x = 0xFFFFFFFF;
     magnitude_result[0] = calculate_magnitude(magnitude[1], magnitude[0], rtiaAndGain);
 
+////    delay(10000);
+//
+//    char str[300];
+////    x = 0x7FFFFFFF;
+//    char* ptr = (char*)&x;
+//    for (int i =0; i<9; i++, ptr++)
+//    	str[i] = *ptr;
+////    sprintf(str, "%ll", x);
+//    //sprintf(str, "%ll", y);
+//    PRINT("A");
+//    PRINT(str);
+//    PRINT("B");
+////    char buffer [33];
+////    itoa (x[0],buffer,8);
+//BlinkSetup();
+//Blink();
+//
+return 0;
     /* Phase calculations */
-    if (magnitude_result[0].full)
+    if (magnitude_result[0])
     {
         /* Current phase    */
         phase[0] = arctan(dft_results[1], dft_results[0]);
@@ -298,11 +315,12 @@ x:
         /* Voltage phase    */
         phase[1] = 0;
         /* Impedance phase  */
-        phase_result[0].full = 0;
+        phase_result[0] = 0;
     }
 
     /* Print final results to console */
     PRINT("Final results (magnitude, phase):\r\n");
+
     print_MagnitudePhase("Impedance", magnitude_result[0], phase_result[0]);
 
     /* Restore to using default CRC stored with the sequence */
@@ -323,10 +341,7 @@ x:
     /* Uninitilize the UART */
     uart_UnInit();
 
-    BlinkSetup();
-    Blink();
-    delay(10000);
-    goto x;
+
     PASS();
 }
 
@@ -478,33 +493,69 @@ void convert_dft_results(int16_t *dft_results, q15_t *dft_results_q15, q31_t *df
 /* performs the calculation:                            */
 /*      magnitude = magnitude_1 / magnitude_2 * res     */
 /* Output in custom fixed-point format (28.4)           */
-fixed32_t calculate_magnitude(q31_t magnitude_1, q31_t magnitude_2, uint32_t res)
+q63_t calculate_magnitude(q31_t magnitude_1, q31_t magnitude_2, uint32_t res)
 {
     q63_t magnitude;
-    fixed32_t out;
-
     magnitude = (q63_t)0;
+
     if ((q63_t)0 != magnitude_2)
     {
-        magnitude = (q63_t)magnitude_1 * (q63_t)res;
+        magnitude = (q63_t)magnitude_1 * (q63_t)res; //0xb70744cc = 16a09 * 816c
+
+        magnitude = magnitude << 5; //0xe0e8998016, should be 0x16E0E89980
+
+
+        //magnitude = 4 / 2; //OK
+        //magnitude = magnitude_1 / magnitude_2; //OK
+        //magnitude = magnitude / m2; //FAILS
+        //magnitude = magnitude / (q63_t)magnitude_2; //div by 5a827 FAILS, should be 40B5D.DAE899E97
+        //magnitude = magnitude / 370727; //FAILS
+        //magnitude = magnitude / 1; //OK
+        //magnitude = magnitude / 227; //FAILS
+        //magnitude = -521627264 / 227; //OK
+        //magnitude = -521627264 / 370727; //OK
+        //magnitude = 0xFFFFFFFFFAAAAAAA / 0x816c; //OK
+        //magnitude = (q63_t)magnitude / (q63_t)0x5a827; //FAIL
+        char str[300];
+        uint32_t* m32ptr = (uint32_t*)&magnitude;
+        sprintf(str, "m1: %x m2: %x res: %x\n", magnitude_1, magnitude_2, res);
+        PRINT(str);
+        sprintf(str, "%x%x\n", *m32ptr, *(m32ptr+1));
+        PRINT(str);
+		char* ptr = (char*)&magnitude;
+		for (int i =0; i<9; i++, ptr++)
+			str[i] = *ptr;
+		PRINT("...");
+		PRINT(str);
+		PRINT("...");
+		sprintf(str, "%x%x", magnitude);
+		PRINT(str);
+        BlinkSetup();
+		Blink();
+
+		return magnitude;
+
+
         /* Shift up for additional precision and rounding */
         magnitude = (magnitude << 5) / (q63_t)magnitude_2;
+
         /* Rounding */
         magnitude = (magnitude + 1) >> 1;
     }
+
+
 
     /* Saturate if needed */
     if (magnitude & 0xFFFFFFFF00000000)
     {
         /* Cannot be negative */
-        out.full = 0x7FFFFFFF;
+        return 0x7FFFFFFF;
     }
     else
     {
-        out.full = magnitude & 0xFFFFFFFF;
+        return magnitude & 0xFFFFFFFF;
     }
 
-    return out;
 }
 
 /* Calculates phase.                                        */
@@ -512,62 +563,61 @@ fixed32_t calculate_magnitude(q31_t magnitude_1, q31_t magnitude_2, uint32_t res
 /*      phase = (phase_2 - phase_1) * PI / (2 * PI) * 180   */
 /*            = (phase_2 - phase_1) * 180                   */
 /* Output in custom fixed-point format (28.4).              */
-fixed32_t calculate_phase(q15_t phase_1, q15_t phase_2)
+int32_t calculate_phase(q15_t phase_1, q15_t phase_2)
 {
     q63_t phase;
-    fixed32_t out;
 
     /* Multiply by 180 to convert to degrees */
     phase = ((q63_t)(phase_2 - phase_1) * (q63_t)180);
     /* Round and convert to fixed32_t */
-    out.full = ((phase + (q63_t)0x400) >> 11) & 0xFFFFFFFF;
+    return ((phase + (q63_t)0x400) >> 11) & 0xFFFFFFFF;
 
-    return out;
 }
 
 /* Simple conversion of a fixed32_t variable to string format. */
-void sprintf_fixed32(char *out, fixed32_t in)
-{
-    fixed32_t tmp;
-
-    if (in.full < 0)
-    {
-        tmp.parts.fpart = (16 - in.parts.fpart) & 0x0F;
-        tmp.parts.ipart = in.parts.ipart;
-        if (0 != in.parts.fpart)
-        {
-            tmp.parts.ipart++;
-        }
-        if (0 == tmp.parts.ipart)
-        {
-            sprintf(out, "      -0.%04d", tmp.parts.fpart * FIXED32_LSB_SIZE);
-        }
-        else
-        {
-            sprintf(out, "%8d.%04d", tmp.parts.ipart, tmp.parts.fpart * FIXED32_LSB_SIZE);
-        }
-    }
-    else
-    {
-        sprintf(out, "%8d.%04d", in.parts.ipart, in.parts.fpart * FIXED32_LSB_SIZE);
-    }
-}
+//void sprintf_fixed32(char *out, fixed32_t in)
+//{
+//    fixed32_t tmp;
+//
+//    if (in.full < 0)
+//    {
+//        tmp.parts.fpart = (16 - in.parts.fpart) & 0x0F;
+//        tmp.parts.ipart = in.parts.ipart;
+//        if (0 != in.parts.fpart)
+//        {
+//            tmp.parts.ipart++;
+//        }
+//        if (0 == tmp.parts.ipart)
+//        {
+//            sprintf(out, "      -0.%04d", tmp.parts.fpart * FIXED32_LSB_SIZE);
+//        }
+//        else
+//        {
+//            sprintf(out, "%8d.%04d", tmp.parts.ipart, tmp.parts.fpart * FIXED32_LSB_SIZE);
+//        }
+//    }
+//    else
+//    {
+//        sprintf(out, "%8d.%04d", in.parts.ipart, in.parts.fpart * FIXED32_LSB_SIZE);
+//    }
+//}
 
 /* Helper function for printing fixed32_t (magnitude & phase) results */
-void print_MagnitudePhase(char *text, fixed32_t magnitude, fixed32_t phase)
+void print_MagnitudePhase(char *text, int32_t magnitude, int32_t phase)
 {
     char msg[MSG_MAXLEN];
     char tmp[MSG_MAXLEN];
 
     sprintf(msg, "    %s = (", text);
     /* Magnitude */
-    sprintf_fixed32(tmp, magnitude);
+//    sprintf_fixed32(tmp, magnitude);
+    sprintf(tmp, "%ld", magnitude);
     strcat(msg, tmp);
     strcat(msg, ", ");
     /* Phase */
-    sprintf_fixed32(tmp, phase);
-    strcat(msg, tmp);
-    strcat(msg, ")\r\n");
+//    sprintf_fixed32(tmp, phase);
+//    strcat(msg, tmp);
+//    strcat(msg, ")\r\n");
 
     PRINT(msg);
 }
