@@ -547,13 +547,15 @@ q63_t calculate_magnitude(q31_t magnitude_1, q31_t magnitude_2, uint32_t res)
 
 
         /* Shift up for additional precision and rounding */
-//THIS BREAKS!!!
     	magnitude = (q63_t)magnitude_1 * (q63_t)res; //0xb70744cc = 16a09 * 816c
     	magnitude = (magnitude << 5);
-//    	magnitude = magnitude / magnitude_2); //WTF
+    	//THIS BREAKS!!!
+    	//magnitude = magnitude / magnitude_2); //WTF
 
-    	int64_t q = 0x00000000;
-    	magnitude = (q63_t)DIV64((int64_t)magnitude, (int64_t)magnitude_2, &q);
+    	//AG Fix division
+    	//TODO: Do something with remainder?
+    	int64_t rem = 0x00000000;
+    	magnitude = (q63_t)DIV64((int64_t)magnitude, (int64_t)magnitude_2, &rem);
 
     	/* Rounding */
         magnitude = (magnitude + 1) >> 1;
