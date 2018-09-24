@@ -71,6 +71,8 @@ Portions Copyright (c) 2018 Andrew Grosser.
 /* Helper macro for printing strings to UART or Std. Output */
 #define PRINT(s) test_print(s)
 
+#define DIV64(a,b,c) __divmoddi4(a,b,c)
+
 /* Custom fixed-point type used for final results,              */
 /* to keep track of the decimal point position.                 */
 /* Signed number with 28 integer bits and 4 fractional bits.    */
@@ -89,6 +91,7 @@ ADI_UART_RESULT_TYPE uart_Init(void);
 ADI_UART_RESULT_TYPE uart_UnInit(void);
 void delay(uint32_t counts);
 extern int32_t adi_initpinmux(void);
+extern int64_t __divmoddi4(int64_t num, int64_t den, int64_t *rem_p);
 
 /* Sequence for 4-Wire Bio-Impedance measurement, performs 2 DFTs:  */
 /*     TIA (Current) and AN_A (Voltage)                               */
@@ -275,8 +278,6 @@ int main(void) {
 
     /* Calculate final magnitude value, calibrated with RTIA the gain of the instrumenation amplifier */
     rtiaAndGain = (uint32_t)((RTIA * 1.5) / INST_AMP_GAIN);
-    //magnitude_result[0] = calculate_magnitude(magnitude[1], magnitude[0], rtiaAndGain);
-    volatile q63_t x = 0xFFFFFFFF;
     magnitude_result[0] = calculate_magnitude(magnitude[1], magnitude[0], rtiaAndGain);
 
     /* Phase calculations */
@@ -325,6 +326,8 @@ int main(void) {
 
 
     PASS();
+
+    return 0;
 }
 
 void delay(uint32_t count)
@@ -524,7 +527,7 @@ q63_t calculate_magnitude(q31_t magnitude_1, q31_t magnitude_2, uint32_t res)
         //magnitude = (q63_t)magnitude / (q63_t)0x5a827; //FAIL
 
 ////TEST Routine:
-        char str[300];
+//        char str[300];
 //        uint32_t* m32ptr = (uint32_t*)&magnitude;
 //        sprintf(str, "m1: %x m2: %x res: %x\n", magnitude_1, magnitude_2, res);
 //        PRINT(str);
@@ -547,22 +550,13 @@ q63_t calculate_magnitude(q31_t magnitude_1, q31_t magnitude_2, uint32_t res)
 //THIS BREAKS!!!
     	magnitude = (q63_t)magnitude_1 * (q63_t)res; //0xb70744cc = 16a09 * 816c
     	magnitude = (magnitude << 5);
-    	sprintf(str, "MAG %x", magnitude);
-    	PRINT(str);
-    	uint64_t mag = (uint64_t)((uint64_t)magnitude & (uint64_t)0xFFFFFFFF);
-    	sprintf(str, "M2 %x", magnitude_2);
-    	PRINT(str);
+//    	magnitude = magnitude / magnitude_2); //WTF
 
-        magnitude = mag / (magnitude_2 & (uint64_t)0xFFFF); //WTF DIVIDE
-    	//div64by32eq64(&mag, (uint32_t)magnitude_2);
-    	BlinkSetup();
-    	Blink();
-  //  	mag = div(mag / magnitude_2);
-  //  	do_div(mag)
-  //  	magnitude = (q63_t)(((magnitude_1 * res) << 5 ) / magnitude_2); //WORKS WTF
+    	int64_t q = 0x00000000;
+    	magnitude = (q63_t)DIV64((int64_t)magnitude, (int64_t)magnitude_2, &q);
 
-        /* Rounding */
-        magnitude = (mag + 1) >> 1;
+    	/* Rounding */
+        magnitude = (magnitude + 1) >> 1;
     }
 
 
