@@ -43,7 +43,6 @@ git push origin mybranch
 ## Contributors
 
 * Moritz von Buttlar
-* Paul Clarke
 * Andrew Grosser (me)
 
 ## License
