@@ -26,7 +26,7 @@ https://github.com/dioptre/eclipse
 ### Deploying for Production
 
 * Build using the the "Release" configuration and use "upload.sh" to upload it to your device. This version can not be debugged.
-* **My Debug version works differently from Release?** Whoa! The semi-hosting feature of gdb runs some instructions on the host machine. Don't be surprised if it mucks up on the release version (as it did for me). For example, there's no 64 bit division on the Cortex M-3 so execution will fail on overflows unless you implement your own (luckily we've rolled it in with our version - look at https://github.com/dioptre/ADuCM350/blob/imp4wire/src/Impedance4WireTest.c for an example). There may be other issues like this that pop up. 
+* **My Debug version works differently from Release?** Whoa! The semi-hosting feature of gdb runs some instructions on the host machine. Don't be surprised if it mucks up on the release version (as it did for me). For example, there's no 64 bit division on the Cortex M-3 so execution will fail on overflows unless you implement your own (luckily we've rolled it in with our version - look at DIV64 in https://github.com/dioptre/ADuCM350/blob/imp4wire/src/Impedance4WireTest.c for an example). There may be other issues like this that pop up. 
 
 ## Contributions
 
