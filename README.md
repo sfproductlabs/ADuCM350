@@ -4,7 +4,7 @@ This is the open source alternative using GCC to compile firmware for the ADuCM3
 
 This software has been used and tested on:
 * Linux (Debian Buster, Fedora 28)
-* Segger EDU
+* Segger EDU SWD
 
 ## Instructions
 
@@ -56,3 +56,6 @@ Other licenses have been used to develop and source this software. Please see /L
 ## Shameless Plug
 
 Come check out what we're doing with the ADuCM350 and open source biomedical imaging at https://github.com/openeit, or our product development shop at http://sfproductlabs.com/
+
+## Help I stuffed/bricked my chip
+* Use the CM3WSD software that comes with the EVAL SDK (link above) board to erase it. Might need a friend with a Windows box to do this.
