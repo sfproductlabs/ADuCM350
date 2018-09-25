@@ -511,11 +511,11 @@ fixed32_t calculate_magnitude(q31_t magnitude_1, q31_t magnitude_2, uint32_t res
     magnitude = (q63_t)0;
     if ((q63_t)0 != magnitude_2)
     {
-        magnitude = (q63_t)magnitude_1 * (q63_t)res;
+    	magnitude = ((q63_t)magnitude_1 * (q63_t)res) << 5;
         /* Shift up for additional precision and rounding */
         //magnitude = (magnitude << 5) / (q63_t)magnitude_2; //WTF BREAKS
         int64_t rem = 0x00000000;
-	magnitude = (q63_t)DIV64((int64_t)magnitude, (int64_t)magnitude_2, &rem);
+        magnitude = (q63_t)DIV64((int64_t)magnitude, (int64_t)magnitude_2, &rem);
 
         /* Rounding */
         magnitude = (magnitude + 1) >> 1;
