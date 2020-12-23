@@ -1,6 +1,6 @@
 # Firmware Compiler and Linker for the ADuCM350
 
-This is the open source alternative using GCC to compile firmware for the ADuCM350. 
+This is the open source alternative using GCC to compile firmware for the ADuCM350. It replaces the need for IAR Workbench.
 
 This software has been used and tested on:
 * Linux (Debian Buster, Fedora 28)
