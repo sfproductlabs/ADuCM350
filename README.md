@@ -1,6 +1,11 @@
 # Firmware Compiler and Linker for the ADuCM350
 
-This is the open source alternative using GCC to compile firmware for the ADuCM350. It replaces the need for IAR Workbench.
+This is the open source alternative using GCC to compile firmware for the ADuCM350. It replaces the need for IAR Workbench (a commercial tool).
+
+It is intended to be used with https://github.com/eitcom/pyEIT
+
+We do not recommend using OpenEIT as it is non-commercial, and we were not able to obtain a commercial license.
+
 
 This software has been used and tested on:
 * Linux (Debian Buster, Fedora 28)
